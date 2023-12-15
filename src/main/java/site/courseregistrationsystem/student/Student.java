@@ -8,9 +8,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import lombok.Getter;
 import site.courseregistrationsystem.department.Department;
 
 @Entity
+@Getter
 public class Student {
 
 	@Id
