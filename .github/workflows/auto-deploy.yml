@@ -20,6 +20,17 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
 
+    services:
+      mysql:
+        image: mysql:8.0.34
+        env:
+          MYSQL_DATABASE: test_database
+          MYSQL_USER: test
+          MYSQL_PASSWORD: 1234
+          MYSQL_ROOT_PASSWORD: 1234
+        ports:
+          - 3306:3306
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
