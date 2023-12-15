@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public class LoginForm {
 
-	private Integer studentId;
+	private String studentId;
 	private String password;
 
 }
