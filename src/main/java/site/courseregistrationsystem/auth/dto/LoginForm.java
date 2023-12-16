@@ -1,4 +1,4 @@
-package site.courseregistrationsystem.student.dto;
+package site.courseregistrationsystem.auth.dto;
 
 import lombok.Getter;
 
