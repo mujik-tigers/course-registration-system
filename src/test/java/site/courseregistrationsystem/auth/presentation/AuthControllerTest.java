@@ -35,16 +35,9 @@ class AuthControllerTest extends RestDocsSupport {
 		given(authService.login(any(LoginForm.class)))
 			.willReturn(new StudentSession(uuid, studentPk, expiration));
 
-		String cookieName = "JSESSIONID";
-		String cookieDomain = "course-registration-system.site";
-		String cookiePath = "/";
-		int cookieExpiry = 3600;
-		given(cookieProperties.getName()).willReturn(cookieName);
-		given(cookieProperties.getDomain()).willReturn(cookieDomain);
-		given(cookieProperties.getPath()).willReturn(cookiePath);
-		given(cookieProperties.getExpiry()).willReturn(cookieExpiry);
-
 		// when & then
+		String cookieName = cookieProperties.getName();
+
 		mockMvc.perform(post("/login")
 				.content(objectMapper.writeValueAsString(loginForm))
 				.contentType(MediaType.APPLICATION_JSON))
@@ -53,9 +46,9 @@ class AuthControllerTest extends RestDocsSupport {
 			.andExpect(cookie().exists(cookieName))
 			.andExpect(cookie().httpOnly(cookieName, true))
 			.andExpect(cookie().secure(cookieName, true))
-			.andExpect(cookie().domain(cookieName, cookieDomain))
-			.andExpect(cookie().path(cookieName, cookiePath))
-			.andExpect(cookie().maxAge(cookieName, cookieExpiry))
+			.andExpect(cookie().domain(cookieName, cookieProperties.getDomain()))
+			.andExpect(cookie().path(cookieName, cookieProperties.getPath()))
+			.andExpect(cookie().maxAge(cookieName, cookieProperties.getExpiry()))
 			.andDo(document("login-success",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),

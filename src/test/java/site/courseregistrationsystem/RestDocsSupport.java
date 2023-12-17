@@ -1,5 +1,7 @@
 package site.courseregistrationsystem;
 
+import static org.mockito.BDDMockito.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -39,7 +41,14 @@ public abstract class RestDocsSupport {
 
 	@BeforeEach
 	void setUp() {
-
+		String cookieName = "SESSIONID";
+		String cookieDomain = "course-registration-system.site";
+		String cookiePath = "/";
+		int cookieExpiry = 3600;
+		given(cookieProperties.getName()).willReturn(cookieName);
+		given(cookieProperties.getDomain()).willReturn(cookieDomain);
+		given(cookieProperties.getPath()).willReturn(cookiePath);
+		given(cookieProperties.getExpiry()).willReturn(cookieExpiry);
 	}
 
 }
