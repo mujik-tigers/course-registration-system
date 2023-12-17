@@ -1,4 +1,4 @@
-package site.courseregistrationsystem.config.redis;
+package site.courseregistrationsystem.config;
 
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
