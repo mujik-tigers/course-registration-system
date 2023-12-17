@@ -3,6 +3,7 @@ package site.courseregistrationsystem.auth.presentation;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.Cookie;
@@ -26,6 +27,7 @@ public class AuthController {
 
 	private final AuthService authService;
 
+	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/login")
 	public ApiResponse<Void> login(@RequestBody @Valid LoginForm loginForm, HttpServletResponse response) {
 		StudentSession session = authService.login(loginForm);  // 로그인 데이터 검증
