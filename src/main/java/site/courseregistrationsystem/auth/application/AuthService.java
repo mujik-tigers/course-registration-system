@@ -7,6 +7,7 @@ import site.courseregistrationsystem.auth.StudentSession;
 import site.courseregistrationsystem.auth.dto.LoginForm;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
+import site.courseregistrationsystem.util.encryption.BCryptManager;
 
 @Service
 @RequiredArgsConstructor
@@ -16,7 +17,8 @@ public class AuthService {
 	private final SessionManager sessionManager;
 
 	public StudentSession login(LoginForm loginForm) {
-		Student student = studentRepository.findByLoginForm(loginForm.getStudentId(), loginForm.getPassword())
+		String encryptedPassword = BCryptManager.encrypt(loginForm.getPassword());
+		Student student = studentRepository.findByLoginForm(loginForm.getStudentId(), encryptedPassword)
 			.orElseThrow();
 
 		return sessionManager.generate(student.getId());
