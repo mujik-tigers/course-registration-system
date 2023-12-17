@@ -21,9 +21,12 @@ public class AuthService {
 
 	public StudentSession login(LoginForm loginForm) {
 		String encryptedStudentId = aes256Manager.encrypt(loginForm.getStudentId());
-		String encryptedPassword = BCryptManager.encrypt(loginForm.getPassword());
-		Student student = studentRepository.findByLoginForm(encryptedStudentId, encryptedPassword)
+		Student student = studentRepository.findByStudentId(encryptedStudentId)
 			.orElseThrow(InvalidLoginException::new);
+
+		if (!BCryptManager.isMatch(loginForm.getPassword(), student.getPassword())) {
+			throw new InvalidLoginException();
+		}
 
 		return sessionManager.generate(student.getId());
 	}
