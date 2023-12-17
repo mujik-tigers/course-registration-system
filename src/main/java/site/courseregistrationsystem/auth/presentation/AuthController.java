@@ -20,7 +20,7 @@ import site.courseregistrationsystem.util.api.ResponseMessage;
 @RequiredArgsConstructor
 public class AuthController {
 
-	private static final String COOKIE_KEY = "JSESSIONID";
+	private static final String COOKIE_NAME = "JSESSIONID";
 	private static final String COOKIE_DOMAIN = "course-registration-system.site";
 	private static final String COOKIE_PATH = "/";
 	private static final int COOKIE_EXPIRY = 3600;  // 60분
@@ -32,7 +32,7 @@ public class AuthController {
 	public ApiResponse<Void> login(@RequestBody @Valid LoginForm loginForm, HttpServletResponse response) {
 		StudentSession session = authService.login(loginForm);  // 로그인 데이터 검증
 
-		Cookie cookie = new Cookie(COOKIE_KEY, session.getId());  // 쿠키 생성
+		Cookie cookie = new Cookie(COOKIE_NAME, session.getId());  // 쿠키 생성
 		cookie.setHttpOnly(true);
 		cookie.setSecure(true);
 		cookie.setDomain(COOKIE_DOMAIN);
