@@ -21,6 +21,7 @@ public class AuthController {
 	private static final String COOKIE_KEY = "JSESSIONID";
 	private static final String COOKIE_DOMAIN = "course-registration-system.site";
 	private static final String COOKIE_PATH = "/";
+	private static final int COOKIE_EXPIRY = 3600;  // 60분
 
 	private final AuthService authService;
 
@@ -31,9 +32,9 @@ public class AuthController {
 		Cookie cookie = new Cookie(COOKIE_KEY, session.getId());  // 쿠키 생성
 		cookie.setHttpOnly(true);
 		cookie.setSecure(true);
-		cookie.setMaxAge(3600);  // 60분
 		cookie.setDomain(COOKIE_DOMAIN);
 		cookie.setPath(COOKIE_PATH);
+		cookie.setMaxAge(COOKIE_EXPIRY);
 
 		response.addCookie(cookie); // 쿠키 설정
 
