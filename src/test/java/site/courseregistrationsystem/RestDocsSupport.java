@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import site.courseregistrationsystem.auth.application.AuthService;
 import site.courseregistrationsystem.auth.application.SessionManager;
 import site.courseregistrationsystem.auth.presentation.AuthController;
+import site.courseregistrationsystem.auth.presentation.CookieProperties;
 import site.courseregistrationsystem.util.encryption.Aes256Manager;
 
 @WebMvcTest(controllers = {AuthController.class})
@@ -23,6 +24,9 @@ public abstract class RestDocsSupport {
 
 	@Autowired
 	protected ObjectMapper objectMapper;
+
+	@MockBean
+	protected CookieProperties cookieProperties;
 
 	@MockBean
 	protected AuthService authService;
