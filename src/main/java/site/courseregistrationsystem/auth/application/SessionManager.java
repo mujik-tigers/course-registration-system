@@ -17,25 +17,25 @@ public class SessionManager {
 	private final SessionStorage sessionStorage;
 
 	public StudentSession generate(Long studentPk) {  // 세션 생성 및 저장
-		String id = UUID.randomUUID().toString();
-		StudentSession session = new StudentSession(id, studentPk, SESSION_EXPIRY);
+		String sessionId = UUID.randomUUID().toString();
+		StudentSession session = new StudentSession(sessionId, studentPk, SESSION_EXPIRY);
 
 		return sessionStorage.save(session);
 	}
 
-	public StudentSession fetch(String id) {  // 세션 조회
-		return sessionStorage.findById(id).orElseThrow();
+	public StudentSession fetch(String sessionId) {  // 세션 조회
+		return sessionStorage.findById(sessionId).orElseThrow();
 	}
 
-	public void invalidate(String id) {  // 세션 무효화
-		sessionStorage.deleteById(id);
+	public void invalidate(String sessionId) {  // 세션 무효화
+		sessionStorage.deleteById(sessionId);
 	}
 
-	public StudentSession renew(String id) {  // 세션 갱신
-		StudentSession session = fetch(id);
+	public StudentSession renew(String sessionId) {  // 세션 갱신
+		StudentSession session = fetch(sessionId);
 		StudentSession newSession = generate(session.getStudentPk());
 
-		invalidate(id);
+		invalidate(sessionId);
 
 		return newSession;
 	}
