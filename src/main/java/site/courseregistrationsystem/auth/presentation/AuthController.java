@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.auth.StudentSession;
 import site.courseregistrationsystem.auth.application.AuthService;
@@ -26,7 +27,7 @@ public class AuthController {
 	private final AuthService authService;
 
 	@PostMapping("/login")
-	public ApiResponse<Void> login(@RequestBody LoginForm loginForm, HttpServletResponse response) {
+	public ApiResponse<Void> login(@RequestBody @Valid LoginForm loginForm, HttpServletResponse response) {
 		StudentSession session = authService.login(loginForm);  // 로그인 데이터 검증
 
 		Cookie cookie = new Cookie(COOKIE_KEY, session.getId());  // 쿠키 생성
