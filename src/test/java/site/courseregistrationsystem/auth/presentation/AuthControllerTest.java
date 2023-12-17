@@ -35,12 +35,16 @@ class AuthControllerTest extends RestDocsSupport {
 		given(authService.login(any(LoginForm.class)))
 			.willReturn(new StudentSession(uuid, studentPk, expiration));
 
-		// when & then
 		String cookieName = "JSESSIONID";
 		String cookieDomain = "course-registration-system.site";
 		String cookiePath = "/";
 		int cookieExpiry = 3600;
+		given(cookieProperties.getName()).willReturn(cookieName);
+		given(cookieProperties.getDomain()).willReturn(cookieDomain);
+		given(cookieProperties.getPath()).willReturn(cookiePath);
+		given(cookieProperties.getExpiry()).willReturn(cookieExpiry);
 
+		// when & then
 		mockMvc.perform(post("/login")
 				.content(objectMapper.writeValueAsString(loginForm))
 				.contentType(MediaType.APPLICATION_JSON))
