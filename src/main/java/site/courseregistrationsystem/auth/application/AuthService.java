@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.auth.StudentSession;
 import site.courseregistrationsystem.auth.dto.LoginForm;
-import site.courseregistrationsystem.auth.util.SessionManager;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
 

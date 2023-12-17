@@ -1,4 +1,4 @@
-package site.courseregistrationsystem.auth.util;
+package site.courseregistrationsystem.auth.application;
 
 import java.util.UUID;
 
