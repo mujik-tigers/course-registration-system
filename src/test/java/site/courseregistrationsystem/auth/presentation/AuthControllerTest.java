@@ -17,7 +17,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import site.courseregistrationsystem.RestDocsSupport;
 import site.courseregistrationsystem.auth.StudentSession;
 import site.courseregistrationsystem.auth.dto.LoginForm;
-import site.courseregistrationsystem.exception.auth.InvalidLoginException;
+import site.courseregistrationsystem.exception.auth.InvalidPasswordException;
 
 class AuthControllerTest extends RestDocsSupport {
 
@@ -74,7 +74,7 @@ class AuthControllerTest extends RestDocsSupport {
 		LoginForm loginForm = new LoginForm(studentId, password);
 
 		given(authService.login(any(LoginForm.class)))
-			.willThrow(new InvalidLoginException());
+			.willThrow(new InvalidPasswordException());
 
 		// when & then
 		mockMvc.perform(post("/login")
