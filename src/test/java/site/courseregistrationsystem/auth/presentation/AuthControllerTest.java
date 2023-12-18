@@ -18,6 +18,7 @@ import site.courseregistrationsystem.RestDocsSupport;
 import site.courseregistrationsystem.auth.StudentSession;
 import site.courseregistrationsystem.auth.dto.LoginForm;
 import site.courseregistrationsystem.exception.auth.InvalidPasswordException;
+import site.courseregistrationsystem.exception.auth.NonexistenceStudentIdException;
 
 class AuthControllerTest extends RestDocsSupport {
 
@@ -66,11 +67,44 @@ class AuthControllerTest extends RestDocsSupport {
 	}
 
 	@Test
-	@DisplayName("로그인 : 실패")
-	void loginFail() throws Exception {
+	@DisplayName("로그인 : 실패 - 존재하지 않는 학번")
+	void loginFailStudentId() throws Exception {
+		// given
+		String studentId = "012345678";
+		String password = "test1234!";
+		LoginForm loginForm = new LoginForm(studentId, password);
+
+		given(authService.login(any(LoginForm.class)))
+			.willThrow(new NonexistenceStudentIdException());
+
+		// when & then
+		mockMvc.perform(post("/login")
+				.content(objectMapper.writeValueAsString(loginForm))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andDo(document("login-fail-student-id",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				requestFields(
+					fieldWithPath("studentId").type(JsonFieldType.STRING).description("학번"),
+					fieldWithPath("password").type(JsonFieldType.STRING).description("비밀번호")
+				),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("로그인 : 실패 - 비밀번호 불일치")
+	void loginFailPassword() throws Exception {
 		// given
 		String studentId = "123456789";
-		String password = "test1234!";
+		String password = "test0123!";
 		LoginForm loginForm = new LoginForm(studentId, password);
 
 		given(authService.login(any(LoginForm.class)))
@@ -82,7 +116,7 @@ class AuthControllerTest extends RestDocsSupport {
 				.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print())
 			.andExpect(status().isUnauthorized())
-			.andDo(document("login-fail",
+			.andDo(document("login-fail-password",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
 				requestFields(
@@ -118,6 +152,36 @@ class AuthControllerTest extends RestDocsSupport {
 				requestFields(
 					fieldWithPath("studentId").type(JsonFieldType.STRING).description("학번"),
 					fieldWithPath("password").type(JsonFieldType.STRING).description("비밀번호")
+				),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.NULL).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.ARRAY).description("응답 데이터"),
+					fieldWithPath("data[].field").type(JsonFieldType.STRING).description("필드"),
+					fieldWithPath("data[].message").type(JsonFieldType.STRING).description("오류 메시지")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("로그인 : 빈 요청 오류")
+	void loginNull() throws Exception {
+		// given
+		LoginForm loginForm = new LoginForm(null, null);
+
+		// when & then
+		mockMvc.perform(post("/login")
+				.content(objectMapper.writeValueAsString(loginForm))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andDo(document("login-null",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				requestFields(
+					fieldWithPath("studentId").type(JsonFieldType.NULL).description("학번"),
+					fieldWithPath("password").type(JsonFieldType.NULL).description("비밀번호")
 				),
 				responseFields(
 					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
