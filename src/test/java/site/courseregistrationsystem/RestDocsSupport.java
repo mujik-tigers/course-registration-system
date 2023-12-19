@@ -15,9 +15,10 @@ import site.courseregistrationsystem.auth.application.AuthService;
 import site.courseregistrationsystem.auth.application.SessionManager;
 import site.courseregistrationsystem.auth.presentation.AuthController;
 import site.courseregistrationsystem.auth.presentation.CookieProperties;
+import site.courseregistrationsystem.clock.presentation.ClockController;
 import site.courseregistrationsystem.util.encryption.Aes256Manager;
 
-@WebMvcTest(controllers = {AuthController.class})
+@WebMvcTest(controllers = {AuthController.class, ClockController.class})
 @AutoConfigureRestDocs
 public abstract class RestDocsSupport {
 

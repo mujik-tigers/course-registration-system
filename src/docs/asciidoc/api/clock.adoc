@@ -1,0 +1,14 @@
+[[Clock-API]]
+== Clock API
+
+[[login-success]]
+=== 로그인 : 성공
+
+==== HTTP Request
+
+include::{snippets}/current-server-time-fetch-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/current-server-time-fetch-success/http-response.adoc[]
+include::{snippets}/current-server-time-fetch-success/response-fields.adoc[]

@@ -10,4 +10,4 @@ endif::[]
 :toclevels: 2
 :sectlinks:
 
-include::auth.adoc[]
+include::api/auth.adoc[]
