@@ -1,6 +1,7 @@
 package site.courseregistrationsystem.auth.application;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.auth.StudentSession;
@@ -13,6 +14,7 @@ import site.courseregistrationsystem.util.encryption.Aes256Manager;
 import site.courseregistrationsystem.util.encryption.BCryptManager;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class AuthService {
 
