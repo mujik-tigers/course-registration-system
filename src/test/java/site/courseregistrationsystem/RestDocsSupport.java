@@ -18,9 +18,15 @@ import site.courseregistrationsystem.auth.presentation.AuthController;
 import site.courseregistrationsystem.auth.presentation.CookieProperties;
 import site.courseregistrationsystem.clock.presentation.ClockController;
 import site.courseregistrationsystem.exception.auth.NonexistenceSessionException;
+import site.courseregistrationsystem.student.application.StudentService;
+import site.courseregistrationsystem.student.presentation.StudentController;
 import site.courseregistrationsystem.util.encryption.Aes256Manager;
 
-@WebMvcTest(controllers = {AuthController.class, ClockController.class})
+@WebMvcTest(controllers = {
+	AuthController.class,
+	ClockController.class,
+	StudentController.class
+})
 @AutoConfigureRestDocs
 public abstract class RestDocsSupport {
 
@@ -35,6 +41,9 @@ public abstract class RestDocsSupport {
 
 	@MockBean
 	protected AuthService authService;
+
+	@MockBean
+	protected StudentService studentService;
 
 	@MockBean
 	protected Aes256Manager aes256Manager;
