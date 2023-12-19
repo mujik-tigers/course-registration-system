@@ -11,3 +11,4 @@ endif::[]
 :sectlinks:
 
 include::api/auth.adoc[]
+include::api/clock.adoc[]
