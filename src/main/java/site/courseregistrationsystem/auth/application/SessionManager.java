@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.auth.StudentSession;
 import site.courseregistrationsystem.auth.infrastructure.SessionStorage;
+import site.courseregistrationsystem.exception.auth.NonexistenceSessionException;
 
 @Component
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class SessionManager {
 	}
 
 	public StudentSession fetch(String sessionId) {  // 세션 조회
-		return sessionStorage.findById(sessionId).orElseThrow();
+		return sessionStorage.findById(sessionId).orElseThrow(NonexistenceSessionException::new);
 	}
 
 	public void invalidate(String sessionId) {  // 세션 무효화
