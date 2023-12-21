@@ -16,8 +16,8 @@ public class StudentService {
 	private final StudentRepository studentRepository;
 	private final Aes256Manager aes256Manager;
 
-	public StudentInformation fetchStudentInformation(Long studentPK) {
-		Student student = studentRepository.findById(studentPK)
+	public StudentInformation fetchStudentInformation(Long studentPk) {
+		Student student = studentRepository.findById(studentPk)
 			.orElseThrow(NonexistenceStudentException::new);
 
 		return new StudentInformation(

@@ -7,7 +7,10 @@ public enum ResponseMessage {
 	STUDENT_INFORMATION_FETCH_SUCCESS("학생 정보 조회에 성공했습니다"),
 
 	// Time
-	CURRENT_SERVER_TIME_FETCH_SUCCESS("현재 서버 시간 조회에 성공했습니다");
+	CURRENT_SERVER_TIME_FETCH_SUCCESS("현재 서버 시간 조회에 성공했습니다"),
+
+	// Session
+	RENEW_SESSION_DURATION_SUCCESS("세션 지속시간 갱신에 성공했습니다");
 
 	private final String message;
 

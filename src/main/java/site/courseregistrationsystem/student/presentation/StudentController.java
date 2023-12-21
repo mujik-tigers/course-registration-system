@@ -18,8 +18,8 @@ public class StudentController {
 	private final StudentService studentService;
 
 	@GetMapping("/students")
-	public ApiResponse<StudentInformation> fetchStudentInformation(@Login Long studentPK) {
-		StudentInformation studentInformation = studentService.fetchStudentInformation(studentPK);
+	public ApiResponse<StudentInformation> fetchStudentInformation(@Login Long studentPk) {
+		StudentInformation studentInformation = studentService.fetchStudentInformation(studentPk);
 
 		return ApiResponse.ok(STUDENT_INFORMATION_FETCH_SUCCESS.getMessage(), studentInformation);
 	}
