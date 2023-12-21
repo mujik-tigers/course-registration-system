@@ -5,13 +5,11 @@ import java.time.LocalDateTime;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.clock.dto.CurrentServerTime;
 import site.courseregistrationsystem.util.api.ApiResponse;
 import site.courseregistrationsystem.util.api.ResponseMessage;
 
 @RestController
-@RequiredArgsConstructor
 public class ClockController {
 
 	@GetMapping("/clock/server")
