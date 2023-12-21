@@ -32,16 +32,10 @@ public class AuthController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/login")
 	public ApiResponse<Void> login(@RequestBody @Valid LoginForm loginForm, HttpServletResponse response) {
-		StudentSession session = authService.login(loginForm);  // 로그인 데이터 검증
+		StudentSession session = authService.login(loginForm);
 
-		Cookie cookie = new Cookie(cookieProperties.getName(), session.getId());  // 쿠키 생성
-		cookie.setHttpOnly(true);
-		cookie.setSecure(true);
-		cookie.setDomain(cookieProperties.getDomain());
-		cookie.setPath(cookieProperties.getPath());
-		cookie.setMaxAge(cookieProperties.getExpiry());
-
-		response.addCookie(cookie); // 쿠키 설정
+		Cookie cookie = generateCookieBy(session);
+		response.addCookie(cookie);
 
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.LOGIN_SUCCESS.getMessage(), null);
 	}
@@ -51,14 +45,8 @@ public class AuthController {
 	public ApiResponse<Void> renewSessionDuration(@CookieValue(value = SESSION_ID) Cookie sessionCookie, HttpServletResponse response) {
 		StudentSession renewSession = sessionManager.renew(sessionCookie.getValue());
 
-		Cookie cookie = new Cookie(cookieProperties.getName(), renewSession.getId());
-		cookie.setHttpOnly(true);
-		cookie.setSecure(true);
-		cookie.setDomain(cookieProperties.getDomain());
-		cookie.setPath(cookieProperties.getPath());
-		cookie.setMaxAge(cookieProperties.getExpiry());
-
-		response.addCookie(cookie); // 쿠키 설정
+		Cookie cookie = generateCookieBy(renewSession);
+		response.addCookie(cookie);
 
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.RENEW_SESSION_DURATION_SUCCESS.getMessage(), null);
 	}
@@ -67,14 +55,28 @@ public class AuthController {
 	public ApiResponse<Void> logout(@CookieValue(value = SESSION_ID) Cookie sessionCookie, HttpServletResponse response) {
 		sessionManager.invalidate(sessionCookie.getValue());
 
-		sessionCookie.setMaxAge(0);
+		invalidateCookie(sessionCookie);
+		response.addCookie(sessionCookie);
+
+		return ApiResponse.ok(ResponseMessage.LOGOUT_SUCCESS.getMessage(), null);
+	}
+
+	private Cookie generateCookieBy(StudentSession renewSession) {
+		Cookie cookie = new Cookie(cookieProperties.getName(), renewSession.getId());
+		cookie.setHttpOnly(true);
+		cookie.setSecure(true);
+		cookie.setDomain(cookieProperties.getDomain());
+		cookie.setPath(cookieProperties.getPath());
+		cookie.setMaxAge(cookieProperties.getExpiry());
+		return cookie;
+	}
+
+	private void invalidateCookie(Cookie sessionCookie) {
 		sessionCookie.setHttpOnly(true);
 		sessionCookie.setSecure(true);
 		sessionCookie.setDomain(cookieProperties.getDomain());
 		sessionCookie.setPath(cookieProperties.getPath());
-		response.addCookie(sessionCookie);
-
-		return ApiResponse.ok(ResponseMessage.LOGOUT_SUCCESS.getMessage(), null);
+		sessionCookie.setMaxAge(0);
 	}
 
 }
