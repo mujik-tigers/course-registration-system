@@ -1,6 +1,6 @@
 package site.courseregistrationsystem.lecture;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -8,10 +8,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import lombok.Getter;
 import site.courseregistrationsystem.professor.Professor;
 import site.courseregistrationsystem.subject.Subject;
 
 @Entity
+@Getter
 public class Lecture {
 
 	@Id
@@ -20,8 +22,8 @@ public class Lecture {
 
 	private Integer lectureNumber;
 	private String lectureRoom;
-	private LocalDateTime lectureStartTime;
-	private LocalDateTime lectureEndTime;
+	private LocalTime lectureStartTime;
+	private LocalTime lectureEndTime;
 	private Integer totalCapacity;
 
 	@ManyToOne(fetch = FetchType.LAZY)
