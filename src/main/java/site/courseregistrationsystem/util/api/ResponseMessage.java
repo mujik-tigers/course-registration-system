@@ -4,6 +4,7 @@ public enum ResponseMessage {
 
 	// Student
 	LOGIN_SUCCESS("로그인에 성공했습니다"),
+	LOGOUT_SUCCESS("로그아웃에 성공했습니다"),
 	STUDENT_INFORMATION_FETCH_SUCCESS("학생 정보 조회에 성공했습니다"),
 
 	// Time
@@ -11,6 +12,7 @@ public enum ResponseMessage {
 
 	// Session
 	RENEW_SESSION_DURATION_SUCCESS("세션 지속시간 갱신에 성공했습니다");
+
 
 	private final String message;
 
