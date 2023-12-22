@@ -2,6 +2,7 @@ package site.courseregistrationsystem.auth.application;
 
 import static org.assertj.core.api.Assertions.*;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,7 +27,7 @@ class SessionManagerTest extends IntegrationTestSupport {
 		// then
 		assertThat(session.getStudentPk()).isEqualTo(studentPk);
 		assertThat(session.getId()).hasSize(36);
-		assertThat(session.getExpiration()).isLessThanOrEqualTo(3600);
+		assertThat(session.getExpiration()).isCloseTo(3600L, Offset.offset(10L));
 	}
 
 	@Test
