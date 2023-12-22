@@ -7,10 +7,10 @@ public enum Grade {
 
 	FRESHMAN(1), SOPHOMORE(2), JUNIOR(3), SENIOR(4);
 
-	private final int number;
+	private final int gradeNumber;
 
-	Grade(int number) {
-		this.number = number;
+	Grade(int gradeNumber) {
+		this.gradeNumber = gradeNumber;
 	}
 
 }

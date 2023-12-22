@@ -11,13 +11,22 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import site.courseregistrationsystem.auth.StudentSession;
 import site.courseregistrationsystem.auth.application.AuthService;
 import site.courseregistrationsystem.auth.application.SessionManager;
 import site.courseregistrationsystem.auth.presentation.AuthController;
 import site.courseregistrationsystem.auth.presentation.CookieProperties;
+import site.courseregistrationsystem.clock.presentation.ClockController;
+import site.courseregistrationsystem.exception.auth.NonexistenceSessionException;
+import site.courseregistrationsystem.student.application.StudentService;
+import site.courseregistrationsystem.student.presentation.StudentController;
 import site.courseregistrationsystem.util.encryption.Aes256Manager;
 
-@WebMvcTest(controllers = {AuthController.class})
+@WebMvcTest(controllers = {
+	AuthController.class,
+	ClockController.class,
+	StudentController.class
+})
 @AutoConfigureRestDocs
 public abstract class RestDocsSupport {
 
@@ -32,6 +41,9 @@ public abstract class RestDocsSupport {
 
 	@MockBean
 	protected AuthService authService;
+
+	@MockBean
+	protected StudentService studentService;
 
 	@MockBean
 	protected Aes256Manager aes256Manager;
@@ -49,6 +61,17 @@ public abstract class RestDocsSupport {
 		given(cookieProperties.getDomain()).willReturn(cookieDomain);
 		given(cookieProperties.getPath()).willReturn(cookiePath);
 		given(cookieProperties.getExpiry()).willReturn(cookieExpiry);
+
+		given(sessionManager.fetch(any(String.class)))
+			.will(invocation -> {
+				String sessionId = invocation.getArgument(0, String.class);
+
+				if (sessionId.length() == 36) {
+					return new StudentSession(sessionId, 1L, 3600L);
+				}
+
+				throw new NonexistenceSessionException();
+			});
 	}
 
 }
