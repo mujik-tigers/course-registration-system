@@ -1,0 +1,27 @@
+[[Clock-API]]
+== Clock API
+
+[[current-server-time-fetch-success]]
+=== 서버 현재 시간 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/current-server-time-fetch-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/current-server-time-fetch-success/http-response.adoc[]
+include::{snippets}/current-server-time-fetch-success/response-fields.adoc[]
+
+[[current-server-time-fetch-fail]]
+=== 서버 현재 시간 조회 : 실패
+==== 세션 쿠키가 없는 경우, 즉 로그인하지 않은 회원은 서버 시간을 조회할 수 없다.
+
+==== HTTP Request
+
+include::{snippets}/current-server-time-fetch-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/current-server-time-fetch-fail/http-response.adoc[]
+include::{snippets}/current-server-time-fetch-fail/response-fields.adoc[]

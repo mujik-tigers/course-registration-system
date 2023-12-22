@@ -37,4 +37,19 @@ public class Student {
 		this.password = password;
 	}
 
+	public Student(String studentId, String name, Grade grade, Department department) {
+		this.studentId = studentId;
+		this.name = name;
+		this.grade = grade;
+		this.department = department;
+	}
+
+	public String fetchDepartmentName() {
+		return department.getName();
+	}
+
+	public int fetchGradeNumber() {
+		return grade.getGradeNumber();
+	}
+
 }

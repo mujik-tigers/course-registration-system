@@ -1,0 +1,28 @@
+[[Student-API]]
+== Student API
+
+[[student-information-fetch-success]]
+=== 학생 정보 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/student-information-fetch-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/student-information-fetch-success/http-response.adoc[]
+include::{snippets}/student-information-fetch-success/response-fields.adoc[]
+
+[[student-information-fetch-fail]]
+=== 학생 정보 조회 : 실패
+
+==== 세션 쿠키가 없는 경우, 즉 로그인하지 않은 회원은 학생 정보를 조회할 수 없다.
+
+==== HTTP Request
+
+include::{snippets}/student-information-fetch-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/student-information-fetch-fail/http-response.adoc[]
+include::{snippets}/student-information-fetch-fail/response-fields.adoc[]

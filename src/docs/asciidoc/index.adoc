@@ -10,4 +10,6 @@ endif::[]
 :toclevels: 2
 :sectlinks:
 
-include::auth.adoc[]
+include::api/auth.adoc[]
+include::api/clock.adoc[]
+include::api/student.adoc[]
