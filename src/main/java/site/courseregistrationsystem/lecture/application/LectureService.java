@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.lecture.dto.LectureDetail;
-import site.courseregistrationsystem.lecture.dto.LectureDetailPage;
+import site.courseregistrationsystem.lecture.dto.LectureSchedulePage;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.subject.SubjectDivision;
 
@@ -17,9 +17,9 @@ public class LectureService {
 	private final LectureRepository lectureRepository;
 
 	@Transactional(readOnly = true)
-	public LectureDetailPage fetch(Pageable pageable, SubjectDivision subjectDivision, Long departmentId,
+	public LectureSchedulePage fetch(Pageable pageable, SubjectDivision subjectDivision, Long departmentId,
 		String subjectName) {
-		return new LectureDetailPage(
+		return new LectureSchedulePage(
 			lectureRepository.findMatchedLectures(pageable, subjectDivision, departmentId, subjectName)
 				.map(LectureDetail::new));
 	}

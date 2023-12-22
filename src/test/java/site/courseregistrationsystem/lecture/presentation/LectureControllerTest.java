@@ -20,7 +20,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import jakarta.servlet.http.Cookie;
 import site.courseregistrationsystem.RestDocsSupport;
 import site.courseregistrationsystem.lecture.dto.LectureDetail;
-import site.courseregistrationsystem.lecture.dto.LectureDetailPage;
+import site.courseregistrationsystem.lecture.dto.LectureSchedulePage;
 
 class LectureControllerTest extends RestDocsSupport {
 
@@ -34,7 +34,7 @@ class LectureControllerTest extends RestDocsSupport {
 		), PageRequest.of(0, 20), 2);
 
 		given(lectureService.fetch(any(), any(), any(), any()))
-			.willReturn(new LectureDetailPage(fetchedLectures));
+			.willReturn(new LectureSchedulePage(fetchedLectures));
 
 		String COOKIE_NAME = "SESSIONID";
 		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
