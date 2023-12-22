@@ -1,0 +1,25 @@
+[[Lecture-API]]
+== Lecture API
+
+[[lecture-fetch-success]]
+=== 종합 강의 시간표 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/lecture-fetch-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/lecture-fetch-success/http-response.adoc[]
+include::{snippets}/lecture-fetch-success/response-fields.adoc[]
+
+=== 종합 강의 시간표 조회 : 쿠키 인증 실패
+
+==== HTTP Request
+
+include::{snippets}/lecture-fetch-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/lecture-fetch-fail/http-response.adoc[]
+include::{snippets}/lecture-fetch-fail/response-fields.adoc[]
