@@ -1,8 +1,10 @@
 package site.courseregistrationsystem.lecture.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import site.courseregistrationsystem.lecture.Lecture;
 
+@AllArgsConstructor
 @Getter
 public class LectureDetail {
 
@@ -25,7 +27,7 @@ public class LectureDetail {
 		subjectName = lecture.getSubject().getName();
 		hoursPerWeek = lecture.getSubject().getHoursPerWeek();
 		credits = lecture.getSubject().getCredits();
-		targetGrade = lecture.getSubject().getTargetGrade().getNumber();
+		targetGrade = lecture.getSubject().getTargetGrade().getGradeNumber();
 		departmentName = lecture.getSubject().getDepartment().getName();
 		professorName = lecture.getProfessor().getName();
 		schedule = lecture.generateSchedule();
