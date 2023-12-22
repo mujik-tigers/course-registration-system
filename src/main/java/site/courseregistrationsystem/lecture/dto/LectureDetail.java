@@ -1,7 +1,5 @@
 package site.courseregistrationsystem.lecture.dto;
 
-import java.time.LocalTime;
-
 import lombok.Getter;
 import site.courseregistrationsystem.lecture.Lecture;
 
@@ -17,8 +15,7 @@ public class LectureDetail {
 	private final int targetGrade;
 	private final String departmentName;
 	private final String professorName;
-	private final LocalTime lectureStartTime;
-	private final LocalTime lectureEndTime;
+	private final String schedule;
 	private final Integer totalCapacity;
 
 	public LectureDetail(Lecture lecture) {
@@ -31,8 +28,7 @@ public class LectureDetail {
 		targetGrade = lecture.getSubject().getTargetGrade().getNumber();
 		departmentName = lecture.getSubject().getDepartment().getName();
 		professorName = lecture.getProfessor().getName();
-		lectureStartTime = lecture.getLectureStartTime();
-		lectureEndTime = lecture.getLectureEndTime();
+		schedule = lecture.generateSchedule();
 		totalCapacity = lecture.getTotalCapacity();
 	}
 
