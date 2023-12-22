@@ -18,7 +18,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
 			+ "JOIN FETCH l.schedules sc "
 			+ "WHERE (:subjectDivision IS NULL OR s.subjectDivision = :subjectDivision) "
 			+ "AND (:departmentId IS NULL OR d.id = :departmentId) "
-			+ "AND (:subjectName IS NULL OR s.name = :subjectName) "
+			+ "AND (:subjectName IS NULL OR s.name LIKE %:subjectName%) "
 	)
 	Page<Lecture> findMatchedLectures(Pageable pageable, SubjectDivision subjectDivision, Long departmentId,
 		String subjectName);
