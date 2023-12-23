@@ -8,9 +8,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.courseregistrationsystem.department.Department;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class Student {
 
 	@Id
@@ -26,5 +31,25 @@ public class Student {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Department department;
+
+	public Student(String studentId, String password) {
+		this.studentId = studentId;
+		this.password = password;
+	}
+
+	public Student(String studentId, String name, Grade grade, Department department) {
+		this.studentId = studentId;
+		this.name = name;
+		this.grade = grade;
+		this.department = department;
+	}
+
+	public String fetchDepartmentName() {
+		return department.getName();
+	}
+
+	public int fetchGradeNumber() {
+		return grade.getGradeNumber();
+	}
 
 }
