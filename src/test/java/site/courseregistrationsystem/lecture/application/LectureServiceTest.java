@@ -51,6 +51,37 @@ class LectureServiceTest extends IntegrationTestSupport {
 	private ProfessorRepository professorRepository;
 
 	@Test
+	@DisplayName("검색 조건 없이 강의를 조회한다")
+	void fetch() {
+		// given
+		Department department = departmentRepository.save(new Department("departmentName"));
+		Professor professor = professorRepository.save(new Professor("professorName"));
+		Subject subject = subjectRepository.save(
+			new Subject(department, SubjectDivision.MR, Grade.FRESHMAN, "subjectName", 3, 2));
+		List<Lecture> lectures = lectureRepository.saveAll(generateCopiedLectureFixtures(50, subject, professor));
+		List<Schedule> schedules = scheduleRepository.saveAll(generateScheduleFixtures(lectures));
+
+		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
+		LectureFilterOptions lectureFilterOptions = new LectureFilterOptions(null, null, null);
+
+		// when
+		LectureSchedulePage lectureSchedulePage = lectureService.fetchLectureSchedule(pageRequest,
+			lectureFilterOptions);
+
+		// then
+		int firstIndex = 0;
+
+		assertAll(
+			() -> assertThat(lectureSchedulePage.isFirst()).isTrue(),
+			() -> assertThat(lectureSchedulePage.isLast()).isFalse(),
+			() -> assertThat(lectureSchedulePage.getTotalElements()).isEqualTo(lectures.size()),
+			() -> assertThat(lectureSchedulePage.getLectures()).hasSize(pageRequest.getPageSize()),
+			() -> assertThat(lectureSchedulePage.getLectures().get(firstIndex).getId())
+				.isEqualTo(lectures.get(firstIndex).getId())
+		);
+	}
+
+	@Test
 	@DisplayName("금속공예디자인학과의 전공 필수 수업이면서 과목명에 공예가 들어가는 강의를 조회한다")
 	void fetchWithOptions() {
 		// given
@@ -79,18 +110,27 @@ class LectureServiceTest extends IntegrationTestSupport {
 			lectureFilterOptions);
 
 		// then
-		assertAll(() -> assertThat(lectureSchedulePage.isFirst()).isTrue(),
+		int firstIndex = 0;
+
+		assertAll(
+			() -> assertThat(lectureSchedulePage.isFirst()).isTrue(),
 			() -> assertThat(lectureSchedulePage.isLast()).isFalse(),
-			() -> assertThat(lectureSchedulePage.getTotalElements()).isEqualTo(30L),
-			() -> assertThat(lectureSchedulePage.getLectures()).hasSize(20),
-			() -> assertThat(lectureSchedulePage.getLectures().get(0).getId()).isEqualTo(
-				matchedLectureFixtures.get(0).getId()),
-			() -> assertThat(lectureSchedulePage.getLectures().get(0).getSubjectDivision()).isEqualTo(
+			() -> assertThat(lectureSchedulePage.getTotalElements()).isEqualTo(matchedLectureFixtures.size()),
+			() -> assertThat(lectureSchedulePage.getLectures()).hasSize(pageRequest.getPageSize()),
+			() -> assertThat(lectureSchedulePage.getLectures().get(firstIndex).getId()).isEqualTo(
+				matchedLectureFixtures.get(firstIndex).getId()),
+			() -> assertThat(lectureSchedulePage.getLectures().get(firstIndex).getSubjectDivision()).isEqualTo(
 				SubjectDivision.MR.getDescription()),
-			() -> assertThat(lectureSchedulePage.getLectures().get(0).getSubjectName()).contains(
+			() -> assertThat(lectureSchedulePage.getLectures().get(firstIndex).getSubjectName()).contains(
 				lectureFilterOptions.getSubjectName())
 		);
+	}
 
+	private List<Lecture> generateCopiedLectureFixtures(int size, Subject subjects, Professor professor) {
+		return IntStream.rangeClosed(1, size)
+			.mapToObj(number -> new Lecture(100100 + number, Integer.toString(100 + number), 10 + number,
+				subjects, professor))
+			.toList();
 	}
 
 	private List<Lecture> generateLectureFixtures(List<Subject> subjects, Professor professor) {
