@@ -8,10 +8,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.courseregistrationsystem.lecture.Lecture;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Schedule {
 
@@ -30,5 +33,12 @@ public class Schedule {
 
 	@Enumerated(EnumType.STRING)
 	private Period lastPeriod;
+
+	public Schedule(Lecture lecture, DayOfWeek dayOfWeek, Period firstPeriod, Period lastPeriod) {
+		this.lecture = lecture;
+		this.dayOfWeek = dayOfWeek;
+		this.firstPeriod = firstPeriod;
+		this.lastPeriod = lastPeriod;
+	}
 
 }
