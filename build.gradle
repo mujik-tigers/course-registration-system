@@ -101,3 +101,6 @@ jacocoTestReport {
     }
 }
 
+jar {
+	enabled = false
+}
