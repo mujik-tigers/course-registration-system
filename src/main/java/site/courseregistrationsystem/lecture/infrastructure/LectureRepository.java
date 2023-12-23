@@ -15,7 +15,6 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
 			+ "JOIN FETCH l.subject s "
 			+ "JOIN FETCH s.department d "
 			+ "JOIN FETCH l.professor "
-			+ "JOIN FETCH l.schedules sc "
 			+ "WHERE (:subjectDivision IS NULL OR s.subjectDivision = :subjectDivision) "
 			+ "AND (:departmentId IS NULL OR d.id = :departmentId) "
 			+ "AND (:subjectName IS NULL OR s.name LIKE %:subjectName%) "
