@@ -2,6 +2,7 @@ package site.courseregistrationsystem.auth.application;
 
 import static org.assertj.core.api.Assertions.*;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -30,6 +31,7 @@ class AuthServiceTest extends IntegrationTestSupport {
 	private StudentRepository studentRepository;
 
 	@Test
+	@DisplayName("학번과 비밀번호를 통해 로그인에 성공하면 세션을 생성한다")
 	void loginSuccess() {
 		// given
 		String studentId = "123456789";
@@ -49,6 +51,7 @@ class AuthServiceTest extends IntegrationTestSupport {
 	}
 
 	@Test
+	@DisplayName("비밀번호가 일치하지 않는 경우 로그인에 실패한다")
 	void loginFail() {
 		// given
 		String studentId = "123456789";

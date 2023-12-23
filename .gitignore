@@ -37,4 +37,4 @@ out/
 .vscode/
 
 application*.yml
-
+**/src/test/java/site/courseregistrationsystem/learn/

@@ -1,5 +1,8 @@
 package site.courseregistrationsystem.subject;
 
+import lombok.Getter;
+
+@Getter
 public enum SubjectDivision {
 
 	MR("전필"),
