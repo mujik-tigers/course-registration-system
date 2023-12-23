@@ -60,7 +60,7 @@ jobs:
           echo "${{ secrets.APPLICATION_TEST }}" > ./src/main/resources/application-test.yml
 
       - name: Build with Gradle
-        run: ./gradlew clean build
+        run: ./gradlew test -i
         working-directory: ${{ env.working-directory }}
 
       - name: Configure AWS credentials
