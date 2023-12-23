@@ -20,13 +20,13 @@ public class LectureController {
 	private final LectureService lectureService;
 
 	@GetMapping("/lectures")
-	public ApiResponse<LectureSchedulePage> fetch(
+	public ApiResponse<LectureSchedulePage> fetchLectureSchedule(
 		@PageableDefault(size = 20, sort = "id") Pageable pageable,
 		@RequestParam(required = false) SubjectDivision subjectDivision,
 		@RequestParam(required = false) Long departmentId,
 		@RequestParam(required = false) String subjectName) {
-		return ApiResponse.ok(ResponseMessage.LECTURE_LIST_FETCH_SUCCESS.getMessage(),
-			lectureService.fetch(pageable, subjectDivision, departmentId, subjectName));
+		return ApiResponse.ok(ResponseMessage.LECTURE_SCHEDULE_FETCH_SUCCESS.getMessage(),
+			lectureService.fetchLectureSchedule(pageable, subjectDivision, departmentId, subjectName));
 	}
 
 }

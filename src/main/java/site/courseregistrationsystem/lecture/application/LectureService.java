@@ -17,7 +17,8 @@ public class LectureService {
 	private final LectureRepository lectureRepository;
 
 	@Transactional(readOnly = true)
-	public LectureSchedulePage fetch(Pageable pageable, SubjectDivision subjectDivision, Long departmentId,
+	public LectureSchedulePage fetchLectureSchedule(Pageable pageable, SubjectDivision subjectDivision,
+		Long departmentId,
 		String subjectName) {
 		return new LectureSchedulePage(
 			lectureRepository.findMatchedLectures(pageable, subjectDivision, departmentId, subjectName)
