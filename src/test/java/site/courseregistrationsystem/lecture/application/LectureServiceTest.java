@@ -16,6 +16,7 @@ import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.department.infrastructure.DepartmentRepository;
 import site.courseregistrationsystem.lecture.Lecture;
+import site.courseregistrationsystem.lecture.dto.LectureFilterOptions;
 import site.courseregistrationsystem.lecture.dto.LectureSchedulePage;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.professor.Professor;
@@ -70,13 +71,12 @@ class LectureServiceTest extends IntegrationTestSupport {
 		scheduleRepository.saveAll(generateScheduleFixtures(unmatchedLectureFixtures));
 
 		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
-		SubjectDivision subjectDivision = SubjectDivision.MR;
-		Long departmentId = department.getId();
-		String subjectName = "공예";
+		LectureFilterOptions lectureFilterOptions = new LectureFilterOptions(SubjectDivision.MR, department.getId(),
+			"공예");
 
 		// when
-		LectureSchedulePage lectureSchedulePage = lectureService.fetchLectureSchedule(pageRequest, subjectDivision,
-			departmentId, subjectName);
+		LectureSchedulePage lectureSchedulePage = lectureService.fetchLectureSchedule(pageRequest,
+			lectureFilterOptions);
 
 		// then
 		assertAll(() -> assertThat(lectureSchedulePage.isFirst()).isTrue(),
@@ -86,8 +86,9 @@ class LectureServiceTest extends IntegrationTestSupport {
 			() -> assertThat(lectureSchedulePage.getLectures().get(0).getId()).isEqualTo(
 				matchedLectureFixtures.get(0).getId()),
 			() -> assertThat(lectureSchedulePage.getLectures().get(0).getSubjectDivision()).isEqualTo(
-				subjectDivision.getDescription()),
-			() -> assertThat(lectureSchedulePage.getLectures().get(0).getSubjectName()).contains(subjectName));
+				SubjectDivision.MR.getDescription()),
+			() -> assertThat(lectureSchedulePage.getLectures().get(0).getSubjectName()).contains(
+				lectureFilterOptions.getSubjectName()));
 
 	}
 

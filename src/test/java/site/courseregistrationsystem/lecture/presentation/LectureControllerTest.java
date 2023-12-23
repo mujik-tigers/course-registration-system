@@ -33,7 +33,7 @@ class LectureControllerTest extends RestDocsSupport {
 			new LectureDetail(2L, 300101, "전필", "금속공예기초", 4, 3, 1, "금속공예디자인학과", "남유진", "목(6-9)", 20)
 		), PageRequest.of(0, 20), 2);
 
-		given(lectureService.fetchLectureSchedule(any(), any(), any(), any()))
+		given(lectureService.fetchLectureSchedule(any(), any()))
 			.willReturn(new LectureSchedulePage(fetchedLectures));
 
 		String COOKIE_NAME = "SESSIONID";
