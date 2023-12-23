@@ -11,12 +11,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.courseregistrationsystem.professor.Professor;
 import site.courseregistrationsystem.schedule.Schedule;
 import site.courseregistrationsystem.subject.Subject;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Lecture {
 
@@ -36,6 +39,15 @@ public class Lecture {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Professor professor;
+
+	public Lecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity, Subject subject,
+		Professor professor) {
+		this.lectureNumber = lectureNumber;
+		this.lectureRoom = lectureRoom;
+		this.totalCapacity = totalCapacity;
+		this.subject = subject;
+		this.professor = professor;
+	}
 
 	public String generateSchedule() {
 		return schedules.stream().map(schedule ->
