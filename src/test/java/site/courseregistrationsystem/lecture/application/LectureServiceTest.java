@@ -51,7 +51,7 @@ class LectureServiceTest extends IntegrationTestSupport {
 	private ProfessorRepository professorRepository;
 
 	@Test
-	@DisplayName("설정한 탐색 및 정렬 조건에 맞는 강의를 Page 단위의 목록으로 응답한다")
+	@DisplayName("금속공예디자인학과의 전공 필수 수업이면서 과목명에 공예가 들어가는 강의를 조회한다")
 	void fetchWithOptions() {
 		// given
 		Department department = departmentRepository.save(new Department("금속공예디자인학과"));
@@ -88,7 +88,8 @@ class LectureServiceTest extends IntegrationTestSupport {
 			() -> assertThat(lectureSchedulePage.getLectures().get(0).getSubjectDivision()).isEqualTo(
 				SubjectDivision.MR.getDescription()),
 			() -> assertThat(lectureSchedulePage.getLectures().get(0).getSubjectName()).contains(
-				lectureFilterOptions.getSubjectName()));
+				lectureFilterOptions.getSubjectName())
+		);
 
 	}
 
