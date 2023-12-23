@@ -8,11 +8,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.student.Grade;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Subject {
 
@@ -32,5 +35,15 @@ public class Subject {
 	private String name;
 	private Integer hoursPerWeek;
 	private Integer credits;
+
+	public Subject(Department department, SubjectDivision subjectDivision, Grade targetGrade, String name,
+		Integer hoursPerWeek, Integer credits) {
+		this.department = department;
+		this.subjectDivision = subjectDivision;
+		this.targetGrade = targetGrade;
+		this.name = name;
+		this.hoursPerWeek = hoursPerWeek;
+		this.credits = credits;
+	}
 
 }
