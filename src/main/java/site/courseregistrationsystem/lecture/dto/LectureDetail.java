@@ -23,13 +23,13 @@ public class LectureDetail {
 	public LectureDetail(Lecture lecture) {
 		id = lecture.getId();
 		lectureNumber = lecture.getLectureNumber();
-		subjectDivision = lecture.getSubject().getSubjectDivision().getDescription();
-		subjectName = lecture.getSubject().getName();
-		hoursPerWeek = lecture.getSubject().getHoursPerWeek();
-		credits = lecture.getSubject().getCredits();
-		targetGrade = lecture.getSubject().getTargetGrade().getGradeNumber();
-		departmentName = lecture.getSubject().getDepartment().getName();
-		professorName = lecture.getProfessor().getName();
+		subjectDivision = lecture.fetchSubjectDivisionDescription();
+		subjectName = lecture.fetchSubjectName();
+		hoursPerWeek = lecture.fetchHoursPerWeek();
+		credits = lecture.fetchCredits();
+		targetGrade = lecture.fetchTargetGradeNumber();
+		departmentName = lecture.fetchDepartmentName();
+		professorName = lecture.fetchProfessorName();
 		schedule = lecture.generateSchedule();
 		totalCapacity = lecture.getTotalCapacity();
 	}

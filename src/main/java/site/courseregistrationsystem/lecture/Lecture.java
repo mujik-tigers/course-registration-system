@@ -60,4 +60,32 @@ public class Lecture {
 			.collect(Collectors.joining(", "));
 	}
 
+	public String fetchSubjectDivisionDescription() {
+		return subject.getSubjectDivision().getDescription();
+	}
+
+	public String fetchSubjectName() {
+		return subject.getName();
+	}
+
+	public Integer fetchHoursPerWeek() {
+		return subject.getHoursPerWeek();
+	}
+
+	public Integer fetchCredits() {
+		return subject.getCredits();
+	}
+
+	public int fetchTargetGradeNumber() {
+		return subject.getTargetGrade().getGradeNumber();
+	}
+
+	public String fetchDepartmentName() {
+		return subject.getDepartment().getName();
+	}
+
+	public String fetchProfessorName() {
+		return professor.getName();
+	}
+
 }
