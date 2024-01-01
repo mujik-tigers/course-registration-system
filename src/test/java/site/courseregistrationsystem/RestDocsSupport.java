@@ -73,7 +73,11 @@ public abstract class RestDocsSupport {
 				String sessionId = invocation.getArgument(0, String.class);
 
 				if (sessionId.length() == 36) {
-					return new StudentSession(sessionId, 1L, 3600L);
+					return StudentSession.builder()
+						.id(sessionId)
+						.studentPk(1L)
+						.expiration(3600L)
+						.build();
 				}
 
 				throw new NonexistenceSessionException();

@@ -19,7 +19,11 @@ public class SessionManager {
 
 	public StudentSession generate(Long studentPk) {  // 세션 생성 및 저장
 		String sessionId = UUID.randomUUID().toString();
-		StudentSession session = new StudentSession(sessionId, studentPk, SESSION_EXPIRY);
+		StudentSession session = StudentSession.builder()
+			.id(sessionId)
+			.studentPk(studentPk)
+			.expiration(SESSION_EXPIRY)
+			.build();
 
 		return sessionStorage.save(session);
 	}
