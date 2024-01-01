@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.courseregistrationsystem.department.Department;
@@ -36,7 +37,8 @@ public class Subject {
 	private Integer hoursPerWeek;
 	private Integer credits;
 
-	public Subject(Department department, SubjectDivision subjectDivision, Grade targetGrade, String name,
+	@Builder
+	private Subject(Department department, SubjectDivision subjectDivision, Grade targetGrade, String name,
 		Integer hoursPerWeek, Integer credits) {
 		this.department = department;
 		this.subjectDivision = subjectDivision;

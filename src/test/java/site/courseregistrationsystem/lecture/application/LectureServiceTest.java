@@ -26,7 +26,6 @@ import site.courseregistrationsystem.schedule.Schedule;
 import site.courseregistrationsystem.student.Grade;
 import site.courseregistrationsystem.subject.Subject;
 import site.courseregistrationsystem.subject.SubjectDivision;
-import site.courseregistrationsystem.subject.infrastructure.SubjectRepository;
 
 class LectureServiceTest extends IntegrationTestSupport {
 
@@ -37,9 +36,6 @@ class LectureServiceTest extends IntegrationTestSupport {
 	private LectureRepository lectureRepository;
 
 	@Autowired
-	private SubjectRepository subjectRepository;
-
-	@Autowired
 	private EntityManager entityManager;
 
 	@Test
@@ -48,9 +44,9 @@ class LectureServiceTest extends IntegrationTestSupport {
 		// given
 		Department department = saveDepartment("departmentName");
 		Professor professor = saveProfessor("professorName");
-		Subject subject = subjectRepository.save(
-			new Subject(department, SubjectDivision.MR, Grade.FRESHMAN, "subjectName", 3, 2));
-		List<Lecture> lectures = lectureRepository.saveAll(generateCopiedLectureFixtures(50, subject, professor));
+		Subject subject = createSubject(department, SubjectDivision.MR, Grade.FRESHMAN, "subjectName", 3, 2);
+		Subject savedSubject = saveSubject(subject);
+		List<Lecture> lectures = lectureRepository.saveAll(generateCopiedLectureFixtures(50, savedSubject, professor));
 		saveSchedules(generateScheduleFixtures(lectures));
 
 		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
@@ -78,9 +74,9 @@ class LectureServiceTest extends IntegrationTestSupport {
 		Department department = saveDepartment("금속공예디자인학과");
 		Professor professor = saveProfessor("남유진");
 
-		List<Subject> majorRequiredSubjects = subjectRepository.saveAll(
+		List<Subject> majorRequiredSubjects = saveSubjects(
 			generateSubjectFixtures(30, SubjectDivision.MR, department, "공예"));
-		List<Subject> generalRequiredSubjects = subjectRepository.saveAll(
+		List<Subject> generalRequiredSubjects = saveSubjects(
 			generateSubjectFixtures(10, SubjectDivision.GR, department, "역사"));
 
 		List<Lecture> matchedLectureFixtures = lectureRepository.saveAll(
@@ -134,7 +130,7 @@ class LectureServiceTest extends IntegrationTestSupport {
 	private List<Subject> generateSubjectFixtures(int size, SubjectDivision subjectDivision, Department department,
 		String subjectName) {
 		return IntStream.rangeClosed(1, size)
-			.mapToObj(number -> new Subject(department, subjectDivision, Grade.FRESHMAN, subjectName + number, 4, 3))
+			.mapToObj(number -> createSubject(department, subjectDivision, Grade.FRESHMAN, subjectName + number, 4, 3))
 			.toList();
 	}
 
@@ -160,6 +156,19 @@ class LectureServiceTest extends IntegrationTestSupport {
 			.build();
 	}
 
+	private static Subject createSubject(Department department, SubjectDivision subjectDivision, Grade targetGrade,
+		String name,
+		Integer hoursPerWeek, Integer credits) {
+		return Subject.builder()
+			.department(department)
+			.subjectDivision(subjectDivision)
+			.targetGrade(targetGrade)
+			.name(name)
+			.hoursPerWeek(hoursPerWeek)
+			.credits(credits)
+			.build();
+	}
+
 	private Department saveDepartment(String departmentName) {
 		Department department = new Department(departmentName);
 		entityManager.persist(department);
@@ -174,10 +183,20 @@ class LectureServiceTest extends IntegrationTestSupport {
 		return professor;
 	}
 
-	private List<Schedule> saveSchedules(List<Schedule> schedules) {
+	private void saveSchedules(List<Schedule> schedules) {
 		schedules.forEach(entityManager::persist);
+	}
 
-		return schedules;
+	private Subject saveSubject(Subject subjects) {
+		entityManager.persist(subjects);
+
+		return subjects;
+	}
+
+	private List<Subject> saveSubjects(List<Subject> subjects) {
+		subjects.forEach(entityManager::persist);
+
+		return subjects;
 	}
 
 }
