@@ -131,7 +131,14 @@ class LectureServiceTest extends IntegrationTestSupport {
 	}
 
 	private List<Schedule> generateScheduleFixtures(List<Lecture> lectures) {
-		return lectures.stream().map(lecture -> new Schedule(lecture, DayOfWeek.MON, Period.SIX, Period.NINE)).toList();
+		return lectures.stream()
+			.map(lecture -> Schedule.builder()
+				.lecture(lecture)
+				.dayOfWeek(DayOfWeek.MON)
+				.firstPeriod(Period.SIX)
+				.lastPeriod(Period.NINE)
+				.build())
+			.toList();
 	}
 
 	private static Lecture createLecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity, Subject subject, Professor professor) {
