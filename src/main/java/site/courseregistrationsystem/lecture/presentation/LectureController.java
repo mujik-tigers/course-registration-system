@@ -20,7 +20,7 @@ public class LectureController {
 
 	@GetMapping("/lectures")
 	public ApiResponse<LectureSchedulePage> fetchLectureSchedule(
-		@PageableDefault(size = 20, sort = "id") Pageable pageable, LectureFilterOptions lectureFilterOptions) {
+		@PageableDefault(size = 20) Pageable pageable, LectureFilterOptions lectureFilterOptions) {
 		return ApiResponse.ok(ResponseMessage.LECTURE_SCHEDULE_FETCH_SUCCESS.getMessage(),
 			lectureService.fetchLectureSchedule(pageable, lectureFilterOptions));
 	}
