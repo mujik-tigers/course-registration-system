@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.courseregistrationsystem.lecture.Lecture;
@@ -34,7 +35,8 @@ public class Schedule {
 	@Enumerated(EnumType.STRING)
 	private Period lastPeriod;
 
-	public Schedule(Lecture lecture, DayOfWeek dayOfWeek, Period firstPeriod, Period lastPeriod) {
+	@Builder
+	private Schedule(Lecture lecture, DayOfWeek dayOfWeek, Period firstPeriod, Period lastPeriod) {
 		this.lecture = lecture;
 		this.dayOfWeek = dayOfWeek;
 		this.firstPeriod = firstPeriod;

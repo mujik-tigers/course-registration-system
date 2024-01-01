@@ -29,13 +29,13 @@ class AuthControllerTest extends RestDocsSupport {
 		// given
 		String studentId = "123456789";
 		String password = "test1234!";
-		LoginForm loginForm = new LoginForm(studentId, password);
+		LoginForm loginForm = createLoginForm(studentId, password);
 
 		String uuid = "a8b0a12b-998c-4d9a-a294-e54a95a9b6ba";
 		Long studentPk = 1L;
 		Long expiration = 3600L;
 		given(authService.login(any(LoginForm.class)))
-			.willReturn(new StudentSession(uuid, studentPk, expiration));
+			.willReturn(createStudentSession(uuid, studentPk, expiration));
 
 		// when & then
 		String cookieName = cookieProperties.getName();
@@ -73,7 +73,7 @@ class AuthControllerTest extends RestDocsSupport {
 		// given
 		String studentId = "012345678";
 		String password = "test1234!";
-		LoginForm loginForm = new LoginForm(studentId, password);
+		LoginForm loginForm = createLoginForm(studentId, password);
 
 		given(authService.login(any(LoginForm.class)))
 			.willThrow(new NonexistenceStudentIdException());
@@ -106,7 +106,7 @@ class AuthControllerTest extends RestDocsSupport {
 		// given
 		String studentId = "123456789";
 		String password = "test0123!";
-		LoginForm loginForm = new LoginForm(studentId, password);
+		LoginForm loginForm = createLoginForm(studentId, password);
 
 		given(authService.login(any(LoginForm.class)))
 			.willThrow(new InvalidPasswordException());
@@ -139,7 +139,7 @@ class AuthControllerTest extends RestDocsSupport {
 		// given
 		String studentId = "12345678";
 		String password = "test1234";
-		LoginForm loginForm = new LoginForm(studentId, password);
+		LoginForm loginForm = createLoginForm(studentId, password);
 
 		// when & then
 		mockMvc.perform(post("/login")
@@ -169,7 +169,7 @@ class AuthControllerTest extends RestDocsSupport {
 	@DisplayName("로그인 : 빈 요청 오류")
 	void loginNull() throws Exception {
 		// given
-		LoginForm loginForm = new LoginForm(null, null);
+		LoginForm loginForm = createLoginForm(null, null);
 
 		// when & then
 		mockMvc.perform(post("/login")
@@ -210,7 +210,7 @@ class AuthControllerTest extends RestDocsSupport {
 		String cookieName = cookieProperties.getName();
 
 		given(sessionManager.renew(anyString()))
-			.willReturn(new StudentSession(RENEW_UUID, STUDENT_PK, EXPIRATION));
+			.willReturn(createStudentSession(RENEW_UUID, STUDENT_PK, EXPIRATION));
 
 		// when & then
 		mockMvc.perform(post("/session")
@@ -286,6 +286,21 @@ class AuthControllerTest extends RestDocsSupport {
 					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
 				)
 			));
+	}
+
+	private static StudentSession createStudentSession(String uuid, Long studentPk, Long expiration) {
+		return StudentSession.builder()
+			.id(uuid)
+			.studentPk(studentPk)
+			.expiration(expiration)
+			.build();
+	}
+
+	private static LoginForm createLoginForm(String studentId, String password) {
+		return LoginForm.builder()
+			.studentId(studentId)
+			.password(password)
+			.build();
 	}
 
 }

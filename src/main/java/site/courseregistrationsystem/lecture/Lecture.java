@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.courseregistrationsystem.professor.Professor;
@@ -40,7 +41,8 @@ public class Lecture {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Professor professor;
 
-	public Lecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity, Subject subject,
+	@Builder
+	private Lecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity, Subject subject,
 		Professor professor) {
 		this.lectureNumber = lectureNumber;
 		this.lectureRoom = lectureRoom;

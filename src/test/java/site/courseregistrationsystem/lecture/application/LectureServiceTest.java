@@ -12,23 +12,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.department.Department;
-import site.courseregistrationsystem.department.infrastructure.DepartmentRepository;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.dto.LectureFilterOptions;
 import site.courseregistrationsystem.lecture.dto.LectureSchedulePage;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.professor.Professor;
-import site.courseregistrationsystem.professor.infrastructure.ProfessorRepository;
 import site.courseregistrationsystem.schedule.DayOfWeek;
 import site.courseregistrationsystem.schedule.Period;
 import site.courseregistrationsystem.schedule.Schedule;
-import site.courseregistrationsystem.schedule.infrastructure.ScheduleRepository;
 import site.courseregistrationsystem.student.Grade;
 import site.courseregistrationsystem.subject.Subject;
 import site.courseregistrationsystem.subject.SubjectDivision;
-import site.courseregistrationsystem.subject.infrastructure.SubjectRepository;
 
 class LectureServiceTest extends IntegrationTestSupport {
 
@@ -39,30 +36,21 @@ class LectureServiceTest extends IntegrationTestSupport {
 	private LectureRepository lectureRepository;
 
 	@Autowired
-	private SubjectRepository subjectRepository;
-
-	@Autowired
-	private ScheduleRepository scheduleRepository;
-
-	@Autowired
-	private DepartmentRepository departmentRepository;
-
-	@Autowired
-	private ProfessorRepository professorRepository;
+	private EntityManager entityManager;
 
 	@Test
 	@DisplayName("검색 조건 없이 강의를 조회한다")
 	void fetch() {
 		// given
-		Department department = departmentRepository.save(new Department("departmentName"));
-		Professor professor = professorRepository.save(new Professor("professorName"));
-		Subject subject = subjectRepository.save(
-			new Subject(department, SubjectDivision.MR, Grade.FRESHMAN, "subjectName", 3, 2));
-		List<Lecture> lectures = lectureRepository.saveAll(generateCopiedLectureFixtures(50, subject, professor));
-		List<Schedule> schedules = scheduleRepository.saveAll(generateScheduleFixtures(lectures));
+		Department department = saveDepartment("departmentName");
+		Professor professor = saveProfessor("professorName");
+		Subject subject = createSubject(department, SubjectDivision.MR, Grade.FRESHMAN, "subjectName", 3, 2);
+		Subject savedSubject = saveSubject(subject);
+		List<Lecture> lectures = lectureRepository.saveAll(generateCopiedLectureFixtures(50, savedSubject, professor));
+		saveSchedules(generateScheduleFixtures(lectures));
 
 		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
-		LectureFilterOptions lectureFilterOptions = new LectureFilterOptions(null, null, null);
+		LectureFilterOptions lectureFilterOptions = LectureFilterOptions.builder().build();
 
 		// when
 		LectureSchedulePage lectureSchedulePage = lectureService.fetchLectureSchedule(pageRequest,
@@ -71,26 +59,24 @@ class LectureServiceTest extends IntegrationTestSupport {
 		// then
 		int firstIndex = 0;
 
-		assertAll(
-			() -> assertThat(lectureSchedulePage.isFirst()).isTrue(),
+		assertAll(() -> assertThat(lectureSchedulePage.isFirst()).isTrue(),
 			() -> assertThat(lectureSchedulePage.isLast()).isFalse(),
 			() -> assertThat(lectureSchedulePage.getTotalElements()).isEqualTo(lectures.size()),
 			() -> assertThat(lectureSchedulePage.getLectures()).hasSize(pageRequest.getPageSize()),
-			() -> assertThat(lectureSchedulePage.getLectures().get(firstIndex).getId())
-				.isEqualTo(lectures.get(firstIndex).getId())
-		);
+			() -> assertThat(lectureSchedulePage.getLectures().get(firstIndex).getId()).isEqualTo(
+				lectures.get(firstIndex).getId()));
 	}
 
 	@Test
 	@DisplayName("금속공예디자인학과의 전공 필수 수업이면서 과목명에 공예가 들어가는 강의를 조회한다")
 	void fetchWithOptions() {
 		// given
-		Department department = departmentRepository.save(new Department("금속공예디자인학과"));
-		Professor professor = professorRepository.save(new Professor("남유진"));
+		Department department = saveDepartment("금속공예디자인학과");
+		Professor professor = saveProfessor("남유진");
 
-		List<Subject> majorRequiredSubjects = subjectRepository.saveAll(
+		List<Subject> majorRequiredSubjects = saveSubjects(
 			generateSubjectFixtures(30, SubjectDivision.MR, department, "공예"));
-		List<Subject> generalRequiredSubjects = subjectRepository.saveAll(
+		List<Subject> generalRequiredSubjects = saveSubjects(
 			generateSubjectFixtures(10, SubjectDivision.GR, department, "역사"));
 
 		List<Lecture> matchedLectureFixtures = lectureRepository.saveAll(
@@ -98,12 +84,15 @@ class LectureServiceTest extends IntegrationTestSupport {
 		List<Lecture> unmatchedLectureFixtures = lectureRepository.saveAll(
 			generateLectureFixtures(generalRequiredSubjects, professor));
 
-		scheduleRepository.saveAll(generateScheduleFixtures(matchedLectureFixtures));
-		scheduleRepository.saveAll(generateScheduleFixtures(unmatchedLectureFixtures));
+		saveSchedules(generateScheduleFixtures(matchedLectureFixtures));
+		saveSchedules(generateScheduleFixtures(unmatchedLectureFixtures));
 
 		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
-		LectureFilterOptions lectureFilterOptions = new LectureFilterOptions(SubjectDivision.MR, department.getId(),
-			"공예");
+		LectureFilterOptions lectureFilterOptions = LectureFilterOptions.builder()
+			.subjectDivision(SubjectDivision.MR)
+			.departmentId(department.getId())
+			.subjectName("공예")
+			.build();
 
 		// when
 		LectureSchedulePage lectureSchedulePage = lectureService.fetchLectureSchedule(pageRequest,
@@ -112,8 +101,7 @@ class LectureServiceTest extends IntegrationTestSupport {
 		// then
 		int firstIndex = 0;
 
-		assertAll(
-			() -> assertThat(lectureSchedulePage.isFirst()).isTrue(),
+		assertAll(() -> assertThat(lectureSchedulePage.isFirst()).isTrue(),
 			() -> assertThat(lectureSchedulePage.isLast()).isFalse(),
 			() -> assertThat(lectureSchedulePage.getTotalElements()).isEqualTo(matchedLectureFixtures.size()),
 			() -> assertThat(lectureSchedulePage.getLectures()).hasSize(pageRequest.getPageSize()),
@@ -122,20 +110,19 @@ class LectureServiceTest extends IntegrationTestSupport {
 			() -> assertThat(lectureSchedulePage.getLectures().get(firstIndex).getSubjectDivision()).isEqualTo(
 				SubjectDivision.MR.getDescription()),
 			() -> assertThat(lectureSchedulePage.getLectures().get(firstIndex).getSubjectName()).contains(
-				lectureFilterOptions.getSubjectName())
-		);
+				lectureFilterOptions.getSubjectName()));
 	}
 
 	private List<Lecture> generateCopiedLectureFixtures(int size, Subject subjects, Professor professor) {
 		return IntStream.rangeClosed(1, size)
-			.mapToObj(number -> new Lecture(100100 + number, Integer.toString(100 + number), 10 + number,
-				subjects, professor))
+			.mapToObj(number -> createLecture(100100 + number, Integer.toString(100 + number), 10 + number, subjects,
+				professor))
 			.toList();
 	}
 
 	private List<Lecture> generateLectureFixtures(List<Subject> subjects, Professor professor) {
 		return IntStream.rangeClosed(1, subjects.size())
-			.mapToObj(number -> new Lecture(100100 + number, Integer.toString(100 + number), 10 + number,
+			.mapToObj(number -> createLecture(100100 + number, Integer.toString(100 + number), 10 + number,
 				subjects.get(number - 1), professor))
 			.toList();
 	}
@@ -143,12 +130,73 @@ class LectureServiceTest extends IntegrationTestSupport {
 	private List<Subject> generateSubjectFixtures(int size, SubjectDivision subjectDivision, Department department,
 		String subjectName) {
 		return IntStream.rangeClosed(1, size)
-			.mapToObj(number -> new Subject(department, subjectDivision, Grade.FRESHMAN, subjectName + number, 4, 3))
+			.mapToObj(number -> createSubject(department, subjectDivision, Grade.FRESHMAN, subjectName + number, 4, 3))
 			.toList();
 	}
 
 	private List<Schedule> generateScheduleFixtures(List<Lecture> lectures) {
-		return lectures.stream().map(lecture -> new Schedule(lecture, DayOfWeek.MON, Period.SIX, Period.NINE)).toList();
+		return lectures.stream()
+			.map(lecture -> Schedule.builder()
+				.lecture(lecture)
+				.dayOfWeek(DayOfWeek.MON)
+				.firstPeriod(Period.SIX)
+				.lastPeriod(Period.NINE)
+				.build())
+			.toList();
+	}
+
+	private static Lecture createLecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity,
+		Subject subject, Professor professor) {
+		return Lecture.builder()
+			.lectureNumber(lectureNumber)
+			.lectureRoom(lectureRoom)
+			.totalCapacity(totalCapacity)
+			.subject(subject)
+			.professor(professor)
+			.build();
+	}
+
+	private static Subject createSubject(Department department, SubjectDivision subjectDivision, Grade targetGrade,
+		String name,
+		Integer hoursPerWeek, Integer credits) {
+		return Subject.builder()
+			.department(department)
+			.subjectDivision(subjectDivision)
+			.targetGrade(targetGrade)
+			.name(name)
+			.hoursPerWeek(hoursPerWeek)
+			.credits(credits)
+			.build();
+	}
+
+	private Department saveDepartment(String departmentName) {
+		Department department = new Department(departmentName);
+		entityManager.persist(department);
+
+		return department;
+	}
+
+	private Professor saveProfessor(String professorName) {
+		Professor professor = new Professor(professorName);
+		entityManager.persist(professor);
+
+		return professor;
+	}
+
+	private void saveSchedules(List<Schedule> schedules) {
+		schedules.forEach(entityManager::persist);
+	}
+
+	private Subject saveSubject(Subject subjects) {
+		entityManager.persist(subjects);
+
+		return subjects;
+	}
+
+	private List<Subject> saveSubjects(List<Subject> subjects) {
+		subjects.forEach(entityManager::persist);
+
+		return subjects;
 	}
 
 }

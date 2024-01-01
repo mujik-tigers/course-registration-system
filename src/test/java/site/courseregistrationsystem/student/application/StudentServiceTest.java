@@ -6,9 +6,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.department.Department;
-import site.courseregistrationsystem.department.infrastructure.DepartmentRepository;
 import site.courseregistrationsystem.exception.student.NonexistenceStudentException;
 import site.courseregistrationsystem.student.Grade;
 import site.courseregistrationsystem.student.Student;
@@ -25,7 +25,7 @@ class StudentServiceTest extends IntegrationTestSupport {
 	private StudentRepository studentRepository;
 
 	@Autowired
-	private DepartmentRepository departmentRepository;
+	private EntityManager entityManager;
 
 	@Autowired
 	private Aes256Manager aes256Manager;
@@ -37,7 +37,7 @@ class StudentServiceTest extends IntegrationTestSupport {
 		String STUDENT_ID = "201711282";
 		String NAME = "황현";
 		Grade grade = Grade.SENIOR;
-		Department department = departmentRepository.save(new Department("전기전자공학부"));
+		Department department = saveDepartment("전기전자공학부");
 
 		Student student = new Student(
 			aes256Manager.encrypt(STUDENT_ID),
@@ -67,6 +67,13 @@ class StudentServiceTest extends IntegrationTestSupport {
 		// when & then
 		assertThatThrownBy(() -> studentService.fetchStudentInformation(INVALID_STUDENT_PK))
 			.isInstanceOf(NonexistenceStudentException.class);
+	}
+
+	private Department saveDepartment(String departmentName) {
+		Department department = new Department(departmentName);
+		entityManager.persist(department);
+
+		return department;
 	}
 
 }
