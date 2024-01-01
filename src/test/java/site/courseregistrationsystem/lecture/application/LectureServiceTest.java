@@ -23,7 +23,6 @@ import site.courseregistrationsystem.professor.Professor;
 import site.courseregistrationsystem.schedule.DayOfWeek;
 import site.courseregistrationsystem.schedule.Period;
 import site.courseregistrationsystem.schedule.Schedule;
-import site.courseregistrationsystem.schedule.infrastructure.ScheduleRepository;
 import site.courseregistrationsystem.student.Grade;
 import site.courseregistrationsystem.subject.Subject;
 import site.courseregistrationsystem.subject.SubjectDivision;
@@ -41,9 +40,6 @@ class LectureServiceTest extends IntegrationTestSupport {
 	private SubjectRepository subjectRepository;
 
 	@Autowired
-	private ScheduleRepository scheduleRepository;
-
-	@Autowired
 	private EntityManager entityManager;
 
 	@Test
@@ -55,7 +51,7 @@ class LectureServiceTest extends IntegrationTestSupport {
 		Subject subject = subjectRepository.save(
 			new Subject(department, SubjectDivision.MR, Grade.FRESHMAN, "subjectName", 3, 2));
 		List<Lecture> lectures = lectureRepository.saveAll(generateCopiedLectureFixtures(50, subject, professor));
-		List<Schedule> schedules = scheduleRepository.saveAll(generateScheduleFixtures(lectures));
+		saveSchedules(generateScheduleFixtures(lectures));
 
 		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
 		LectureFilterOptions lectureFilterOptions = LectureFilterOptions.builder().build();
@@ -92,8 +88,8 @@ class LectureServiceTest extends IntegrationTestSupport {
 		List<Lecture> unmatchedLectureFixtures = lectureRepository.saveAll(
 			generateLectureFixtures(generalRequiredSubjects, professor));
 
-		scheduleRepository.saveAll(generateScheduleFixtures(matchedLectureFixtures));
-		scheduleRepository.saveAll(generateScheduleFixtures(unmatchedLectureFixtures));
+		saveSchedules(generateScheduleFixtures(matchedLectureFixtures));
+		saveSchedules(generateScheduleFixtures(unmatchedLectureFixtures));
 
 		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
 		LectureFilterOptions lectureFilterOptions = LectureFilterOptions.builder()
@@ -176,6 +172,12 @@ class LectureServiceTest extends IntegrationTestSupport {
 		entityManager.persist(professor);
 
 		return professor;
+	}
+
+	private List<Schedule> saveSchedules(List<Schedule> schedules) {
+		schedules.forEach(entityManager::persist);
+
+		return schedules;
 	}
 
 }
