@@ -20,7 +20,6 @@ import site.courseregistrationsystem.lecture.dto.LectureFilterOptions;
 import site.courseregistrationsystem.lecture.dto.LectureSchedulePage;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.professor.Professor;
-import site.courseregistrationsystem.professor.infrastructure.ProfessorRepository;
 import site.courseregistrationsystem.schedule.DayOfWeek;
 import site.courseregistrationsystem.schedule.Period;
 import site.courseregistrationsystem.schedule.Schedule;
@@ -47,15 +46,12 @@ class LectureServiceTest extends IntegrationTestSupport {
 	@Autowired
 	private EntityManager entityManager;
 
-	@Autowired
-	private ProfessorRepository professorRepository;
-
 	@Test
 	@DisplayName("검색 조건 없이 강의를 조회한다")
 	void fetch() {
 		// given
 		Department department = saveDepartment("departmentName");
-		Professor professor = professorRepository.save(new Professor("professorName"));
+		Professor professor = saveProfessor("professorName");
 		Subject subject = subjectRepository.save(
 			new Subject(department, SubjectDivision.MR, Grade.FRESHMAN, "subjectName", 3, 2));
 		List<Lecture> lectures = lectureRepository.saveAll(generateCopiedLectureFixtures(50, subject, professor));
@@ -84,7 +80,7 @@ class LectureServiceTest extends IntegrationTestSupport {
 	void fetchWithOptions() {
 		// given
 		Department department = saveDepartment("금속공예디자인학과");
-		Professor professor = professorRepository.save(new Professor("남유진"));
+		Professor professor = saveProfessor("남유진");
 
 		List<Subject> majorRequiredSubjects = subjectRepository.saveAll(
 			generateSubjectFixtures(30, SubjectDivision.MR, department, "공예"));
@@ -173,6 +169,13 @@ class LectureServiceTest extends IntegrationTestSupport {
 		entityManager.persist(department);
 
 		return department;
+	}
+
+	private Professor saveProfessor(String professorName) {
+		Professor professor = new Professor(professorName);
+		entityManager.persist(professor);
+
+		return professor;
 	}
 
 }
