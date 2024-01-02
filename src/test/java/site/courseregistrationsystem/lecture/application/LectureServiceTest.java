@@ -3,6 +3,7 @@ package site.courseregistrationsystem.lecture.application;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Year;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -16,6 +17,7 @@ import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.lecture.Lecture;
+import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.dto.LectureFilterOptions;
 import site.courseregistrationsystem.lecture.dto.LectureSchedulePage;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
@@ -39,7 +41,7 @@ class LectureServiceTest extends IntegrationTestSupport {
 	private EntityManager entityManager;
 
 	@Test
-	@DisplayName("검색 조건 없이 강의를 조회한다")
+	@DisplayName("개강년도와 학기 조건과 함께 강의를 조회한다")
 	void fetch() {
 		// given
 		Department department = saveDepartment("departmentName");
@@ -50,7 +52,10 @@ class LectureServiceTest extends IntegrationTestSupport {
 		saveSchedules(generateScheduleFixtures(lectures));
 
 		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
-		LectureFilterOptions lectureFilterOptions = LectureFilterOptions.builder().build();
+		LectureFilterOptions lectureFilterOptions = LectureFilterOptions.builder()
+			.openingYear(Year.of(2024))
+			.semester(Semester.FIRST)
+			.build();
 
 		// when
 		LectureSchedulePage lectureSchedulePage = lectureService.fetchLectureSchedule(pageRequest,
@@ -89,6 +94,8 @@ class LectureServiceTest extends IntegrationTestSupport {
 
 		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
 		LectureFilterOptions lectureFilterOptions = LectureFilterOptions.builder()
+			.openingYear(Year.of(2024))
+			.semester(Semester.FIRST)
 			.subjectDivision(SubjectDivision.MR)
 			.departmentId(department.getId())
 			.subjectName("공예")
@@ -148,6 +155,8 @@ class LectureServiceTest extends IntegrationTestSupport {
 	private static Lecture createLecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity,
 		Subject subject, Professor professor) {
 		return Lecture.builder()
+			.openingYear(Year.of(2024))
+			.semester(Semester.FIRST)
 			.lectureNumber(lectureNumber)
 			.lectureRoom(lectureRoom)
 			.totalCapacity(totalCapacity)
