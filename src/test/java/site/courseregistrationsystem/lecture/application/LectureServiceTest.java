@@ -46,9 +46,10 @@ class LectureServiceTest extends IntegrationTestSupport {
 		// given
 		Department department = saveDepartment("departmentName");
 		Professor professor = saveProfessor("professorName");
-		Subject subject = createSubject(department, SubjectDivision.MR, Grade.FRESHMAN, "subjectName", 3, 2);
+		Subject subject = createSubject(SubjectDivision.MR, Grade.FRESHMAN, "subjectName", 3, 2);
 		Subject savedSubject = saveSubject(subject);
-		List<Lecture> lectures = lectureRepository.saveAll(generateCopiedLectureFixtures(50, savedSubject, professor));
+		List<Lecture> lectures = lectureRepository.saveAll(
+			generateCopiedLectureFixtures(50, savedSubject, professor, department));
 		saveSchedules(generateScheduleFixtures(lectures));
 
 		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
@@ -80,14 +81,14 @@ class LectureServiceTest extends IntegrationTestSupport {
 		Professor professor = saveProfessor("남유진");
 
 		List<Subject> majorRequiredSubjects = saveSubjects(
-			generateSubjectFixtures(30, SubjectDivision.MR, department, "공예"));
+			generateSubjectFixtures(30, SubjectDivision.MR, "공예"));
 		List<Subject> generalRequiredSubjects = saveSubjects(
-			generateSubjectFixtures(10, SubjectDivision.GR, department, "역사"));
+			generateSubjectFixtures(10, SubjectDivision.GR, "역사"));
 
 		List<Lecture> matchedLectureFixtures = lectureRepository.saveAll(
-			generateLectureFixtures(majorRequiredSubjects, professor));
+			generateLectureFixtures(majorRequiredSubjects, professor, department));
 		List<Lecture> unmatchedLectureFixtures = lectureRepository.saveAll(
-			generateLectureFixtures(generalRequiredSubjects, professor));
+			generateLectureFixtures(generalRequiredSubjects, professor, department));
 
 		saveSchedules(generateScheduleFixtures(matchedLectureFixtures));
 		saveSchedules(generateScheduleFixtures(unmatchedLectureFixtures));
@@ -120,24 +121,24 @@ class LectureServiceTest extends IntegrationTestSupport {
 				lectureFilterOptions.getSubjectName()));
 	}
 
-	private List<Lecture> generateCopiedLectureFixtures(int size, Subject subjects, Professor professor) {
+	private List<Lecture> generateCopiedLectureFixtures(int size, Subject subjects, Professor professor,
+		Department department) {
 		return IntStream.rangeClosed(1, size)
 			.mapToObj(number -> createLecture(100100 + number, Integer.toString(100 + number), 10 + number, subjects,
-				professor))
+				professor, department))
 			.toList();
 	}
 
-	private List<Lecture> generateLectureFixtures(List<Subject> subjects, Professor professor) {
+	private List<Lecture> generateLectureFixtures(List<Subject> subjects, Professor professor, Department department) {
 		return IntStream.rangeClosed(1, subjects.size())
 			.mapToObj(number -> createLecture(100100 + number, Integer.toString(100 + number), 10 + number,
-				subjects.get(number - 1), professor))
+				subjects.get(number - 1), professor, department))
 			.toList();
 	}
 
-	private List<Subject> generateSubjectFixtures(int size, SubjectDivision subjectDivision, Department department,
-		String subjectName) {
+	private List<Subject> generateSubjectFixtures(int size, SubjectDivision subjectDivision, String subjectName) {
 		return IntStream.rangeClosed(1, size)
-			.mapToObj(number -> createSubject(department, subjectDivision, Grade.FRESHMAN, subjectName + number, 4, 3))
+			.mapToObj(number -> createSubject(subjectDivision, Grade.FRESHMAN, subjectName + number, 4, 3))
 			.toList();
 	}
 
@@ -153,7 +154,7 @@ class LectureServiceTest extends IntegrationTestSupport {
 	}
 
 	private static Lecture createLecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity,
-		Subject subject, Professor professor) {
+		Subject subject, Professor professor, Department department) {
 		return Lecture.builder()
 			.openingYear(Year.of(2024))
 			.semester(Semester.FIRST)
@@ -162,14 +163,13 @@ class LectureServiceTest extends IntegrationTestSupport {
 			.totalCapacity(totalCapacity)
 			.subject(subject)
 			.professor(professor)
+			.department(department)
 			.build();
 	}
 
-	private static Subject createSubject(Department department, SubjectDivision subjectDivision, Grade targetGrade,
-		String name,
+	private static Subject createSubject(SubjectDivision subjectDivision, Grade targetGrade, String name,
 		Integer hoursPerWeek, Integer credits) {
 		return Subject.builder()
-			.department(department)
 			.subjectDivision(subjectDivision)
 			.targetGrade(targetGrade)
 			.name(name)

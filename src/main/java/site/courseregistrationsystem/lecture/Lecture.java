@@ -16,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.professor.Professor;
 import site.courseregistrationsystem.schedule.Schedule;
 import site.courseregistrationsystem.subject.Subject;
@@ -44,9 +45,12 @@ public class Lecture {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Professor professor;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Department department;
+
 	@Builder
 	private Lecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity, Year openingYear,
-		Semester semester, Subject subject, Professor professor) {
+		Semester semester, Subject subject, Professor professor, Department department) {
 		this.lectureNumber = lectureNumber;
 		this.lectureRoom = lectureRoom;
 		this.totalCapacity = totalCapacity;
@@ -54,6 +58,7 @@ public class Lecture {
 		this.semester = semester;
 		this.subject = subject;
 		this.professor = professor;
+		this.department = department;
 	}
 
 	public String generateSchedule() {
@@ -88,7 +93,7 @@ public class Lecture {
 	}
 
 	public String fetchDepartmentName() {
-		return subject.getDepartment().getName();
+		return department.getName();
 	}
 
 	public String fetchProfessorName() {

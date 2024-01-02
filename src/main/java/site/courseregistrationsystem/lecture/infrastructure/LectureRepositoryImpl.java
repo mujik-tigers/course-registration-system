@@ -32,7 +32,7 @@ public class LectureRepositoryImpl implements LectureRepositoryCustom {
 		SubjectDivision subjectDivision, Long departmentId, String subjectName) {
 		List<Lecture> lectures = queryFactory.selectFrom(lecture)
 			.join(lecture.subject, subject).fetchJoin()
-			.join(lecture.subject.department, department).fetchJoin()
+			.join(lecture.department, department).fetchJoin()
 			.join(lecture.professor, professor).fetchJoin()
 			.where(
 				subjectDivisionEq(subjectDivision),
@@ -71,7 +71,7 @@ public class LectureRepositoryImpl implements LectureRepositoryCustom {
 			return null;
 		}
 
-		return lecture.subject.department.id.eq(departmentId);
+		return lecture.department.id.eq(departmentId);
 	}
 
 	private BooleanExpression subjectNameContains(String subjectName) {
