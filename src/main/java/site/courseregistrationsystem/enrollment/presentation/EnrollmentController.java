@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import site.courseregistrationsystem.enrollment.application.EnrollmentService;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.util.api.ApiResponse;
 import site.courseregistrationsystem.util.api.ResponseMessage;
