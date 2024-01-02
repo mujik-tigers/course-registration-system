@@ -19,7 +19,10 @@ public enum ResponseMessage {
 	RENEW_SESSION_DURATION_SUCCESS("세션 지속시간 갱신에 성공했습니다"),
 
 	// Lecture
-	LECTURE_SCHEDULE_FETCH_SUCCESS("강의 시간표 조회에 성공했습니다");
+	LECTURE_SCHEDULE_FETCH_SUCCESS("강의 시간표 조회에 성공했습니다"),
+
+	// Enrollment
+	ENROLL_LECTURE_SUCCESS("수강 신청이 성공적으로 완료되었습니다");
 
 	private final String message;
 
