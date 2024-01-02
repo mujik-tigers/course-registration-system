@@ -1,5 +1,6 @@
 package site.courseregistrationsystem.lecture;
 
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +32,8 @@ public class Lecture {
 	private Integer lectureNumber;
 	private String lectureRoom;
 	private Integer totalCapacity;
+	private Year openingYear;
+	private Semester semester;
 
 	@OneToMany(mappedBy = "lecture")
 	private List<Schedule> schedules = new ArrayList<>();
@@ -42,11 +45,13 @@ public class Lecture {
 	private Professor professor;
 
 	@Builder
-	private Lecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity, Subject subject,
-		Professor professor) {
+	private Lecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity, Year openingYear,
+		Semester semester, Subject subject, Professor professor) {
 		this.lectureNumber = lectureNumber;
 		this.lectureRoom = lectureRoom;
 		this.totalCapacity = totalCapacity;
+		this.openingYear = openingYear;
+		this.semester = semester;
 		this.subject = subject;
 		this.professor = professor;
 	}
