@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,6 +36,8 @@ public class Lecture {
 	private String lectureRoom;
 	private Integer totalCapacity;
 	private Year openingYear;
+
+	@Enumerated(EnumType.STRING)
 	private Semester semester;
 
 	@OneToMany(mappedBy = "lecture")
