@@ -20,7 +20,12 @@ public enum ErrorType {
 	AES256_SETTING_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "AES256 설정에 실패했습니다"),
 
 	// Lecture
-	NONEXISTENT_LECTURE(HttpStatus.BAD_REQUEST, "존재하지 않는 수업입니다");
+	NONEXISTENT_LECTURE(HttpStatus.BAD_REQUEST, "존재하지 않는 수업입니다"),
+
+	// Enrollment
+	ENROLLMENT_DUPLICATION(HttpStatus.BAD_REQUEST, "중복된 과목을 수강 신청할 수 없습니다"),
+	SEMESTER_CREDIT_EXCEED(HttpStatus.BAD_REQUEST, "학기 내 신청 가능한 최대 학점을 초과했습니다"),
+	SCHEDULE_CONFLICT(HttpStatus.BAD_REQUEST, "다른 수업과 시간이 겹칩니다");
 
 	private final HttpStatus status;
 	private final String message;
