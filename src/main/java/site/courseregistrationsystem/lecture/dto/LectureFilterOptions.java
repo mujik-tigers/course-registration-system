@@ -2,6 +2,7 @@ package site.courseregistrationsystem.lecture.dto;
 
 import java.time.Year;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,8 +13,12 @@ import site.courseregistrationsystem.subject.SubjectDivision;
 @Getter
 public class LectureFilterOptions {
 
+	@NotNull
 	private Year openingYear;
+
+	@NotNull
 	private Semester semester;
+
 	private SubjectDivision subjectDivision;
 	private Long departmentId;
 	private String subjectName;
