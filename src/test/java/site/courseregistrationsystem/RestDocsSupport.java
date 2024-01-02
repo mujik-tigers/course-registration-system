@@ -16,6 +16,8 @@ import site.courseregistrationsystem.auth.application.AuthService;
 import site.courseregistrationsystem.auth.application.SessionManager;
 import site.courseregistrationsystem.auth.presentation.AuthController;
 import site.courseregistrationsystem.auth.presentation.CookieProperties;
+import site.courseregistrationsystem.basket.application.BasketService;
+import site.courseregistrationsystem.basket.presentation.BasketController;
 import site.courseregistrationsystem.clock.presentation.ClockController;
 import site.courseregistrationsystem.exception.auth.NonexistenceSessionException;
 import site.courseregistrationsystem.lecture.application.LectureService;
@@ -28,7 +30,8 @@ import site.courseregistrationsystem.util.encryption.Aes256Manager;
 	AuthController.class,
 	ClockController.class,
 	StudentController.class,
-	LectureController.class
+	LectureController.class,
+	BasketController.class
 })
 @AutoConfigureRestDocs
 public abstract class RestDocsSupport {
@@ -56,6 +59,9 @@ public abstract class RestDocsSupport {
 
 	@MockBean
 	protected LectureService lectureService;
+
+	@MockBean
+	protected BasketService basketService;
 
 	@BeforeEach
 	void setUp() {

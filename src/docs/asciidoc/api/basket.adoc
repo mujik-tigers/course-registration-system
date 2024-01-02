@@ -1,0 +1,38 @@
+[[Basket-API]]
+== Basket API
+
+[[basket-save-success]]
+=== 수강 바구니 담기 : 성공
+
+==== HTTP Request
+
+include::{snippets}/basket-save-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/basket-save-success/http-response.adoc[]
+include::{snippets}/basket-save-success/response-fields.adoc[]
+
+[[basket-save-duplicate-fail]]
+=== 수강 바구니 담기 : 실패 - 중복 과목 담기
+
+==== HTTP Request
+
+include::{snippets}/basket-save-duplicate-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/basket-save-duplicate-fail/http-response.adoc[]
+include::{snippets}/basket-save-duplicate-fail/response-fields.adoc[]
+
+[[basket-save-exceeded-fail]]
+=== 수강 바구니 담기 : 실패 - 한 학기 제한 학점 초과
+
+==== HTTP Request
+
+include::{snippets}/basket-save-exceeded-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/basket-save-exceeded-fail/http-response.adoc[]
+include::{snippets}/basket-save-exceeded-fail/response-fields.adoc[]
