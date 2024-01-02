@@ -13,8 +13,11 @@ public enum ErrorType {
 	NONEXISTENT_SESSION(HttpStatus.BAD_REQUEST, "존재하지 않는 세션입니다"),
 	NONEXISTENT_SESSION_COOKIE(HttpStatus.UNAUTHORIZED, "세션 쿠키가 없습니다"),
 
-	// Student,
+	// Student
 	NONEXISTENT_STUDENT(HttpStatus.BAD_REQUEST, "존재하지 않는 학생입니다"),
+
+	// Lecture
+	NONEXISTENT_LECTURE(HttpStatus.BAD_REQUEST, "존재하지 않는 강의입니다"),
 
 	// AES256
 	AES256_SETTING_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "AES256 설정에 실패했습니다");
