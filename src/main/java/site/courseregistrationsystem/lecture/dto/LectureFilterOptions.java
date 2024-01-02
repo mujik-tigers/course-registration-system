@@ -5,28 +5,27 @@ import java.time.Year;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.extern.jackson.Jacksonized;
 import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.subject.SubjectDivision;
 
-@NoArgsConstructor
 @Getter
-@Setter
 public class LectureFilterOptions {
 
 	@NotNull
-	private Year openingYear;
+	private final Year openingYear;
 
 	@NotNull
-	private Semester semester;
+	private final Semester semester;
 
-	private SubjectDivision subjectDivision;
-	private Long departmentId;
-	private String subjectName;
+	private final SubjectDivision subjectDivision;
+	private final Long departmentId;
+	private final String subjectName;
 
 	@Builder
-	public LectureFilterOptions(Year openingYear, Semester semester, SubjectDivision subjectDivision, Long departmentId,
+	@Jacksonized
+	private LectureFilterOptions(Year openingYear, Semester semester, SubjectDivision subjectDivision,
+		Long departmentId,
 		String subjectName) {
 		this.openingYear = openingYear;
 		this.semester = semester;
