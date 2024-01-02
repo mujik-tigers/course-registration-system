@@ -76,6 +76,15 @@ public class Lecture {
 			.collect(Collectors.joining(", "));
 	}
 
+	public boolean hasScheduleConflict(Lecture lecture) {
+		return this.schedules.stream()
+			.anyMatch(schedule -> lecture.getSchedules().stream().anyMatch(schedule::hasConflictWith));
+	}
+
+	public Long fetchSubjectId() {
+		return subject.getId();
+	}
+
 	public String fetchSubjectDivisionDescription() {
 		return subject.getSubjectDivision().getDescription();
 	}
