@@ -38,4 +38,12 @@ public class Enrollment {
 		return lecture.getId();
 	}
 
+	public Long fetchSubjectId() {
+		return lecture.fetchSubjectId();
+	}
+
+	public int fetchCredits() {
+		return lecture.fetchCredits();
+	}
+
 }
