@@ -5,6 +5,7 @@ import static site.courseregistrationsystem.lecture.QLecture.*;
 import static site.courseregistrationsystem.professor.QProfessor.*;
 import static site.courseregistrationsystem.subject.QSubject.*;
 
+import java.time.Year;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.lecture.Lecture;
+import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.subject.SubjectDivision;
 
 @RequiredArgsConstructor
@@ -26,7 +28,8 @@ public class LectureRepositoryImpl implements LectureRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public Page<Lecture> findMatchedLectures(Pageable pageable, SubjectDivision subjectDivision, Long departmentId, String subjectName) {
+	public Page<Lecture> findMatchedLectures(Pageable pageable, Year openingYear, Semester semester,
+		SubjectDivision subjectDivision, Long departmentId, String subjectName) {
 		List<Lecture> lectures = queryFactory.selectFrom(lecture)
 			.join(lecture.subject, subject).fetchJoin()
 			.join(lecture.subject.department, department).fetchJoin()
@@ -34,7 +37,9 @@ public class LectureRepositoryImpl implements LectureRepositoryCustom {
 			.where(
 				subjectDivisionEq(subjectDivision),
 				departmentEq(departmentId),
-				subjectNameContains(subjectName)
+				subjectNameContains(subjectName),
+				lecture.openingYear.eq(openingYear),
+				lecture.semester.eq(semester)
 			)
 			.orderBy(lecture.id.asc())
 			.offset(pageable.getOffset())
