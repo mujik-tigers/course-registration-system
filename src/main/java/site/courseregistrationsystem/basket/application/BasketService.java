@@ -9,12 +9,15 @@ import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.basket.Basket;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
+import site.courseregistrationsystem.exception.basket.ExceededCreditLimitException;
 import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
 import site.courseregistrationsystem.exception.student.NonexistenceStudentException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
+import site.courseregistrationsystem.subject.Subject;
+import site.courseregistrationsystem.util.ProjectConstant;
 
 @Service
 @Transactional(readOnly = true)
@@ -34,6 +37,7 @@ public class BasketService {
 			.orElseThrow(NonexistenceLectureException::new);
 
 		checkSubjectInBasketDuplicated(student, lecture);
+		checkCreditLimitExceeded(student, lecture);
 
 		Basket basket = Basket.builder()
 			.student(student)
@@ -55,6 +59,20 @@ public class BasketService {
 
 		if (duplicated)
 			throw new DuplicateBasketException();
+	}
+
+	private void checkCreditLimitExceeded(Student student, Lecture lecture) {
+		List<Basket> baskets = basketRepository.findAllByStudent(student);
+
+		int creditSum = baskets.stream()
+			.map(Basket::getLecture)
+			.map(Lecture::getSubject)
+			.mapToInt(Subject::getCredits)
+			.sum();
+
+		if (creditSum + lecture.getSubject().getCredits() > ProjectConstant.DEFAULT_CREDIT_LIMIT) {
+			throw new ExceededCreditLimitException();
+		}
 	}
 
 }

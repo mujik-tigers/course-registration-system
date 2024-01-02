@@ -13,6 +13,7 @@ import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.basket.Basket;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
+import site.courseregistrationsystem.exception.basket.ExceededCreditLimitException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.student.Student;
@@ -40,11 +41,11 @@ class BasketServiceTest extends IntegrationTestSupport {
 	@DisplayName("학생은 원하는 수업을 선택하여 수강 바구니에 담은 뒤, 담은 수업(Lecture)의 id 를 반환한다.")
 	void addLectureToBasket() throws Exception {
 		// given
-		Subject subject = createMockSubject("선형대수학");
+		Subject subject = create3CreditSubject("선형대수학");
 		entityManager.persist(subject);
 
-		Student savedStudent = studentRepository.save(createMockStudent());
-		Lecture savedLecture = lectureRepository.save(createMockLecture(subject));
+		Student savedStudent = studentRepository.save(createStudent());
+		Lecture savedLecture = lectureRepository.save(createLecture(subject));
 
 		// when
 		Long basketSavedLectureId = basketService.addLectureToBasket(savedStudent.getId(), savedLecture.getId());
@@ -63,33 +64,77 @@ class BasketServiceTest extends IntegrationTestSupport {
 	@DisplayName("이미 수강 바구니에 담은 과목(Subject)은 중복하여 담을 수 없다.")
 	void duplicateBasket() throws Exception {
 		// given
-		Subject subject = createMockSubject("선형대수학");
+		Subject subject = create3CreditSubject("선형대수학");
 		entityManager.persist(subject);
 
-		Student savedStudent = studentRepository.save(createMockStudent());
-		Lecture savedLecture = lectureRepository.save(createMockLecture(subject));
+		Student savedStudent = studentRepository.save(createStudent());
+		Lecture savedLecture = lectureRepository.save(createLecture(subject));
 
 		basketRepository.save(createBasket(savedStudent, savedLecture));
 
-		Lecture duplicateSubjectLecture = lectureRepository.save(createMockLecture(subject));
+		Lecture duplicateSubjectLecture = lectureRepository.save(createLecture(subject));
 
 		// when & then
 		assertThatThrownBy(() -> basketService.addLectureToBasket(savedStudent.getId(), duplicateSubjectLecture.getId()))
 			.isInstanceOf(DuplicateBasketException.class);
 	}
 
-	private Student createMockStudent() {
+	@Test
+	@DisplayName("한 학생은 총 18학점 상당의 수업을 담을 수 있습니다.")
+	void addManyLectureToBasket() throws Exception {
+		// given
+		Student student = studentRepository.save(createStudent());
+		int LECTURE_COUNT = 6;
+
+		// when
+		for (int i = 0; i < LECTURE_COUNT; i++) {                                        // 주어진 학생이 18학점의 수업을 수강바구니에 담음
+			Subject subject = create3CreditSubject("선형대수학" + i);
+			entityManager.persist(subject);
+			Lecture lecture = lectureRepository.save(createLecture(subject));
+
+			basketService.addLectureToBasket(student.getId(), lecture.getId());
+		}
+
+		// then
+		List<Basket> baskets = basketRepository.findAll();
+		assertThat(baskets).hasSize(LECTURE_COUNT);
+	}
+
+	@Test
+	@DisplayName("수강 바구니에 담은 수업들의 총 학점이 한 학기 제한 학점을 넘을 수 없습니다.")
+	void exceededDefaultCreditLimit() throws Exception {
+		// given
+		Student student = studentRepository.save(createStudent());
+
+		for (int i = 0; i < 6; i++) {                                        // 주어진 학생이 18학점의 수업을 수강바구니에 담음
+			Subject subject = create3CreditSubject("선형대수학" + i);
+			entityManager.persist(subject);
+			Lecture lecture = lectureRepository.save(createLecture(subject));
+
+			basketRepository.save(createBasket(student, lecture));
+		}
+
+		Subject subject = create3CreditSubject("법학입문");
+		entityManager.persist(subject);
+		Lecture lecture = lectureRepository.save(createLecture(subject));
+
+		// when & then
+		assertThatThrownBy(() -> basketService.addLectureToBasket(student.getId(), lecture.getId()))
+			.isInstanceOf(ExceededCreditLimitException.class);
+	}
+
+	private Student createStudent() {
 		return Student.builder().build();
 	}
 
-	private Subject createMockSubject(String name) {
+	private Subject create3CreditSubject(String name) {
 		return Subject.builder()
 			.name(name)
 			.credits(3)
 			.build();
 	}
 
-	private Lecture createMockLecture(Subject subject) {
+	private Lecture createLecture(Subject subject) {
 		return Lecture.builder()
 			.lectureNumber(012345)
 			.lectureRoom("법학관301")
@@ -98,10 +143,10 @@ class BasketServiceTest extends IntegrationTestSupport {
 			.build();
 	}
 
-	private Basket createBasket(Student savedStudent, Lecture savedLecture) {
+	private Basket createBasket(Student student, Lecture lecture) {
 		return Basket.builder()
-			.student(savedStudent)
-			.lecture(savedLecture)
+			.student(student)
+			.lecture(lecture)
 			.build();
 	}
 
