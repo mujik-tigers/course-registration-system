@@ -6,11 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.subject.SubjectDivision;
 
 @NoArgsConstructor
 @Getter
+@Setter
 public class LectureFilterOptions {
 
 	@NotNull
