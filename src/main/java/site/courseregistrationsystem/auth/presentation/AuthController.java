@@ -42,7 +42,8 @@ public class AuthController {
 
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/session")
-	public ApiResponse<Void> renewSessionDuration(@CookieValue(value = SESSION_ID) Cookie sessionCookie, HttpServletResponse response) {
+	public ApiResponse<Void> renewSession(@CookieValue(value = SESSION_ID) Cookie sessionCookie,
+		HttpServletResponse response) {
 		StudentSession renewSession = sessionManager.renew(sessionCookie.getValue());
 
 		Cookie cookie = generateCookieBy(renewSession);
@@ -52,7 +53,8 @@ public class AuthController {
 	}
 
 	@DeleteMapping("/logout")
-	public ApiResponse<Void> logout(@CookieValue(value = SESSION_ID) Cookie sessionCookie, HttpServletResponse response) {
+	public ApiResponse<Void> logout(@CookieValue(value = SESSION_ID) Cookie sessionCookie,
+		HttpServletResponse response) {
 		sessionManager.invalidate(sessionCookie.getValue());
 
 		invalidateCookie(sessionCookie);
