@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.basket.Basket;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
+import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.student.Student;
@@ -52,6 +53,26 @@ class BasketServiceTest extends IntegrationTestSupport {
 		Basket savedBasket = baskets.get(0);
 		assertThat(savedBasket.getStudent()).isEqualTo(savedStudent);
 		assertThat(savedBasket.getLecture()).isEqualTo(savedLecture);
+	}
+
+	@Test
+	@DisplayName("이미 수강 바구니에 담은 수업은 다시 담을 수 없다.")
+	void duplicateBasket() throws Exception {
+		// given
+		Student savedStudent = studentRepository.save(createMockStudent());
+		Lecture savedLecture = lectureRepository.save(createMockLecture());
+		Basket savedBasket = basketRepository.save(createBasket(savedStudent, savedLecture));
+
+		// when & then
+		assertThatThrownBy(() -> basketService.addLectureToBasket(savedStudent.getId(), savedLecture.getId()))
+			.isInstanceOf(DuplicateBasketException.class);
+	}
+
+	private static Basket createBasket(Student savedStudent, Lecture savedLecture) {
+		return Basket.builder()
+			.student(savedStudent)
+			.lecture(savedLecture)
+			.build();
 	}
 
 	private static Student createMockStudent() {
