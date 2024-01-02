@@ -1,5 +1,7 @@
 package site.courseregistrationsystem.basket.application;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +33,7 @@ public class BasketService {
 		Lecture lecture = lectureRepository.findById(lectureId)
 			.orElseThrow(NonexistenceLectureException::new);
 
-		checkBasketDuplicated(student, lecture);
+		checkSubjectInBasketDuplicated(student, lecture);
 
 		Basket basket = Basket.builder()
 			.student(student)
@@ -40,13 +42,19 @@ public class BasketService {
 
 		basketRepository.save(basket);
 
-		return basket.getId();
+		return lecture.getId();
 	}
 
-	private void checkBasketDuplicated(Student student, Lecture lecture) {
-		if (basketRepository.existsByStudentAndLecture(student, lecture)) {
+	private void checkSubjectInBasketDuplicated(Student student, Lecture lecture) {
+		List<Basket> baskets = basketRepository.findAllByStudent(student);
+
+		boolean duplicated = baskets.stream()
+			.map(Basket::getLecture)
+			.map(Lecture::getSubject)
+			.anyMatch(subject -> lecture.getSubject().equals(subject));
+
+		if (duplicated)
 			throw new DuplicateBasketException();
-		}
 	}
 
 }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.basket.Basket;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
@@ -16,7 +17,7 @@ import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
-import site.courseregistrationsystem.util.encryption.Aes256Manager;
+import site.courseregistrationsystem.subject.Subject;
 
 class BasketServiceTest extends IntegrationTestSupport {
 
@@ -33,14 +34,17 @@ class BasketServiceTest extends IntegrationTestSupport {
 	private BasketService basketService;
 
 	@Autowired
-	private Aes256Manager aes256Manager;
+	private EntityManager entityManager;
 
 	@Test
 	@DisplayName("학생은 원하는 수업을 선택하여 수강 바구니에 담은 뒤, 담은 수업(Lecture)의 id 를 반환한다.")
 	void addLectureToBasket() throws Exception {
 		// given
+		Subject subject = createMockSubject("선형대수학");
+		entityManager.persist(subject);
+
 		Student savedStudent = studentRepository.save(createMockStudent());
-		Lecture savedLecture = lectureRepository.save(createMockLecture());
+		Lecture savedLecture = lectureRepository.save(createMockLecture(subject));
 
 		// when
 		Long basketSavedLectureId = basketService.addLectureToBasket(savedStudent.getId(), savedLecture.getId());
@@ -56,34 +60,48 @@ class BasketServiceTest extends IntegrationTestSupport {
 	}
 
 	@Test
-	@DisplayName("이미 수강 바구니에 담은 수업은 다시 담을 수 없다.")
+	@DisplayName("이미 수강 바구니에 담은 과목(Subject)은 중복하여 담을 수 없다.")
 	void duplicateBasket() throws Exception {
 		// given
+		Subject subject = createMockSubject("선형대수학");
+		entityManager.persist(subject);
+
 		Student savedStudent = studentRepository.save(createMockStudent());
-		Lecture savedLecture = lectureRepository.save(createMockLecture());
-		Basket savedBasket = basketRepository.save(createBasket(savedStudent, savedLecture));
+		Lecture savedLecture = lectureRepository.save(createMockLecture(subject));
+
+		basketRepository.save(createBasket(savedStudent, savedLecture));
+
+		Lecture duplicateSubjectLecture = lectureRepository.save(createMockLecture(subject));
 
 		// when & then
-		assertThatThrownBy(() -> basketService.addLectureToBasket(savedStudent.getId(), savedLecture.getId()))
+		assertThatThrownBy(() -> basketService.addLectureToBasket(savedStudent.getId(), duplicateSubjectLecture.getId()))
 			.isInstanceOf(DuplicateBasketException.class);
 	}
 
-	private static Basket createBasket(Student savedStudent, Lecture savedLecture) {
-		return Basket.builder()
-			.student(savedStudent)
-			.lecture(savedLecture)
-			.build();
-	}
-
-	private static Student createMockStudent() {
+	private Student createMockStudent() {
 		return Student.builder().build();
 	}
 
-	private static Lecture createMockLecture() {
+	private Subject createMockSubject(String name) {
+		return Subject.builder()
+			.name(name)
+			.credits(3)
+			.build();
+	}
+
+	private Lecture createMockLecture(Subject subject) {
 		return Lecture.builder()
 			.lectureNumber(012345)
 			.lectureRoom("법학관301")
 			.totalCapacity(40)
+			.subject(subject)
+			.build();
+	}
+
+	private Basket createBasket(Student savedStudent, Lecture savedLecture) {
+		return Basket.builder()
+			.student(savedStudent)
+			.lecture(savedLecture)
 			.build();
 	}
 
