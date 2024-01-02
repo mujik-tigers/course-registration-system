@@ -80,7 +80,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 	}
 
 	@Test
-	@DisplayName("한 학생은 총 18학점 상당의 수업을 담을 수 있습니다.")
+	@DisplayName("한 학생은 총 18학점 상당의 수업을 담을 수 있다.")
 	void addManyLectureToBasket() throws Exception {
 		// given
 		Student student = studentRepository.save(createStudent());
@@ -101,7 +101,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 	}
 
 	@Test
-	@DisplayName("수강 바구니에 담은 수업들의 총 학점이 한 학기 제한 학점을 넘을 수 없습니다.")
+	@DisplayName("수강 바구니에 담은 수업들의 총 학점이 한 학기 제한 학점을 넘을 수 없다.")
 	void exceededDefaultCreditLimit() throws Exception {
 		// given
 		Student student = studentRepository.save(createStudent());

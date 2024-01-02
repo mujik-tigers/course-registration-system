@@ -33,44 +33,42 @@ public class BasketService {
 		Student student = studentRepository.findById(studentPk)
 			.orElseThrow(NonexistenceStudentException::new);
 
-		Lecture lecture = lectureRepository.findById(lectureId)
+		Lecture lectureForBasket = lectureRepository.findById(lectureId)
 			.orElseThrow(NonexistenceLectureException::new);
 
-		checkSubjectInBasketDuplicated(student, lecture);
-		checkCreditLimitExceeded(student, lecture);
+		List<Basket> baskets = basketRepository.findAllByStudent(student);
+
+		checkSubjectInBasketDuplicated(baskets, lectureForBasket);
+		checkCreditLimitExceeded(baskets, lectureForBasket);
 
 		Basket basket = Basket.builder()
 			.student(student)
-			.lecture(lecture)
+			.lecture(lectureForBasket)
 			.build();
 
 		basketRepository.save(basket);
 
-		return lecture.getId();
+		return lectureForBasket.getId();
 	}
 
-	private void checkSubjectInBasketDuplicated(Student student, Lecture lecture) {
-		List<Basket> baskets = basketRepository.findAllByStudent(student);
-
+	private void checkSubjectInBasketDuplicated(List<Basket> baskets, Lecture lectureForBasket) {
 		boolean duplicated = baskets.stream()
 			.map(Basket::getLecture)
 			.map(Lecture::getSubject)
-			.anyMatch(subject -> lecture.getSubject().equals(subject));
+			.anyMatch(subject -> lectureForBasket.getSubject().equals(subject));
 
 		if (duplicated)
 			throw new DuplicateBasketException();
 	}
 
-	private void checkCreditLimitExceeded(Student student, Lecture lecture) {
-		List<Basket> baskets = basketRepository.findAllByStudent(student);
-
+	private void checkCreditLimitExceeded(List<Basket> baskets, Lecture lectureForBasket) {
 		int creditSum = baskets.stream()
 			.map(Basket::getLecture)
 			.map(Lecture::getSubject)
 			.mapToInt(Subject::getCredits)
 			.sum();
 
-		if (creditSum + lecture.getSubject().getCredits() > ProjectConstant.DEFAULT_CREDIT_LIMIT) {
+		if (creditSum + lectureForBasket.getSubject().getCredits() > ProjectConstant.DEFAULT_CREDIT_LIMIT) {
 			throw new ExceededCreditLimitException();
 		}
 	}
