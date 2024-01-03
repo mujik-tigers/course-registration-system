@@ -28,4 +28,11 @@ public class EnrollmentController {
 			enrollmentService.enrollLecture(studentPk, lectureId));
 	}
 
+	@ResponseStatus(HttpStatus.CREATED)
+	@PostMapping("/{lectureNumber}")
+	public ApiResponse<EnrolledLecture> enrollLectureByNumber(@Login Long studentPk, @PathVariable Long lectureNumber) {
+		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.ENROLL_LECTURE_SUCCESS.getMessage(),
+			enrollmentService.enrollLectureByNumber(studentPk, lectureNumber));
+	}
+
 }
