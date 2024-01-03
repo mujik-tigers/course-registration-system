@@ -38,28 +38,9 @@ public class EnrollmentService {
 
 		List<Enrollment> enrollments = enrollmentRepository.findAllInCurrentSemester(studentPk, openingYear, semester);
 
-		int creditsForCurrentSemester = enrollments.stream()
-			.mapToInt(Enrollment::fetchCredits)
-			.sum();
-
-		if (creditsForCurrentSemester >= MAX_CREDITS_PER_SEMESTER) {
-			throw new EnrollmentLimitExceededException();
-		}
-
-		boolean isEnrollmentExist = enrollments.stream()
-			.anyMatch(enrollment -> enrollment.fetchSubjectId().equals(lecture.fetchSubjectId()));
-
-		if (isEnrollmentExist) {
-			throw new DuplicateEnrollmentException();
-		}
-
-		boolean hasEnrollmentConflict = enrollments.stream()
-			.map(Enrollment::getLecture)
-			.anyMatch(l -> l.hasScheduleConflict(lecture));
-
-		if (hasEnrollmentConflict) {
-			throw new ScheduleConflictException();
-		}
+		checkCreditsLimit(enrollments);
+		checkDuplicateSubject(enrollments, lecture);
+		checkScheduleConflict(enrollments, lecture);
 
 		Enrollment newEnrollment = Enrollment.builder()
 			.student(student)
@@ -69,6 +50,35 @@ public class EnrollmentService {
 		Enrollment savedEnrollment = enrollmentRepository.save(newEnrollment);
 
 		return savedEnrollment.fetchLectureId();
+	}
+
+	private void checkCreditsLimit(List<Enrollment> enrollments) {
+		int creditsForCurrentSemester = enrollments.stream()
+			.mapToInt(Enrollment::fetchCredits)
+			.sum();
+
+		if (creditsForCurrentSemester >= MAX_CREDITS_PER_SEMESTER) {
+			throw new EnrollmentLimitExceededException();
+		}
+	}
+
+	private void checkDuplicateSubject(List<Enrollment> enrollments, Lecture lecture) {
+		boolean isEnrollmentExist = enrollments.stream()
+			.anyMatch(enrollment -> enrollment.fetchSubjectId().equals(lecture.fetchSubjectId()));
+
+		if (isEnrollmentExist) {
+			throw new DuplicateEnrollmentException();
+		}
+	}
+
+	private void checkScheduleConflict(List<Enrollment> enrollments, Lecture lecture) {
+		boolean hasEnrollmentConflict = enrollments.stream()
+			.map(Enrollment::getLecture)
+			.anyMatch(l -> l.hasScheduleConflict(lecture));
+
+		if (hasEnrollmentConflict) {
+			throw new ScheduleConflictException();
+		}
 	}
 
 }
