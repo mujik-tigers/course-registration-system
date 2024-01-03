@@ -44,8 +44,8 @@ public class Schedule {
 	}
 
 	public boolean hasConflictWith(Schedule schedule) {
-		return this.firstPeriod.getPeriodNumber() < schedule.lastPeriod.getPeriodNumber() &&
-			this.lastPeriod.getPeriodNumber() > schedule.firstPeriod.getPeriodNumber();
+		return !(this.firstPeriod.getPeriodNumber() > schedule.lastPeriod.getPeriodNumber() ||
+			this.lastPeriod.getPeriodNumber() < schedule.firstPeriod.getPeriodNumber());
 	}
 
 }
