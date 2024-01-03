@@ -1,11 +1,13 @@
 package site.courseregistrationsystem.basket.presentation;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.basket.application.BasketService;
+import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.basket.dto.SelectedLecture;
 import site.courseregistrationsystem.util.api.ApiResponse;
 import site.courseregistrationsystem.util.api.ResponseMessage;
@@ -23,6 +25,13 @@ public class BasketController {
 		SelectedLecture selectedLecture = new SelectedLecture(selectedLectureId);
 
 		return ApiResponse.ok(ResponseMessage.BASKET_ADD_SUCCESS.getMessage(), selectedLecture);
+	}
+
+	@GetMapping("/baskets")
+	public ApiResponse<BasketList> fetchBaskets(@Login Long studentPk) {
+		BasketList basketList = basketService.fetchBaskets(studentPk);
+
+		return ApiResponse.ok(ResponseMessage.BASKET_FETCH_SUCCESS.getMessage(), basketList);
 	}
 
 }

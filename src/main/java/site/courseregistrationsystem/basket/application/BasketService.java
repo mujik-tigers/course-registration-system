@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.basket.Basket;
+import site.courseregistrationsystem.basket.dto.BasketDetail;
+import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.ExceededCreditLimitException;
@@ -51,6 +53,18 @@ public class BasketService {
 		basketRepository.save(basket);
 
 		return lectureForBasket.getId();
+	}
+
+	public BasketList fetchBaskets(Long studentPk) {
+		Student student = studentRepository.findById(studentPk)
+			.orElseThrow(NonexistenceStudentException::new);
+
+		List<Basket> baskets = basketRepository.findAllByStudent(student);
+		List<BasketDetail> basketDetails = baskets.stream()
+			.map(BasketDetail::new)
+			.toList();
+
+		return new BasketList(basketDetails);
 	}
 
 	private void checkSubjectInBasketDuplicated(List<Basket> baskets, Lecture lectureForBasket) {

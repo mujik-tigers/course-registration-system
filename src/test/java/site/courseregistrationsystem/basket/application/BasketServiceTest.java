@@ -11,18 +11,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.basket.Basket;
+import site.courseregistrationsystem.basket.dto.BasketDetail;
+import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.ExceededCreditLimitException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
+import site.courseregistrationsystem.professor.Professor;
 import site.courseregistrationsystem.schedule.DayOfWeek;
 import site.courseregistrationsystem.schedule.Period;
 import site.courseregistrationsystem.schedule.Schedule;
+import site.courseregistrationsystem.student.Grade;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
 import site.courseregistrationsystem.subject.Subject;
+import site.courseregistrationsystem.subject.SubjectDivision;
 
 class BasketServiceTest extends IntegrationTestSupport {
 
@@ -180,23 +185,91 @@ class BasketServiceTest extends IntegrationTestSupport {
 			.isInstanceOf(ScheduleConflictException.class);
 	}
 
+	@Test
+	@DisplayName("수강 바구니에 담은 수업둘 목록을 가져올 수 있다.")
+	void fetchBasketList() throws Exception {
+		// given
+		Professor professor = createProfessor();
+		entityManager.persist(professor);
+		Student student = studentRepository.save(createStudent());
+
+		String SUBJECT1_NAME = "선형대수학";                                        // 주어진 student 가 `선형대수학` 수업을 수강바구니에 담는 과정
+		Subject subject1 = create3CreditSubject(SUBJECT1_NAME);
+		entityManager.persist(subject1);
+		Lecture lecture1 = lectureRepository.save(createLecture(subject1, professor));
+		entityManager.persist(createSchedule(lecture1, DayOfWeek.MON, Period.ONE, Period.FIVE));
+		entityManager.persist(createBasket(student, lecture1));
+
+		String SUBJECT2_NAME = "미분적분학";                                        // 주어진 student 가 `미분적분학` 수업을 수강바구니에 담는 과정
+		Subject subject2 = create3CreditSubject(SUBJECT2_NAME);
+		entityManager.persist(subject2);
+		Lecture lecture2 = lectureRepository.save(createLecture(subject2, professor));
+		entityManager.persist(createSchedule(lecture2, DayOfWeek.THU, Period.ONE, Period.FIVE));
+		entityManager.persist(createBasket(student, lecture2));
+
+		entityManager.flush();
+		entityManager.clear();
+
+		// when
+		BasketList basketList = basketService.fetchBaskets(student.getId());
+
+		// then
+		List<BasketDetail> baskets = basketList.getBaskets();
+		assertThat(baskets).hasSize(2)
+			.extracting("subjectName", "professorName")
+			.containsExactlyInAnyOrder(
+				tuple(SUBJECT1_NAME, professor.getName()),
+				tuple(SUBJECT2_NAME, professor.getName())
+			);
+	}
+
+	@Test
+	@DisplayName("수강 바구니에 담은 수업이 없는 경우 빈 리스트를 반환한다.")
+	void fetchEmptyBasketList() throws Exception {
+		// given
+		Student student = studentRepository.save(createStudent());
+
+		// when
+		BasketList basketList = basketService.fetchBaskets(student.getId());
+
+		// then
+		List<BasketDetail> baskets = basketList.getBaskets();
+		assertThat(baskets).isEmpty();
+	}
+
 	private Student createStudent() {
 		return Student.builder().build();
+	}
+
+	private Professor createProfessor() {
+		return new Professor("김서연");
 	}
 
 	private Subject create3CreditSubject(String name) {
 		return Subject.builder()
 			.name(name)
 			.credits(3)
+			.targetGrade(Grade.SENIOR)
+			.subjectDivision(SubjectDivision.GR)
 			.build();
 	}
 
 	private Lecture createLecture(Subject subject) {
 		return Lecture.builder()
-			.lectureNumber(012345)
+			.lectureNumber(5349)
 			.lectureRoom("법학관301")
 			.totalCapacity(40)
 			.subject(subject)
+			.build();
+	}
+
+	private Lecture createLecture(Subject subject, Professor professor) {
+		return Lecture.builder()
+			.lectureNumber(5349)
+			.lectureRoom("법학관301")
+			.totalCapacity(40)
+			.subject(subject)
+			.professor(professor)
 			.build();
 	}
 

@@ -90,6 +90,11 @@ public class Lecture {
 		return professor.getName();
 	}
 
+	public void addSchedule(Schedule schedule) {
+		schedules.add(schedule);
+		schedule.setLecture(this);
+	}
+
 	public boolean hasScheduleConflict(Lecture lectureToAdd) {
 		return this.schedules.stream()
 			.anyMatch(schedule -> lectureToAdd.getSchedules().stream().anyMatch(scheduleToAdd -> schedule.hasConflictWith(scheduleToAdd)));
