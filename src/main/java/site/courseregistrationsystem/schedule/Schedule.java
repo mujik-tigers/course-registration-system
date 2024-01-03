@@ -44,6 +44,10 @@ public class Schedule {
 	}
 
 	public boolean hasConflictWith(Schedule schedule) {
+		if (!this.dayOfWeek.equals(schedule.dayOfWeek)) {
+			return false;
+		}
+
 		return !(this.firstPeriod.getPeriodNumber() > schedule.lastPeriod.getPeriodNumber() ||
 			this.lastPeriod.getPeriodNumber() < schedule.firstPeriod.getPeriodNumber());
 	}
