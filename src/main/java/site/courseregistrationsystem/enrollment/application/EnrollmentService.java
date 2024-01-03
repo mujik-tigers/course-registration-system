@@ -39,7 +39,7 @@ public class EnrollmentService {
 		return new EnrolledLecture(savedEnrollment.fetchLectureId());
 	}
 
-	public EnrolledLecture enrollLectureByNumber(Long studentPk, Long lectureNumber) {
+	public EnrolledLecture enrollLectureByNumber(Long studentPk, Integer lectureNumber) {
 		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 		Lecture lecture = lectureRepository.findByNumberWithSchedule(lectureNumber)
 			.orElseThrow(NonexistenceLectureException::new);

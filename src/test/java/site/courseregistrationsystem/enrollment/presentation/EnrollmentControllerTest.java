@@ -30,7 +30,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLectureByNumber(anyLong(), anyLong()))
+		given(enrollmentService.enrollLectureByNumber(anyLong(), anyInt()))
 			.willReturn(new EnrolledLecture(lectureId));
 
 		// when & then
