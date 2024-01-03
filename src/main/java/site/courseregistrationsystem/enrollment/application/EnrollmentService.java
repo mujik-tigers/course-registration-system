@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.enrollment.Enrollment;
+import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentRepository;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentLimitExceededException;
@@ -29,7 +30,7 @@ public class EnrollmentService {
 	private final StudentRepository studentRepository;
 	private final LectureRepository lectureRepository;
 
-	public Long enrollLecture(Long studentPk, Long lectureId) {
+	public EnrolledLecture enrollLecture(Long studentPk, Long lectureId) {
 		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(NonexistenceLectureException::new);
 
@@ -49,7 +50,7 @@ public class EnrollmentService {
 
 		Enrollment savedEnrollment = enrollmentRepository.save(newEnrollment);
 
-		return savedEnrollment.fetchLectureId();
+		return new EnrolledLecture(savedEnrollment.fetchLectureId());
 	}
 
 	private void checkCreditsLimit(List<Enrollment> enrollments) {

@@ -24,8 +24,8 @@ public class EnrollmentController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/{lectureId}")
 	public ApiResponse<EnrolledLecture> enrollLecture(@Login Long studentPk, @PathVariable Long lectureId) {
-		EnrolledLecture enrolledLecture = new EnrolledLecture(enrollmentService.enrollLecture(studentPk, lectureId));
-		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.ENROLL_LECTURE_SUCCESS.getMessage(), enrolledLecture);
+		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.ENROLL_LECTURE_SUCCESS.getMessage(),
+			enrollmentService.enrollLecture(studentPk, lectureId));
 	}
 
 }
