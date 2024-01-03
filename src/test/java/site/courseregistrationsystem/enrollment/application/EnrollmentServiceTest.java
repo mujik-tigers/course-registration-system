@@ -1,13 +1,18 @@
 package site.courseregistrationsystem.enrollment.application;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicTest.*;
 import static org.junit.jupiter.params.provider.Arguments.*;
 
 import java.time.Year;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -138,6 +143,81 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 			.hasMessage(ErrorType.SCHEDULE_CONFLICT.getMessage());
 	}
 
+	static Stream<Arguments> unconflictedSchedules() {
+		return Stream.of(
+			arguments(Period.ONE, Period.THREE),
+			arguments(Period.THREE, Period.FOUR),
+			arguments(Period.FOUR, Period.FIVE),
+			arguments(Period.FOUR, Period.SEVEN)
+		);
+	}
+
+	@TestFactory
+	@DisplayName("최대 학점 내에서 중복되지 않은 과목과 시간을 갖는 수업 신청 시, 등록에 성공한다")
+	Collection<DynamicTest> enrollNoConflict() {
+		// given
+		Department department = saveDepartment();
+		Student student = saveStudent(department);
+
+		return List.of(
+			dynamicTest("월요일 1-3교시 수업 수강 신청", () -> {
+				Subject subject = saveSubject("동양미술사", 3);
+				Lecture lecture = saveLecture(department, subject);
+				saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
+
+				// when
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
+
+				// then
+				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
+			}),
+			dynamicTest("월요일 4-6교시 수업 수강 신청", () -> {
+				Subject subject = saveSubject("서양미술사", 3);
+				Lecture lecture = saveLecture(department, subject);
+				saveSchedule(lecture, DayOfWeek.MON, Period.FOUR, Period.SIX);
+
+				// when
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
+
+				// then
+				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
+			}),
+			dynamicTest("화요일 6-9교시 수업 수강 신청", () -> {
+				Subject subject = saveSubject("금속공예기초", 4);
+				Lecture lecture = saveLecture(department, subject);
+				saveSchedule(lecture, DayOfWeek.TUE, Period.SIX, Period.NINE);
+
+				// when
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
+
+				// then
+				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
+			}),
+			dynamicTest("수요일 2-4교시 수업 수강 신청", () -> {
+				Subject subject = saveSubject("창의적사고", 4);
+				Lecture lecture = saveLecture(department, subject);
+				saveSchedule(lecture, DayOfWeek.WED, Period.TWO, Period.FOUR);
+
+				// when
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
+
+				// then
+				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
+			}),
+			dynamicTest("목요일 2-4교시 수업 수강 신청", () -> {
+				Subject subject = saveSubject("철학개론", 4);
+				Lecture lecture = saveLecture(department, subject);
+				saveSchedule(lecture, DayOfWeek.THU, Period.TWO, Period.FOUR);
+
+				// when
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
+
+				// then
+				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
+			})
+		);
+	}
+
 	private Department saveDepartment() {
 		Department department = new Department("금속공예디자인학과");
 		entityManager.persist(department);
@@ -191,7 +271,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 	private void saveSchedule(Lecture lecture, DayOfWeek dayOfWeek, Period firstPeriod, Period lastPeriod) {
 		entityManager.flush();
 		entityManager.clear();
-		
+
 		Schedule schedule = Schedule.builder()
 			.lecture(lecture)
 			.dayOfWeek(dayOfWeek)
