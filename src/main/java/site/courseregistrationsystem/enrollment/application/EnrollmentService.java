@@ -9,8 +9,8 @@ import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.enrollment.Enrollment;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentRepository;
+import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
-import site.courseregistrationsystem.exception.enrollment.EnrollmentLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.ScheduleConflictException;
 import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
 import site.courseregistrationsystem.exception.student.NonexistenceStudentException;
@@ -59,7 +59,7 @@ public class EnrollmentService {
 			.sum();
 
 		if (creditsForCurrentSemester >= MAX_CREDITS_PER_SEMESTER) {
-			throw new EnrollmentLimitExceededException();
+			throw new CreditsLimitExceededException();
 		}
 	}
 
