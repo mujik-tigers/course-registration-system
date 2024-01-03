@@ -1,6 +1,7 @@
 package site.courseregistrationsystem.enrollment.presentation;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +35,12 @@ public class EnrollmentController {
 		@PathVariable Integer lectureNumber) {
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.ENROLL_LECTURE_SUCCESS.getMessage(),
 			enrollmentService.enrollLectureByNumber(studentPk, lectureNumber));
+	}
+
+	@DeleteMapping("/{lectureId}")
+	public ApiResponse<Void> cancelEnrollment(@Login Long studentPk, @PathVariable Long lectureId) {
+		return ApiResponse.ok(ResponseMessage.ENROLLMENT_CANCEL_SUCCESS.getMessage(),
+			enrollmentService.cancel(studentPk, lectureId));
 	}
 
 }
