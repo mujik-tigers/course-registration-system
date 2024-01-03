@@ -16,6 +16,7 @@ import jakarta.servlet.http.Cookie;
 import site.courseregistrationsystem.RestDocsSupport;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.ExceededCreditLimitException;
+import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 
 class BasketControllerTest extends RestDocsSupport {
 
@@ -100,6 +101,36 @@ class BasketControllerTest extends RestDocsSupport {
 			.andDo(print())
 			.andExpect(status().isBadRequest())
 			.andDo(document("basket-save-exceeded-fail",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("수강 바구니 담기 : 실패 - 시간표 겹침")
+	void conflictSchedule() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		Long LECTURE_ID = 1L;
+
+		given(basketService.addLectureToBasket(anyLong(), anyLong()))
+			.willThrow(new ScheduleConflictException());
+
+		// when & then
+		mockMvc.perform(post("/baskets/{lectureId}", LECTURE_ID)
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andDo(document("basket-save-conflict-fail",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
 				responseFields(

@@ -90,4 +90,9 @@ public class Lecture {
 		return professor.getName();
 	}
 
+	public boolean hasScheduleConflict(Lecture lectureToAdd) {
+		return this.schedules.stream()
+			.anyMatch(schedule -> lectureToAdd.getSchedules().stream().anyMatch(scheduleToAdd -> schedule.hasConflictWith(scheduleToAdd)));
+	}
+
 }

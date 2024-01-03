@@ -23,6 +23,9 @@ public enum ErrorType {
 	DUPLICATE_BASKET(HttpStatus.BAD_REQUEST, "이미 수강바구니로 담은 강의입니다"),
 	EXCEEDED_CREDIT_EXCEPTION(HttpStatus.BAD_REQUEST, "수강바구니로 담을 수 있는 학점을 초과하였습니다"),
 
+	// Schedule
+	SCHEDULE_CONFLICT(HttpStatus.BAD_REQUEST, "시간표가 겹칩니다"),
+
 	// AES256
 	AES256_SETTING_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "AES256 설정에 실패했습니다");
 

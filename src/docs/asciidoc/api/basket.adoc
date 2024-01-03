@@ -36,3 +36,15 @@ include::{snippets}/basket-save-exceeded-fail/http-request.adoc[]
 
 include::{snippets}/basket-save-exceeded-fail/http-response.adoc[]
 include::{snippets}/basket-save-exceeded-fail/response-fields.adoc[]
+
+[[basket-save-conflict-fail]]
+=== 수강 바구니 담기 : 실패 - 시간표 겹침
+
+==== HTTP Request
+
+include::{snippets}/basket-save-conflict-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/basket-save-conflict-fail/http-response.adoc[]
+include::{snippets}/basket-save-conflict-fail/response-fields.adoc[]

@@ -11,6 +11,7 @@ import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.ExceededCreditLimitException;
 import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
+import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.exception.student.NonexistenceStudentException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
@@ -40,6 +41,7 @@ public class BasketService {
 
 		checkSubjectInBasketDuplicated(baskets, lectureForBasket);
 		checkCreditLimitExceeded(baskets, lectureForBasket);
+		checkScheduleConflict(baskets, lectureForBasket);
 
 		Basket basket = Basket.builder()
 			.student(student)
@@ -71,6 +73,15 @@ public class BasketService {
 		if (creditSum + lectureForBasket.getSubject().getCredits() > ProjectConstant.DEFAULT_CREDIT_LIMIT) {
 			throw new ExceededCreditLimitException();
 		}
+	}
+
+	private void checkScheduleConflict(List<Basket> baskets, Lecture lectureForBasket) {
+		boolean conflict = baskets.stream()
+			.map(Basket::getLecture)
+			.anyMatch(lecture -> lecture.hasScheduleConflict(lectureForBasket));
+
+		if (conflict)
+			throw new ScheduleConflictException();
 	}
 
 }

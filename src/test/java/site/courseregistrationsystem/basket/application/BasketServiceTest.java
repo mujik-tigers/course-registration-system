@@ -14,8 +14,12 @@ import site.courseregistrationsystem.basket.Basket;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.ExceededCreditLimitException;
+import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
+import site.courseregistrationsystem.schedule.DayOfWeek;
+import site.courseregistrationsystem.schedule.Period;
+import site.courseregistrationsystem.schedule.Schedule;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
 import site.courseregistrationsystem.subject.Subject;
@@ -123,6 +127,59 @@ class BasketServiceTest extends IntegrationTestSupport {
 			.isInstanceOf(ExceededCreditLimitException.class);
 	}
 
+	@Test
+	@DisplayName("수강 바구니에 담은 수업들의 시간표가 겹치지 않는다면 담을 수 있다.")
+	void scheduleNoConflict() throws Exception {
+		// given
+		Student student = studentRepository.save(createStudent());
+
+		Subject subject1 = create3CreditSubject("선형대수학");
+		entityManager.persist(subject1);
+		Lecture savedLecture = lectureRepository.save(createLecture(subject1));
+		entityManager.persist(createSchedule(savedLecture, DayOfWeek.MON, Period.ONE, Period.FIVE));
+		entityManager.persist(createBasket(student, savedLecture));
+
+		Subject subject2 = create3CreditSubject("미분적분학");
+		entityManager.persist(subject2);
+		Lecture lectureToAdd = lectureRepository.save(createLecture(subject2));
+		entityManager.persist(createSchedule(lectureToAdd, DayOfWeek.THU, Period.ONE, Period.FIVE));
+
+		entityManager.flush();
+		entityManager.clear();
+
+		// when
+		basketService.addLectureToBasket(student.getId(), lectureToAdd.getId());
+
+		// then
+		List<Basket> baskets = basketRepository.findAllByStudent(student);
+		assertThat(baskets).hasSize(2);
+	}
+
+	@Test
+	@DisplayName("수강 바구니에 담은 수업들의 시간표가 겹친다면 담을 수 없다.")
+	void scheduleConflict() throws Exception {
+		// given
+		Student student = studentRepository.save(createStudent());
+
+		Subject subject1 = create3CreditSubject("선형대수학");
+		entityManager.persist(subject1);
+		Lecture savedLecture = lectureRepository.save(createLecture(subject1));
+		entityManager.persist(createSchedule(savedLecture, DayOfWeek.MON, Period.ONE, Period.FIVE));
+		entityManager.persist(createBasket(student, savedLecture));
+
+		Subject subject2 = create3CreditSubject("미분적분학");
+		entityManager.persist(subject2);
+		Lecture lectureToAdd = lectureRepository.save(createLecture(subject2));
+		entityManager.persist(createSchedule(lectureToAdd, DayOfWeek.MON, Period.FIVE, Period.NINE));
+
+		entityManager.flush();
+		entityManager.clear();
+
+		// when & then
+		assertThatThrownBy(() -> basketService.addLectureToBasket(student.getId(), lectureToAdd.getId()))
+			.isInstanceOf(ScheduleConflictException.class);
+	}
+
 	private Student createStudent() {
 		return Student.builder().build();
 	}
@@ -140,6 +197,15 @@ class BasketServiceTest extends IntegrationTestSupport {
 			.lectureRoom("법학관301")
 			.totalCapacity(40)
 			.subject(subject)
+			.build();
+	}
+
+	private Schedule createSchedule(Lecture lecture, DayOfWeek dayOfWeek, Period firstPeriod, Period lastPeriod) {
+		return Schedule.builder()
+			.lecture(lecture)
+			.dayOfWeek(dayOfWeek)
+			.firstPeriod(firstPeriod)
+			.lastPeriod(lastPeriod)
 			.build();
 	}
 
