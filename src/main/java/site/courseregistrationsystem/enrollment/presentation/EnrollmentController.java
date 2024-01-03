@@ -29,7 +29,7 @@ public class EnrollmentController {
 	}
 
 	@ResponseStatus(HttpStatus.CREATED)
-	@PostMapping("/{lectureNumber}")
+	@PostMapping("/fast/{lectureNumber}")
 	public ApiResponse<EnrolledLecture> enrollLectureByNumber(@Login Long studentPk, @PathVariable Long lectureNumber) {
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.ENROLL_LECTURE_SUCCESS.getMessage(),
 			enrollmentService.enrollLectureByNumber(studentPk, lectureNumber));
