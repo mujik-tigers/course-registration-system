@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.courseregistrationsystem.department.Department;
@@ -37,6 +38,7 @@ public class Student {
 		this.password = password;
 	}
 
+	@Builder
 	public Student(String studentId, String name, Grade grade, Department department) {
 		this.studentId = studentId;
 		this.name = name;
