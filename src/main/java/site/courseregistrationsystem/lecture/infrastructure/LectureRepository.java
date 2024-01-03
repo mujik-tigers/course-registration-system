@@ -14,4 +14,9 @@ public interface LectureRepository extends JpaRepository<Lecture, Long>, Lecture
 		+ "WHERE l.id = :lectureId")
 	Optional<Lecture> findWithSchedule(Long lectureId);
 
+	@Query("SELECT l FROM Lecture l "
+		+ "JOIN FETCH l.schedules "
+		+ "WHERE l.lectureNumber = :lectureNumber")
+	Optional<Lecture> findByNumberWithSchedule(Long lectureNumber);
+
 }
