@@ -34,6 +34,23 @@ public class EnrollmentService {
 		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(NonexistenceLectureException::new);
 
+		Enrollment savedEnrollment = enroll(student, lecture);
+
+		return new EnrolledLecture(savedEnrollment.fetchLectureId());
+	}
+
+	public EnrolledLecture enrollLectureByNumber(Long studentPk, Long lectureNumber) {
+		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
+		Lecture lecture = lectureRepository.findByNumberWithSchedule(lectureNumber)
+			.orElseThrow(NonexistenceLectureException::new);
+
+		Enrollment savedEnrollment = enroll(student, lecture);
+
+		return new EnrolledLecture(savedEnrollment.fetchLectureId());
+	}
+
+	private Enrollment enroll(Student student, Lecture lecture) {
+		Long studentPk = student.getId();
 		Year openingYear = lecture.getOpeningYear();
 		Semester semester = lecture.getSemester();
 
@@ -48,9 +65,7 @@ public class EnrollmentService {
 			.lecture(lecture)
 			.build();
 
-		Enrollment savedEnrollment = enrollmentRepository.save(newEnrollment);
-
-		return new EnrolledLecture(savedEnrollment.fetchLectureId());
+		return enrollmentRepository.save(newEnrollment);
 	}
 
 	private void checkCreditsLimit(List<Enrollment> enrollments) {
