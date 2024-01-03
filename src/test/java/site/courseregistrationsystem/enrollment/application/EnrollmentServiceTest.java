@@ -50,6 +50,24 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 	private LectureRepository lectureRepository;
 
 	@Test
+	@DisplayName("빠른 수강 신청에 성공하면 신청된 강의의 PK를 반환한다")
+	void enrollFastSuccess() {
+		// given
+		Department department = saveDepartment();
+		Student student = saveStudent(department);
+		Subject subject = saveSubject("미술사", 2);
+		Lecture lecture = saveLecture(department, subject);
+		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
+
+		// when
+		EnrolledLecture enrolledLecture = enrollmentService.enrollLectureByNumber(student.getId(),
+			lecture.getLectureNumber());
+
+		// then
+		assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
+	}
+
+	@Test
 	@DisplayName("수강 신청에 성공하면 신청된 강의의 PK를 반환한다")
 	void enrollSuccess() {
 		// given
