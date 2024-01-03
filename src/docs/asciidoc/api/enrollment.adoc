@@ -1,6 +1,18 @@
 [[Enrollment-API]]
 == Enrollment API
 
+[[fast-enrollment-success]]
+=== 빠른 수강 신청 : 성공
+
+==== HTTP Request
+
+include::{snippets}/fast-enrollment-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/fast-enrollment-success/http-response.adoc[]
+include::{snippets}/fast-enrollment-success/response-fields.adoc[]
+
 [[enrollment-success]]
 === 수강 신청 : 성공
 
