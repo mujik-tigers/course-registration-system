@@ -25,6 +25,7 @@ import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.exception.ErrorType;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
+import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
 import site.courseregistrationsystem.exception.enrollment.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.Semester;
@@ -225,6 +226,44 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
 			})
 		);
+	}
+
+	@Test
+	@DisplayName("해당 학기 내 수강 신청을 취소한다")
+	void cancelEnrollmentSuccess() {
+		// given
+		Department department = saveDepartment();
+		Student student = saveStudent(department);
+		Subject subject = saveSubject("미술사", 2);
+
+		Lecture lecture = saveLecture(department, subject);
+		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
+
+		enrollmentService.enrollLecture(student.getId(), lecture.getId());  // 강의 수강 신청 완료
+
+		// when
+		enrollmentService.cancel(student.getId(), lecture.getId());  // 수강 신청 취소 시
+
+		// then
+		assertThatCode(() -> enrollmentService.enrollLecture(student.getId(), lecture.getId()))
+			.doesNotThrowAnyException();  // 다시 수강 신청해도 예외가 발생하지 않는다
+	}
+
+	@Test
+	@DisplayName("신청한 적 없는 강의를 취소하려는 경우 오류 메세지를 응답한다")
+	void cancelEnrollmentFail() {
+		// given
+		Department department = saveDepartment();
+		Student student = saveStudent(department);
+		Subject subject = saveSubject("미술사", 2);
+
+		Lecture lecture = saveLecture(department, subject);
+		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
+
+		// when & then
+		assertThatThrownBy(() -> enrollmentService.cancel(student.getId(), lecture.getId()))
+			.isInstanceOf(EnrollmentNotFoundException.class)
+			.hasMessage(ErrorType.NONEXISTENT_ENROLLMENT.getMessage());
 	}
 
 	private Department saveDepartment() {
