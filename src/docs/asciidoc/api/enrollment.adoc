@@ -72,3 +72,27 @@ include::{snippets}/enrollment-fail-cookie/http-request.adoc[]
 
 include::{snippets}/enrollment-fail-cookie/http-response.adoc[]
 include::{snippets}/enrollment-fail-cookie/response-fields.adoc[]
+
+[[cancel-enrollment-success]]
+=== 수강 신청 취소 : 성공
+
+==== HTTP Request
+
+include::{snippets}/cancel-enrollment-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/cancel-enrollment-success/http-response.adoc[]
+include::{snippets}/cancel-enrollment-success/response-fields.adoc[]
+
+[[cancel-enrollment-fail]]
+=== 수강 신청 취소 : 미신청 강의 오류
+
+==== HTTP Request
+
+include::{snippets}/cancel-enrollment-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/cancel-enrollment-fail/http-response.adoc[]
+include::{snippets}/cancel-enrollment-fail/response-fields.adoc[]
