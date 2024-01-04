@@ -17,6 +17,7 @@ import site.courseregistrationsystem.RestDocsSupport;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
+import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
 import site.courseregistrationsystem.exception.enrollment.ScheduleConflictException;
 
 class EnrollmentControllerTest extends RestDocsSupport {
@@ -180,6 +181,62 @@ class EnrollmentControllerTest extends RestDocsSupport {
 			.andDo(print())
 			.andExpect(status().isUnauthorized())
 			.andDo(document("enrollment-fail-cookie",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("수강 신청 취소 : 성공")
+	void cancelEnrollmentSuccess() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		Long lectureId = 1L;
+
+		// when & then
+		mockMvc.perform(delete("/enrollments/" + lectureId)
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(document("cancel-enrollment-success",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("수강 신청 취소 : 미신청 강의 오류")
+	void cancelEnrollmentFail() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		Long lectureId = 1L;
+
+		doThrow(new EnrollmentNotFoundException()).when(enrollmentService).cancel(anyLong(), anyLong());
+
+		// when & then
+		mockMvc.perform(delete("/enrollments/" + lectureId)
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andDo(document("cancel-enrollment-fail",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
 				responseFields(
