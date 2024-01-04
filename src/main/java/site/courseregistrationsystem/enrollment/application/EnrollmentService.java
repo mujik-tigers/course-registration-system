@@ -104,10 +104,8 @@ public class EnrollmentService {
 		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 		Lecture lecture = lectureRepository.findWithSchedule(lectureId)
 			.orElseThrow(NonexistenceLectureException::new);
-		Year openingYear = lecture.getOpeningYear();
-		Semester semester = lecture.getSemester();
 
-		int deleted = enrollmentRepository.deleteEnrollment(openingYear, semester, student.getId(), lecture.getId());
+		int deleted = enrollmentRepository.deleteEnrollment(student.getId(), lecture.getId());
 
 		if (deleted == 0) {
 			throw new EnrollmentNotFoundException();

@@ -25,9 +25,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 	@Modifying
 	@Query("DELETE FROM Enrollment e "
 		+ "WHERE e.student.id = :studentPk "
-		+ "AND e.lecture.id = :lectureId "
-		+ "AND e.lecture.openingYear = :openingYear "
-		+ "AND e.lecture.semester = :semester")
-	int deleteEnrollment(Year openingYear, Semester semester, Long studentPk, Long lectureId);
+		+ "AND e.lecture.id = :lectureId")
+	int deleteEnrollment(Long studentPk, Long lectureId);
 
 }
