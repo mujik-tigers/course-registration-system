@@ -39,8 +39,9 @@ public class EnrollmentController {
 
 	@DeleteMapping("/{lectureId}")
 	public ApiResponse<Void> cancelEnrollment(@Login Long studentPk, @PathVariable Long lectureId) {
-		return ApiResponse.ok(ResponseMessage.ENROLLMENT_CANCEL_SUCCESS.getMessage(),
-			enrollmentService.cancel(studentPk, lectureId));
+		enrollmentService.cancel(studentPk, lectureId);
+
+		return ApiResponse.ok(ResponseMessage.ENROLLMENT_CANCEL_SUCCESS.getMessage(), null);
 	}
 
 }
