@@ -161,15 +161,6 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 			.hasMessage(ErrorType.SCHEDULE_CONFLICT.getMessage());
 	}
 
-	static Stream<Arguments> unconflictedSchedules() {
-		return Stream.of(
-			arguments(Period.ONE, Period.THREE),
-			arguments(Period.THREE, Period.FOUR),
-			arguments(Period.FOUR, Period.FIVE),
-			arguments(Period.FOUR, Period.SEVEN)
-		);
-	}
-
 	@TestFactory
 	@DisplayName("최대 학점 내에서 중복되지 않은 과목과 시간을 갖는 수업 신청 시, 등록에 성공한다")
 	Collection<DynamicTest> enrollNoConflict() {
