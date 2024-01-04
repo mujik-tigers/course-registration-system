@@ -4,6 +4,7 @@ import java.time.Year;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import site.courseregistrationsystem.enrollment.Enrollment;
@@ -20,5 +21,13 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 		+ "AND l.openingYear = :openingYear "
 		+ "AND l.semester = :semester")
 	List<Enrollment> findAllInCurrentSemester(Long studentPk, Year openingYear, Semester semester);
+
+	@Modifying
+	@Query("DELETE FROM Enrollment e "
+		+ "WHERE e.student.id = :studentPk "
+		+ "AND e.lecture.id = :lectureId "
+		+ "AND e.lecture.openingYear = :openingYear "
+		+ "AND e.lecture.semester = :semester")
+	int deleteEnrollment(Year openingYear, Semester semester, Long studentPk, Long lectureId);
 
 }
