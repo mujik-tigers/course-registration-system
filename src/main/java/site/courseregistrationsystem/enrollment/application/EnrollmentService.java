@@ -4,6 +4,7 @@ import java.time.Year;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.enrollment.Enrollment;
@@ -11,6 +12,7 @@ import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentRepository;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
+import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
 import site.courseregistrationsystem.exception.enrollment.ScheduleConflictException;
 import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
 import site.courseregistrationsystem.exception.student.NonexistenceStudentException;
@@ -21,6 +23,7 @@ import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class EnrollmentService {
 
@@ -94,6 +97,20 @@ public class EnrollmentService {
 
 		if (hasEnrollmentConflict) {
 			throw new ScheduleConflictException();
+		}
+	}
+
+	public void cancel(Long studentPk, Long lectureId) {
+		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
+		Lecture lecture = lectureRepository.findWithSchedule(lectureId)
+			.orElseThrow(NonexistenceLectureException::new);
+		Year openingYear = lecture.getOpeningYear();
+		Semester semester = lecture.getSemester();
+
+		int deleted = enrollmentRepository.deleteEnrollment(openingYear, semester, student.getId(), lecture.getId());
+
+		if (deleted == 0) {
+			throw new EnrollmentNotFoundException();
 		}
 	}
 
