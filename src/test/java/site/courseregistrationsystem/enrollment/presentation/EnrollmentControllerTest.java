@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -15,11 +17,14 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import jakarta.servlet.http.Cookie;
 import site.courseregistrationsystem.RestDocsSupport;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
+import site.courseregistrationsystem.enrollment.dto.EnrolledLectureDetail;
+import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
 import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
 import site.courseregistrationsystem.exception.enrollment.ScheduleConflictException;
+import site.courseregistrationsystem.subject.SubjectDivision;
 
 class EnrollmentControllerTest extends RestDocsSupport {
 
@@ -274,6 +279,59 @@ class EnrollmentControllerTest extends RestDocsSupport {
 					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
 					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
 					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("수강 신청 내역 조회 : 성공")
+	void fetchEnrollmentsSuccess() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		List<EnrolledLectureDetail> enrolledLectures = List.of(
+			new EnrolledLectureDetail(
+				1L, 100101, SubjectDivision.MR.getDescription(), "금속공예기초", 4, 3, 1, "남유진", "목(6-9)"),
+			new EnrolledLectureDetail(
+				2L, 500401, SubjectDivision.GR.getDescription(), "미술사", 3, 2, 1, "노준", "화(2-4)"),
+			new EnrolledLectureDetail(
+				3L, 900401, SubjectDivision.GE.getDescription(), "봉사활동", 1, 1, 1, "유재석", "금(1-1)")
+		);
+
+		given(enrollmentService.fetchAll(anyLong()))
+			.willReturn(new EnrolledLectures(enrolledLectures));
+
+		// when & then
+		mockMvc.perform(get("/enrollments")
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(document("fetch-enrollments-success",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+					fieldWithPath("data.enrolledLectures").type(JsonFieldType.ARRAY).description("강의 목록"),
+					fieldWithPath("data.enrolledLectures[].id").type(JsonFieldType.NUMBER).description("강의 PK"),
+					fieldWithPath("data.enrolledLectures[].lectureNumber").type(JsonFieldType.NUMBER)
+						.description("강의 번호"),
+					fieldWithPath("data.enrolledLectures[].subjectDivision").type(JsonFieldType.STRING)
+						.description("이수 구분"),
+					fieldWithPath("data.enrolledLectures[].subjectName").type(JsonFieldType.STRING)
+						.description("강의 이름"),
+					fieldWithPath("data.enrolledLectures[].hoursPerWeek").type(JsonFieldType.NUMBER)
+						.description("강의 시간"),
+					fieldWithPath("data.enrolledLectures[].credits").type(JsonFieldType.NUMBER).description("학점"),
+					fieldWithPath("data.enrolledLectures[].targetGrade").type(JsonFieldType.NUMBER)
+						.description("대상 학년"),
+					fieldWithPath("data.enrolledLectures[].professorName").type(JsonFieldType.STRING)
+						.description("교강사"),
+					fieldWithPath("data.enrolledLectures[].schedule").type(JsonFieldType.STRING).description("강의 요시")
 				)
 			));
 	}
