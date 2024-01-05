@@ -18,6 +18,7 @@ import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
+import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
 import site.courseregistrationsystem.exception.enrollment.ScheduleConflictException;
 
 class EnrollmentControllerTest extends RestDocsSupport {
@@ -79,6 +80,35 @@ class EnrollmentControllerTest extends RestDocsSupport {
 					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
 					fieldWithPath("data.enrolledLectureId").type(JsonFieldType.NUMBER).description("수강 신청된 강의 PK")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("수강 신청 : 지난 학기 강의 오류")
+	void enrollmentFailPastLecture() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		Long lectureId = 1L;
+		given(enrollmentService.enrollLecture(anyLong(), anyLong()))
+			.willThrow(new LectureNotInCurrentSemesterException());
+
+		// when & then
+		mockMvc.perform(post("/enrollments/" + lectureId)
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andDo(document("enrollment-fail-past-lecture",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
 				)
 			));
 	}
