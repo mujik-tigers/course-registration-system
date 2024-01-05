@@ -2,6 +2,7 @@ package site.courseregistrationsystem.enrollment.presentation;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.enrollment.application.EnrollmentService;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
+import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.util.api.ApiResponse;
 import site.courseregistrationsystem.util.api.ResponseMessage;
 import site.courseregistrationsystem.util.resolver.Login;
@@ -42,6 +44,12 @@ public class EnrollmentController {
 		enrollmentService.cancel(studentPk, lectureId);
 
 		return ApiResponse.ok(ResponseMessage.ENROLLMENT_CANCEL_SUCCESS.getMessage(), null);
+	}
+
+	@GetMapping
+	public ApiResponse<EnrolledLectures> fetchEnrollments(@Login Long studentPk) {
+		return ApiResponse.ok(ResponseMessage.ENROLLMENT_FETCH_SUCCESS.getMessage(),
+			enrollmentService.fetchAll(studentPk));
 	}
 
 }
