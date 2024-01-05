@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import site.courseregistrationsystem.basket.Basket;
+import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.student.Student;
 
 public interface BasketRepository extends JpaRepository<Basket, Long> {
@@ -20,5 +21,7 @@ public interface BasketRepository extends JpaRepository<Basket, Long> {
 	@Modifying
 	@Query("delete from Basket b where b = :basket")
 	void delete(@Param("basket") Basket basket);
+
+	List<Basket> findAllByLecture(Lecture lecture);
 
 }

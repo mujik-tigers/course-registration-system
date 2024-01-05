@@ -19,6 +19,8 @@ import org.springframework.restdocs.payload.JsonFieldType;
 
 import jakarta.servlet.http.Cookie;
 import site.courseregistrationsystem.RestDocsSupport;
+import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
+import site.courseregistrationsystem.lecture.dto.BasketStoringCount;
 import site.courseregistrationsystem.lecture.dto.LectureDetail;
 import site.courseregistrationsystem.lecture.dto.LectureSchedulePage;
 
@@ -83,6 +85,72 @@ class LectureControllerTest extends RestDocsSupport {
 			.andDo(print())
 			.andExpect(status().isUnauthorized())
 			.andDo(document("lecture-fetch-fail",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("수강 바구니 담은 사람 수 조회 : 성공")
+	void fetchBasketStoringCount() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		long LECTURE_ID = 1L;
+		int TOTAL_CAPACITY = 40;
+		int CURRENT_BASKET_STORING_COUNT = 15;
+
+		given(lectureService.fetchBasketStoringCount(anyLong()))
+			.willReturn(new BasketStoringCount(TOTAL_CAPACITY, CURRENT_BASKET_STORING_COUNT));
+
+		// when & then
+		mockMvc.perform(get("/lectures/{lectureId}/basket-count", LECTURE_ID)
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.totalCapacity").value(TOTAL_CAPACITY))
+			.andExpect(jsonPath("$.data.currentBasketStoringCount").value(CURRENT_BASKET_STORING_COUNT))
+			.andDo(document("storing-basket-count-fetch-success",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+					fieldWithPath("data.totalCapacity").type(JsonFieldType.NUMBER).description("전체 수강 인원"),
+					fieldWithPath("data.currentBasketStoringCount").type(JsonFieldType.NUMBER).description("현재 수강 바구니에 담은 인원")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("수강 바구니 담은 사람 수 조회 : 실패 - 존재하지 않는 강의")
+	void fetchBasketCountFail() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		long LECTURE_ID = 1L;
+
+		given(lectureService.fetchBasketStoringCount(anyLong()))
+			.willThrow(new NonexistenceLectureException());
+
+		// when & then
+		mockMvc.perform(get("/lectures/{lectureId}/basket-count", LECTURE_ID)
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andDo(document("storing-basket-count-fetch-fail",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
 				responseFields(
