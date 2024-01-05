@@ -22,6 +22,7 @@ import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.ExceededCreditLimitException;
+import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.professor.Professor;
@@ -196,6 +197,68 @@ class BasketControllerTest extends RestDocsSupport {
 					fieldWithPath("data.baskets[].schedule").type(JsonFieldType.STRING).description("강의 시간"),
 					fieldWithPath("data.baskets[].professorName").type(JsonFieldType.STRING).description("교수명"),
 					fieldWithPath("data.baskets[].totalCapacity").type(JsonFieldType.NUMBER).description("전체 수강 인원")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("수강 바구니 삭제 : 성공")
+	void deleteBasket() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		Long DELETED_BASKET_ID = 1L;
+
+		given(basketService.deleteBasket(anyLong(), anyLong()))
+			.willReturn(DELETED_BASKET_ID);
+
+		// when & then
+		mockMvc.perform(delete("/baskets/{basketId}", DELETED_BASKET_ID)
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.deletedBasketId").value(DELETED_BASKET_ID))
+			.andDo(document("basket-delete-success",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+					fieldWithPath("data.deletedBasketId").type(JsonFieldType.NUMBER).description("삭제한 수강 바구니 id")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("수강 바구니 삭제 : 실패 - 수강 바구니에 존재하지 않는 강의")
+	void deleteNonexistenceBasket() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		Long DELETED_BASKET_ID = 1L;
+
+		given(basketService.deleteBasket(anyLong(), anyLong()))
+			.willThrow(new NonexistenceBasketException());
+
+		// when & then
+		mockMvc.perform(delete("/baskets/{basketId}", DELETED_BASKET_ID)
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andDo(document("basket-delete-fail",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
 				)
 			));
 	}

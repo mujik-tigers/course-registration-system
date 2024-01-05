@@ -23,7 +23,8 @@ public enum ResponseMessage {
 
 	// Basket
 	BASKET_FETCH_SUCCESS("수강 바구니 목록 조회에 성공했습니다"),
-	BASKET_ADD_SUCCESS("강의를 수강 바구니에 담기에 성공했습니다");
+	BASKET_ADD_SUCCESS("강의를 수강 바구니에 담기에 성공했습니다"),
+	BASKET_DELETE_SUCCESS("수강 바구니 삭제를 성공했습니다");
 
 	private final String message;
 

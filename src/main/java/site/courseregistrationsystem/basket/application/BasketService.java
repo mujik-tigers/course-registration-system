@@ -12,9 +12,9 @@ import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.ExceededCreditLimitException;
+import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
 import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
-import site.courseregistrationsystem.exception.student.NonexistenceStudentException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.student.Student;
@@ -33,8 +33,7 @@ public class BasketService {
 
 	@Transactional
 	public Long addLectureToBasket(Long studentPk, Long lectureId) {
-		Student student = studentRepository.findById(studentPk)
-			.orElseThrow(NonexistenceStudentException::new);
+		Student student = getStudent(studentPk);
 
 		Lecture lectureForBasket = lectureRepository.findById(lectureId)
 			.orElseThrow(NonexistenceLectureException::new);
@@ -56,8 +55,7 @@ public class BasketService {
 	}
 
 	public BasketList fetchBaskets(Long studentPk) {
-		Student student = studentRepository.findById(studentPk)
-			.orElseThrow(NonexistenceStudentException::new);
+		Student student = getStudent(studentPk);
 
 		List<Basket> baskets = basketRepository.findAllByStudent(student);
 		List<BasketDetail> basketDetails = baskets.stream()
@@ -65,6 +63,22 @@ public class BasketService {
 			.toList();
 
 		return new BasketList(basketDetails);
+	}
+
+	@Transactional
+	public Long deleteBasket(Long studentPk, Long basketId) {
+		Student student = getStudent(studentPk);
+
+		Basket basket = basketRepository.findByIdAndStudent(basketId, student)
+			.orElseThrow(NonexistenceBasketException::new);
+		basketRepository.delete(basket);
+
+		return basket.getId();
+	}
+
+	private Student getStudent(Long studentPk) {
+		return studentRepository.findById(studentPk)
+			.orElseThrow(NonexistenceLectureException::new);
 	}
 
 	private void checkSubjectInBasketDuplicated(List<Basket> baskets, Lecture lectureForBasket) {

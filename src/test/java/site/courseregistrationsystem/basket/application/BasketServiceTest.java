@@ -16,6 +16,7 @@ import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.ExceededCreditLimitException;
+import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
@@ -235,6 +236,43 @@ class BasketServiceTest extends IntegrationTestSupport {
 		// then
 		List<BasketDetail> baskets = basketList.getBaskets();
 		assertThat(baskets).isEmpty();
+	}
+
+	@Test
+	@DisplayName("수강 바구니에 담긴 수업 중 하나를 삭제한다.")
+	void deleteBasket() throws Exception {
+		// given
+		Student student = studentRepository.save(createStudent());
+		Subject subject = create3CreditSubject("미분적분학");
+		entityManager.persist(subject);
+		Lecture lecture = lectureRepository.save(createLecture(subject));
+		Basket basket = basketRepository.save(createBasket(student, lecture));
+
+		// when
+		Long deleteBasketId = basketService.deleteBasket(student.getId(), basket.getId());
+
+		// then
+		assertThat(deleteBasketId).isEqualTo(basket.getId());
+
+		List<Basket> baskets = basketRepository.findAll();
+		assertThat(baskets).isEmpty();
+	}
+
+	@Test
+	@DisplayName("학생의 수강 바구니에 존재하지 않는 수업은 삭제할 수 없다.")
+	void nonexistenceDeleteFail() throws Exception {
+		// given
+		Student student1 = studentRepository.save(createStudent());
+		Subject subject = create3CreditSubject("미분적분학");
+		entityManager.persist(subject);
+		Lecture lecture = lectureRepository.save(createLecture(subject));
+		Basket basket = basketRepository.save(createBasket(student1, lecture));
+
+		Student student2 = studentRepository.save(createStudent());
+
+		// when & then
+		assertThatThrownBy(() -> basketService.deleteBasket(student2.getId(), basket.getId()))
+			.isInstanceOf(NonexistenceBasketException.class);
 	}
 
 	private Student createStudent() {

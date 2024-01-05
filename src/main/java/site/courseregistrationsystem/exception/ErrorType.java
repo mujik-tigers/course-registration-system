@@ -22,6 +22,7 @@ public enum ErrorType {
 	// Basket
 	DUPLICATE_BASKET(HttpStatus.BAD_REQUEST, "이미 수강바구니로 담은 강의입니다"),
 	EXCEEDED_CREDIT_EXCEPTION(HttpStatus.BAD_REQUEST, "수강바구니로 담을 수 있는 학점을 초과하였습니다"),
+	NONEXISTENT_BASKET(HttpStatus.BAD_REQUEST, "수강바구니에 담지 않아 존재하지 않는 강의입니다"),
 
 	// Schedule
 	SCHEDULE_CONFLICT(HttpStatus.BAD_REQUEST, "시간표가 겹칩니다"),

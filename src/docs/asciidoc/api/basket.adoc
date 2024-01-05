@@ -60,3 +60,27 @@ include::{snippets}/basket-fetch-success/http-request.adoc[]
 
 include::{snippets}/basket-fetch-success/http-response.adoc[]
 include::{snippets}/basket-fetch-success/response-fields.adoc[]
+
+[[basket-delete-success]]
+=== 수강 바구니 삭제 : 성공
+
+==== HTTP Request
+
+include::{snippets}/basket-delete-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/basket-delete-success/http-response.adoc[]
+include::{snippets}/basket-delete-success/response-fields.adoc[]
+
+[[basket-delete-fail]]
+=== 수강 바구니 삭제 : 실패 - 수강 바구니에 존재하지 않는 강의
+
+==== HTTP Request
+
+include::{snippets}/basket-delete-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/basket-delete-fail/http-response.adoc[]
+include::{snippets}/basket-delete-fail/response-fields.adoc[]
