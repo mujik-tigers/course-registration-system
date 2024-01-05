@@ -22,6 +22,7 @@ import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
+import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.exception.ErrorType;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
@@ -307,6 +308,36 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		assertThatThrownBy(() -> enrollmentService.cancel(student.getId(), lecture.getId()))
 			.isInstanceOf(EnrollmentNotFoundException.class)
 			.hasMessage(ErrorType.NONEXISTENT_ENROLLMENT.getMessage());
+	}
+
+	@Test
+	@DisplayName("해당 학기 내 수강 신청 내역을 조회한다")
+	void fetchEnrollmentsSuccess() {
+		// given
+		Department department = saveDepartment();
+		Student student = saveStudent(department);
+
+		Subject subject1 = saveSubject("미술사", 2);
+		Lecture lecture1 = saveLecture(department, subject1, Year.of(2024), Semester.FIRST);
+		saveSchedule(lecture1, DayOfWeek.MON, Period.ONE, Period.THREE);
+
+		Subject subject2 = saveSubject("창의적사고", 2);
+		Lecture lecture2 = saveLecture(department, subject2, Year.of(2024), Semester.FIRST);
+		saveSchedule(lecture2, DayOfWeek.THU, Period.ONE, Period.THREE);
+
+		Subject subject3 = saveSubject("철학개론", 3);
+		Lecture lecture3 = saveLecture(department, subject3, Year.of(2024), Semester.FIRST);
+		saveSchedule(lecture3, DayOfWeek.FRI, Period.ONE, Period.THREE);
+
+		enrollmentService.enrollLecture(student.getId(), lecture1.getId());  // 수강 신청 1
+		enrollmentService.enrollLecture(student.getId(), lecture2.getId());  // 수강 신청 2
+		enrollmentService.enrollLecture(student.getId(), lecture3.getId());  // 수강 신청 3
+
+		// when
+		EnrolledLectures enrolledLectures = enrollmentService.fetchAll(student.getId());
+
+		// then
+		assertThat(enrolledLectures.getEnrolledLectures()).hasSize(3);
 	}
 
 	private Department saveDepartment() {
