@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.enrollment.Enrollment;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
+import site.courseregistrationsystem.enrollment.dto.EnrolledLectureDetail;
+import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentRepository;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
@@ -112,6 +114,18 @@ public class EnrollmentService {
 		if (deleted == 0) {
 			throw new EnrollmentNotFoundException();
 		}
+	}
+
+	@Transactional(readOnly = true)
+	public EnrolledLectures fetchAll(Long studentPk) {
+		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
+
+		List<EnrolledLectureDetail> enrolledLectures = enrollmentRepository.findAllBy(student.getId()).stream()
+			.map(Enrollment::getLecture)
+			.map(EnrolledLectureDetail::new)
+			.toList();
+
+		return new EnrolledLectures(enrolledLectures);
 	}
 
 }
