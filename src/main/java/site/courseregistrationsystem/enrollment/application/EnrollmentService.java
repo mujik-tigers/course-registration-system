@@ -1,6 +1,5 @@
 package site.courseregistrationsystem.enrollment.application;
 
-import java.time.Year;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -13,11 +12,11 @@ import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentReposit
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
+import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
 import site.courseregistrationsystem.exception.enrollment.ScheduleConflictException;
 import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
 import site.courseregistrationsystem.exception.student.NonexistenceStudentException;
 import site.courseregistrationsystem.lecture.Lecture;
-import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
@@ -53,12 +52,9 @@ public class EnrollmentService {
 	}
 
 	private Enrollment enroll(Student student, Lecture lecture) {
-		Long studentPk = student.getId();
-		Year openingYear = lecture.getOpeningYear();
-		Semester semester = lecture.getSemester();
+		List<Enrollment> enrollments = enrollmentRepository.findAllBy(student.getId());
 
-		List<Enrollment> enrollments = enrollmentRepository.findAllInCurrentSemester(studentPk, openingYear, semester);
-
+		checkLectureInCurrentSemester(lecture);
 		checkCreditsLimit(enrollments);
 		checkDuplicateSubject(enrollments, lecture);
 		checkScheduleConflict(enrollments, lecture);
@@ -69,6 +65,12 @@ public class EnrollmentService {
 			.build();
 
 		return enrollmentRepository.save(newEnrollment);
+	}
+
+	private void checkLectureInCurrentSemester(Lecture lecture) {
+		if (!lecture.isCurrentSemester()) {
+			throw new LectureNotInCurrentSemesterException();
+		}
 	}
 
 	private void checkCreditsLimit(List<Enrollment> enrollments) {

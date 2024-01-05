@@ -1,5 +1,6 @@
 package site.courseregistrationsystem.lecture;
 
+import java.time.LocalDate;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +80,18 @@ public class Lecture {
 	public boolean hasScheduleConflict(Lecture lecture) {
 		return this.schedules.stream()
 			.anyMatch(schedule -> lecture.getSchedules().stream().anyMatch(schedule::hasConflictWith));
+	}
+
+	public boolean isCurrentSemester() {
+		boolean isCurrentSemester;
+
+		if (LocalDate.now().getMonthValue() < 4) {
+			isCurrentSemester = semester.equals(Semester.FIRST);
+		} else {
+			isCurrentSemester = semester.equals(Semester.SECOND);
+		}
+
+		return openingYear.equals(Year.now()) && isCurrentSemester;
 	}
 
 	public Long fetchSubjectId() {
