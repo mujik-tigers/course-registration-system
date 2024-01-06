@@ -1,9 +1,9 @@
 package site.courseregistrationsystem.enrollment.infrastructure;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import site.courseregistrationsystem.enrollment.Enrollment;
@@ -18,10 +18,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 		+ "WHERE s.id = :studentPk")
 	List<Enrollment> findAllBy(Long studentPk);
 
-	@Modifying
-	@Query("DELETE FROM Enrollment e "
-		+ "WHERE e.student.id = :studentPk "
-		+ "AND e.lecture.id = :lectureId")
-	int deleteEnrollment(Long studentPk, Long lectureId);
+	@Query("SELECT e FROM Enrollment e "
+		+ "JOIN FETCH e.student s "
+		+ "WHERE e.id = :enrollmentId")
+	Optional<Enrollment> findByIdWithStudent(Long enrollmentId);
 
 }
