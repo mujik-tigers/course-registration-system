@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 public class EnrolledLecture {
 
-	private Long enrolledLectureId;
+	private final Long enrolledLectureId;
 
 }
