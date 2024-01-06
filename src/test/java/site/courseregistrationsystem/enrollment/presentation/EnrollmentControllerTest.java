@@ -19,6 +19,8 @@ import site.courseregistrationsystem.RestDocsSupport;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectureDetail;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
+import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
+import site.courseregistrationsystem.exception.auth.UnauthorizedAccessException;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
@@ -235,10 +237,10 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
-		Long lectureId = 1L;
+		Long enrollmentId = 1L;
 
 		// when & then
-		mockMvc.perform(delete("/enrollments/" + lectureId)
+		mockMvc.perform(delete("/enrollments/" + enrollmentId)
 				.cookie(sessionCookie))
 			.andDo(print())
 			.andExpect(status().isOk())
@@ -262,16 +264,45 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
-		Long lectureId = 1L;
+		Long enrollmentId = 1L;
 
 		doThrow(new EnrollmentNotFoundException()).when(enrollmentService).cancel(anyLong(), anyLong());
 
 		// when & then
-		mockMvc.perform(delete("/enrollments/" + lectureId)
+		mockMvc.perform(delete("/enrollments/" + enrollmentId)
 				.cookie(sessionCookie))
 			.andDo(print())
 			.andExpect(status().isBadRequest())
 			.andDo(document("cancel-enrollment-fail",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("수강 신청 취소 : 접근 권한 오류")
+	void cancelEnrollmentUnauthorizedFail() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		Long enrollmentId = 1L;
+
+		doThrow(new UnauthorizedAccessException()).when(enrollmentService).cancel(anyLong(), anyLong());
+
+		// when & then
+		mockMvc.perform(delete("/enrollments/" + enrollmentId)
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isUnauthorized())
+			.andDo(document("cancel-enrollment-unauthorized-fail",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
 				responseFields(
@@ -333,6 +364,38 @@ class EnrollmentControllerTest extends RestDocsSupport {
 					fieldWithPath("data.enrolledLectures[].professorName").type(JsonFieldType.STRING)
 						.description("교강사"),
 					fieldWithPath("data.enrolledLectures[].schedule").type(JsonFieldType.STRING).description("강의 요시")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("수강 신청 인원 조회 : 성공")
+	void countEnrollmentsSuccess() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		Long lectureId = 1L;
+
+		given(enrollmentService.fetchCountBy(lectureId))
+			.willReturn(new EnrollmentCapacity(20, 12));
+
+		// when & then
+		mockMvc.perform(get("/enrollments/" + lectureId + "/enrollment-count")
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(document("count-enrollments-success",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+					fieldWithPath("data.capacity").type(JsonFieldType.NUMBER).description("정원"),
+					fieldWithPath("data.currentEnrollmentCount").type(JsonFieldType.NUMBER).description("현재 신청 인원")
 				)
 			));
 	}
