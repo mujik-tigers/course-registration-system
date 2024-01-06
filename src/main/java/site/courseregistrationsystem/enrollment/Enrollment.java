@@ -46,4 +46,8 @@ public class Enrollment {
 		return lecture.fetchCredits();
 	}
 
+	public Long fetchStudentPk() {
+		return student.getId();
+	}
+
 }

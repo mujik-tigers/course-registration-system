@@ -11,6 +11,7 @@ import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectureDetail;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentRepository;
+import site.courseregistrationsystem.exception.auth.UnauthorizedAccessException;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
@@ -104,16 +105,15 @@ public class EnrollmentService {
 		}
 	}
 
-	public void cancel(Long studentPk, Long lectureId) {
-		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
-		Lecture lecture = lectureRepository.findWithSchedule(lectureId)
-			.orElseThrow(NonexistenceLectureException::new);
+	public void cancel(Long studentPk, Long enrollmentId) {
+		Enrollment enrollment = enrollmentRepository.findByIdWithStudent(enrollmentId)
+			.orElseThrow(EnrollmentNotFoundException::new);
 
-		int deleted = enrollmentRepository.deleteEnrollment(student.getId(), lecture.getId());
-
-		if (deleted == 0) {
-			throw new EnrollmentNotFoundException();
+		if (!enrollment.fetchStudentPk().equals(studentPk)) {
+			throw new UnauthorizedAccessException();
 		}
+
+		enrollmentRepository.deleteById(enrollmentId);
 	}
 
 	@Transactional(readOnly = true)
