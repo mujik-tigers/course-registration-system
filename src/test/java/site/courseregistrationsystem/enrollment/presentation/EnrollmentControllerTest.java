@@ -293,11 +293,11 @@ class EnrollmentControllerTest extends RestDocsSupport {
 
 		List<EnrolledLectureDetail> enrolledLectures = List.of(
 			new EnrolledLectureDetail(
-				1L, 100101, SubjectDivision.MR.getDescription(), "금속공예기초", 4, 3, 1, "남유진", "목(6-9)"),
+				10L, 1L, 100101, SubjectDivision.MR.getDescription(), "금속공예기초", 4, 3, 1, "남유진", "목(6-9)"),
 			new EnrolledLectureDetail(
-				2L, 500401, SubjectDivision.GR.getDescription(), "미술사", 3, 2, 1, "노준", "화(2-4)"),
+				11L, 2L, 500401, SubjectDivision.GR.getDescription(), "미술사", 3, 2, 1, "노준", "화(2-4)"),
 			new EnrolledLectureDetail(
-				3L, 900401, SubjectDivision.GE.getDescription(), "봉사활동", 1, 1, 1, "유재석", "금(1-1)")
+				12L, 3L, 900401, SubjectDivision.GE.getDescription(), "봉사활동", 1, 1, 1, "유재석", "금(1-1)")
 		);
 
 		given(enrollmentService.fetchAll(anyLong()))
@@ -316,8 +316,9 @@ class EnrollmentControllerTest extends RestDocsSupport {
 					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
 					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
-					fieldWithPath("data.enrolledLectures").type(JsonFieldType.ARRAY).description("강의 목록"),
-					fieldWithPath("data.enrolledLectures[].id").type(JsonFieldType.NUMBER).description("강의 PK"),
+					fieldWithPath("data.enrolledLectures").type(JsonFieldType.ARRAY).description("수강 신청 내역"),
+					fieldWithPath("data.enrolledLectures[].id").type(JsonFieldType.NUMBER).description("수강 신청 PK"),
+					fieldWithPath("data.enrolledLectures[].lectureId").type(JsonFieldType.NUMBER).description("강의 PK"),
 					fieldWithPath("data.enrolledLectures[].lectureNumber").type(JsonFieldType.NUMBER)
 						.description("강의 번호"),
 					fieldWithPath("data.enrolledLectures[].subjectDivision").type(JsonFieldType.STRING)

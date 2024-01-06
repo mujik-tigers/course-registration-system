@@ -21,9 +21,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.department.Department;
+import site.courseregistrationsystem.enrollment.Enrollment;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
+import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentRepository;
 import site.courseregistrationsystem.exception.ErrorType;
+import site.courseregistrationsystem.exception.auth.UnauthorizedAccessException;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
@@ -52,6 +55,9 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 	@Autowired
 	private LectureRepository lectureRepository;
 
+	@Autowired
+	private EnrollmentRepository enrollmentRepository;
+
 	@Test
 	@DisplayName("빠른 수강 신청에 성공하면 신청된 강의의 PK를 반환한다")
 	void enrollFastSuccess() {
@@ -59,7 +65,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
 		Subject subject = saveSubject("미술사", 2);
-		Lecture lecture = saveLecture(department, subject, Year.of(2024), Semester.FIRST);
+		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		// when
@@ -77,7 +83,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
 		Subject subject = saveSubject("미술사", 2);
-		Lecture lecture = saveLecture(department, subject, Year.of(2024), Semester.FIRST);
+		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		// when
@@ -127,8 +133,8 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		// given
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
-		Year openingYear = Year.of(2024);
-		Semester semester = Semester.FIRST;
+		Year openingYear = Year.now();
+		Semester semester = Semester.getCurrentSemester();
 
 		int maxCredit = 18;
 		Subject subject1 = saveSubject("동양미술사", maxCredit);
@@ -154,8 +160,8 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
 		Subject subject = saveSubject("미술사", 2);
-		Year openingYear = Year.of(2024);
-		Semester semester = Semester.FIRST;
+		Year openingYear = Year.now();
+		Semester semester = Semester.getCurrentSemester();
 
 		Lecture lectureOnMonday = saveLecture(department, subject, openingYear, semester);  // 과목은 동일하나 요일은 다른 강의 2개 생성
 		Lecture LectureOnFriday = saveLecture(department, subject, openingYear, semester);
@@ -186,8 +192,8 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		// given
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
-		Year openingYear = Year.of(2024);
-		Semester semester = Semester.FIRST;
+		Year openingYear = Year.now();
+		Semester semester = Semester.getCurrentSemester();
 
 		Subject subject1 = saveSubject("동양미술사", 2);
 		Lecture lecture1 = saveLecture(department, subject1, openingYear, semester);
@@ -210,8 +216,8 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		// given
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
-		Year openingYear = Year.of(2024);
-		Semester semester = Semester.FIRST;
+		Year openingYear = Year.now();
+		Semester semester = Semester.getCurrentSemester();
 
 		return List.of(
 			dynamicTest("월요일 1-3교시 수업 수강 신청", () -> {
@@ -280,17 +286,17 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Student student = saveStudent(department);
 		Subject subject = saveSubject("미술사", 2);
 
-		Lecture lecture = saveLecture(department, subject, Year.of(2024), Semester.FIRST);
+		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
-		enrollmentService.enrollLecture(student.getId(), lecture.getId());  // 강의 수강 신청 완료
+		enrollmentService.enrollLecture(student.getId(), lecture.getId());
+		List<Enrollment> enrollments = enrollmentRepository.findAllBy(student.getId());
 
 		// when
-		enrollmentService.cancel(student.getId(), lecture.getId());  // 수강 신청 취소 시
+		enrollmentService.cancel(student.getId(), enrollments.get(0).getId());
 
 		// then
-		assertThatCode(() -> enrollmentService.enrollLecture(student.getId(), lecture.getId()))
-			.doesNotThrowAnyException();  // 다시 수강 신청해도 예외가 발생하지 않는다
+		assertThat(enrollmentRepository.findAllBy(student.getId())).hasSize(0);
 	}
 
 	@Test
@@ -299,15 +305,33 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		// given
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
-		Subject subject = saveSubject("미술사", 2);
 
-		Lecture lecture = saveLecture(department, subject, Year.of(2024), Semester.FIRST);
-		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
+		Long invalidEnrollmentId = 10000L;
 
 		// when & then
-		assertThatThrownBy(() -> enrollmentService.cancel(student.getId(), lecture.getId()))
+		assertThatThrownBy(() -> enrollmentService.cancel(student.getId(), invalidEnrollmentId))
 			.isInstanceOf(EnrollmentNotFoundException.class)
 			.hasMessage(ErrorType.NONEXISTENT_ENROLLMENT.getMessage());
+	}
+
+	@Test
+	@DisplayName("다른 사람의 수강 신청을 취소하려고 시도하는 경우 오류 메세지를 응답한다")
+	void cancelEnrollmentUnauthorizedFail() {
+		// given
+		Department department = saveDepartment();
+		Student student = saveStudent(department);
+		Subject subject = saveSubject("미술사", 2);
+		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
+		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
+		enrollmentService.enrollLecture(student.getId(), lecture.getId());  // student가 수강 신청 완료
+		List<Enrollment> enrollments = enrollmentRepository.findAllBy(student.getId());
+
+		Student otherStudent = saveStudent(department);  // otherStudent가 student의 수강 신청을 취소하려고 시도
+
+		// when & then
+		assertThatThrownBy(() -> enrollmentService.cancel(otherStudent.getId(), enrollments.get(0).getId()))
+			.isInstanceOf(UnauthorizedAccessException.class)
+			.hasMessage(ErrorType.UNAUTHORIZED_ACCESS.getMessage());
 	}
 
 	@Test
@@ -318,15 +342,15 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Student student = saveStudent(department);
 
 		Subject subject1 = saveSubject("미술사", 2);
-		Lecture lecture1 = saveLecture(department, subject1, Year.of(2024), Semester.FIRST);
+		Lecture lecture1 = saveLecture(department, subject1, Year.now(), Semester.getCurrentSemester());
 		saveSchedule(lecture1, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		Subject subject2 = saveSubject("창의적사고", 2);
-		Lecture lecture2 = saveLecture(department, subject2, Year.of(2024), Semester.FIRST);
+		Lecture lecture2 = saveLecture(department, subject2, Year.now(), Semester.getCurrentSemester());
 		saveSchedule(lecture2, DayOfWeek.THU, Period.ONE, Period.THREE);
 
 		Subject subject3 = saveSubject("철학개론", 3);
-		Lecture lecture3 = saveLecture(department, subject3, Year.of(2024), Semester.FIRST);
+		Lecture lecture3 = saveLecture(department, subject3, Year.now(), Semester.getCurrentSemester());
 		saveSchedule(lecture3, DayOfWeek.FRI, Period.ONE, Period.THREE);
 
 		enrollmentService.enrollLecture(student.getId(), lecture1.getId());  // 수강 신청 1

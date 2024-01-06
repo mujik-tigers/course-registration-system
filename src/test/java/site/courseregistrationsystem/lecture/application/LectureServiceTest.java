@@ -46,10 +46,10 @@ class LectureServiceTest extends IntegrationTestSupport {
 		// given
 		Department department = saveDepartment("departmentName");
 		Professor professor = saveProfessor("professorName");
-		Subject subject = createSubject(SubjectDivision.MR, Grade.FRESHMAN, "subjectName", 3, 2);
+		Subject subject = createSubject(SubjectDivision.MR, "subjectName", 3, 2);
 		Subject savedSubject = saveSubject(subject);
 		List<Lecture> lectures = lectureRepository.saveAll(
-			generateCopiedLectureFixtures(50, savedSubject, professor, department));
+			generateCopiedLectureFixtures(savedSubject, professor, department));
 		saveSchedules(generateScheduleFixtures(lectures));
 
 		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
@@ -121,9 +121,9 @@ class LectureServiceTest extends IntegrationTestSupport {
 				lectureFilterOptions.getSubjectName()));
 	}
 
-	private List<Lecture> generateCopiedLectureFixtures(int size, Subject subjects, Professor professor,
+	private List<Lecture> generateCopiedLectureFixtures(Subject subjects, Professor professor,
 		Department department) {
-		return IntStream.rangeClosed(1, size)
+		return IntStream.rangeClosed(1, 50)
 			.mapToObj(number -> createLecture(100100 + number, Integer.toString(100 + number), 10 + number, subjects,
 				professor, department))
 			.toList();
@@ -138,7 +138,7 @@ class LectureServiceTest extends IntegrationTestSupport {
 
 	private List<Subject> generateSubjectFixtures(int size, SubjectDivision subjectDivision, String subjectName) {
 		return IntStream.rangeClosed(1, size)
-			.mapToObj(number -> createSubject(subjectDivision, Grade.FRESHMAN, subjectName + number, 4, 3))
+			.mapToObj(number -> createSubject(subjectDivision, subjectName + number, 4, 3))
 			.toList();
 	}
 
@@ -167,11 +167,11 @@ class LectureServiceTest extends IntegrationTestSupport {
 			.build();
 	}
 
-	private static Subject createSubject(SubjectDivision subjectDivision, Grade targetGrade, String name,
+	private static Subject createSubject(SubjectDivision subjectDivision, String name,
 		Integer hoursPerWeek, Integer credits) {
 		return Subject.builder()
 			.subjectDivision(subjectDivision)
-			.targetGrade(targetGrade)
+			.targetGrade(Grade.FRESHMAN)
 			.name(name)
 			.hoursPerWeek(hoursPerWeek)
 			.credits(credits)
