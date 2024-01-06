@@ -10,6 +10,7 @@ import site.courseregistrationsystem.enrollment.Enrollment;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectureDetail;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
+import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
 import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentRepository;
 import site.courseregistrationsystem.exception.auth.UnauthorizedAccessException;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
@@ -125,6 +126,17 @@ public class EnrollmentService {
 			.toList();
 
 		return new EnrolledLectures(enrolledLectures);
+	}
+
+	@Transactional(readOnly = true)
+	public EnrollmentCapacity fetchCountBy(Long lectureId) {
+		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(NonexistenceLectureException::new);
+
+		checkLectureInCurrentSemester(lecture);
+
+		int currentEnrollmentCount = enrollmentRepository.countByLecture(lecture);
+
+		return new EnrollmentCapacity(lecture.getTotalCapacity(), currentEnrollmentCount);
 	}
 
 }
