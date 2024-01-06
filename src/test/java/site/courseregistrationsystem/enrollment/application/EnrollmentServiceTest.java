@@ -24,6 +24,7 @@ import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.enrollment.Enrollment;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
+import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
 import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentRepository;
 import site.courseregistrationsystem.exception.ErrorType;
 import site.courseregistrationsystem.exception.auth.UnauthorizedAccessException;
@@ -220,10 +221,10 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Semester semester = Semester.getCurrentSemester();
 
 		return List.of(
-			dynamicTest("월요일 1-3교시 수업 수강 신청", () -> {
-				Subject subject = saveSubject("동양미술사", 3);
+			dynamicTest("월요일 4-6교시 수업 수강 신청", () -> {
+				Subject subject = saveSubject("서양미술사", 3);
 				Lecture lecture = saveLecture(department, subject, openingYear, semester);
-				saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
+				saveSchedule(lecture, DayOfWeek.MON, Period.FOUR, Period.SIX);
 
 				// when
 				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
@@ -231,10 +232,10 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				// then
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
 			}),
-			dynamicTest("월요일 4-6교시 수업 수강 신청", () -> {
-				Subject subject = saveSubject("서양미술사", 3);
+			dynamicTest("월요일 1-3교시 수업 수강 신청", () -> {
+				Subject subject = saveSubject("동양미술사", 3);
 				Lecture lecture = saveLecture(department, subject, openingYear, semester);
-				saveSchedule(lecture, DayOfWeek.MON, Period.FOUR, Period.SIX);
+				saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 				// when
 				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
@@ -264,10 +265,10 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				// then
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
 			}),
-			dynamicTest("목요일 2-4교시 수업 수강 신청", () -> {
+			dynamicTest("월요일 7-9교시 수업 수강 신청", () -> {
 				Subject subject = saveSubject("철학개론", 4);
 				Lecture lecture = saveLecture(department, subject, openingYear, semester);
-				saveSchedule(lecture, DayOfWeek.THU, Period.TWO, Period.FOUR);
+				saveSchedule(lecture, DayOfWeek.MON, Period.SEVEN, Period.NINE);
 
 				// when
 				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
@@ -362,6 +363,31 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 
 		// then
 		assertThat(enrolledLectures.getEnrolledLectures()).hasSize(3);
+	}
+
+	@Test
+	@DisplayName("강의의 현재 수강 신청 인원을 조회한다")
+	void countEnrollmentsSuccess() {
+		// given
+		Department department = saveDepartment();
+		Student student1 = saveStudent(department);
+		Student student2 = saveStudent(department);
+		Student student3 = saveStudent(department);
+
+		Subject subject = saveSubject("미술사", 2);
+		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
+		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
+
+		enrollmentService.enrollLecture(student1.getId(), lecture.getId());  // 수강 신청 1
+		enrollmentService.enrollLecture(student2.getId(), lecture.getId());  // 수강 신청 2
+		enrollmentService.enrollLecture(student3.getId(), lecture.getId());  // 수강 신청 3
+
+		// when
+		EnrollmentCapacity enrollmentCapacity = enrollmentService.fetchCountBy(lecture.getId());
+
+		// then
+		assertThat(enrollmentCapacity.getCapacity()).isEqualTo(lecture.getTotalCapacity());
+		assertThat(enrollmentCapacity.getCurrentEnrollmentCount()).isEqualTo(3);
 	}
 
 	private Department saveDepartment() {
