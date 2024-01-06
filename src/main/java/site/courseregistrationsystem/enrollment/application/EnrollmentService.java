@@ -121,7 +121,6 @@ public class EnrollmentService {
 		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 
 		List<EnrolledLectureDetail> enrolledLectures = enrollmentRepository.findAllBy(student.getId()).stream()
-			.map(Enrollment::getLecture)
 			.map(EnrolledLectureDetail::new)
 			.toList();
 
