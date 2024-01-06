@@ -21,10 +21,12 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 	private final CookieProperties cookieProperties;
 
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws
+		Exception {
 		Cookie sessionCookie = findSessionCookie(request.getCookies());
 		StudentSession session = sessionManager.fetch(sessionCookie.getValue());
 		request.setAttribute(ProjectConstant.STUDENT_PK, session.getStudentPk());
+
 		return true;
 	}
 
@@ -32,7 +34,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 		if (cookies == null) {
 			throw new NonexistenceSessionCookieException();
 		}
-		
+
 		for (Cookie cookie : cookies) {
 			if (cookie.getName().equals(cookieProperties.getName())) {
 				return cookie;
