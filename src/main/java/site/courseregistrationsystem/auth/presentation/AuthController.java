@@ -49,7 +49,7 @@ public class AuthController {
 		Cookie cookie = generateCookieBy(renewSession);
 		response.addCookie(cookie);
 
-		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.RENEW_SESSION_DURATION_SUCCESS.getMessage(), null);
+		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.SESSION_RENEW_SUCCESS.getMessage(), null);
 	}
 
 	@DeleteMapping("/logout")
