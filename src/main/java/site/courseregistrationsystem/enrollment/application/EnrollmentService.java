@@ -59,7 +59,7 @@ public class EnrollmentService {
 		List<Enrollment> enrollments = enrollmentRepository.findAllBy(student.getId());
 
 		checkLectureInCurrentSemester(lecture);
-		checkCreditsLimit(enrollments);
+		checkCreditsLimit(enrollments, lecture.fetchCredits());
 		checkDuplicateSubject(enrollments, lecture);
 		checkScheduleConflict(enrollments, lecture);
 
@@ -77,12 +77,12 @@ public class EnrollmentService {
 		}
 	}
 
-	private void checkCreditsLimit(List<Enrollment> enrollments) {
+	private void checkCreditsLimit(List<Enrollment> enrollments, int creditsToAdd) {
 		int creditsForCurrentSemester = enrollments.stream()
 			.mapToInt(Enrollment::fetchCredits)
 			.sum();
 
-		if (creditsForCurrentSemester >= MAX_CREDITS_PER_SEMESTER) {
+		if (creditsForCurrentSemester + creditsToAdd > MAX_CREDITS_PER_SEMESTER) {
 			throw new CreditsLimitExceededException();
 		}
 	}
