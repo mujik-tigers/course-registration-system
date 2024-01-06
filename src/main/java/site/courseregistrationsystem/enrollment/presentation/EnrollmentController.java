@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.enrollment.application.EnrollmentService;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
+import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
 import site.courseregistrationsystem.util.api.ApiResponse;
 import site.courseregistrationsystem.util.api.ResponseMessage;
 import site.courseregistrationsystem.util.resolver.Login;
@@ -50,6 +51,12 @@ public class EnrollmentController {
 	public ApiResponse<EnrolledLectures> fetchEnrollments(@Login Long studentPk) {
 		return ApiResponse.ok(ResponseMessage.ENROLLMENT_FETCH_SUCCESS.getMessage(),
 			enrollmentService.fetchAll(studentPk));
+	}
+
+	@GetMapping("/{lectureId}/enrollment-count")
+	public ApiResponse<EnrollmentCapacity> fetchEnrollmentCapacity(@PathVariable Long lectureId) {
+		return ApiResponse.ok(ResponseMessage.ENROLLMENT_CAPACITY_FETCH_SUCCESS.getMessage(),
+			enrollmentService.fetchCountBy(lectureId));
 	}
 
 }
