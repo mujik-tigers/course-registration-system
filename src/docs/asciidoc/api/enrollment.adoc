@@ -109,6 +109,18 @@ include::{snippets}/cancel-enrollment-fail/http-request.adoc[]
 include::{snippets}/cancel-enrollment-fail/http-response.adoc[]
 include::{snippets}/cancel-enrollment-fail/response-fields.adoc[]
 
+[[cancel-enrollment-unauthorized-fail]]
+=== 수강 신청 취소 : 접근 권한 오류
+
+==== HTTP Request
+
+include::{snippets}/cancel-enrollment-unauthorized-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/cancel-enrollment-unauthorized-fail/http-response.adoc[]
+include::{snippets}/cancel-enrollment-unauthorized-fail/response-fields.adoc[]
+
 [[fetch-enrollments-success]]
 === 수강 신청 내역 조회 : 성공
 
@@ -120,3 +132,15 @@ include::{snippets}/fetch-enrollments-success/http-request.adoc[]
 
 include::{snippets}/fetch-enrollments-success/http-response.adoc[]
 include::{snippets}/fetch-enrollments-success/response-fields.adoc[]
+
+[[count-enrollments-success]]
+=== 수강 신청 인원 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/count-enrollments-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/count-enrollments-success/http-response.adoc[]
+include::{snippets}/count-enrollments-success/response-fields.adoc[]
