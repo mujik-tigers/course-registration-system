@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import site.courseregistrationsystem.enrollment.Enrollment;
+import site.courseregistrationsystem.lecture.Lecture;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
@@ -22,5 +23,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 		+ "JOIN FETCH e.student s "
 		+ "WHERE e.id = :enrollmentId")
 	Optional<Enrollment> findByIdWithStudent(Long enrollmentId);
+
+	int countByLecture(Lecture lecture);
 
 }
