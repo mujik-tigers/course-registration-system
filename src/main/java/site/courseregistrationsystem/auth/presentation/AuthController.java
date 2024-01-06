@@ -70,6 +70,7 @@ public class AuthController {
 		cookie.setDomain(cookieProperties.getDomain());
 		cookie.setPath(cookieProperties.getPath());
 		cookie.setMaxAge(cookieProperties.getExpiry());
+
 		return cookie;
 	}
 
