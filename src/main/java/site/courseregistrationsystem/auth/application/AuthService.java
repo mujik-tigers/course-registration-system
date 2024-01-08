@@ -14,7 +14,7 @@ import site.courseregistrationsystem.util.encryption.Aes256Manager;
 import site.courseregistrationsystem.util.encryption.BCryptManager;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AuthService {
 
@@ -22,6 +22,7 @@ public class AuthService {
 	private final Aes256Manager aes256Manager;
 	private final SessionManager sessionManager;
 
+	@Transactional
 	public StudentSession login(LoginForm loginForm) {
 		String encryptedStudentId = aes256Manager.encrypt(loginForm.getStudentId());
 		Student student = studentRepository.findByStudentId(encryptedStudentId)

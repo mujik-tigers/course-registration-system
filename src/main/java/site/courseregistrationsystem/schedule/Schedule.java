@@ -43,4 +43,16 @@ public class Schedule {
 		this.lastPeriod = lastPeriod;
 	}
 
+	public void setLecture(Lecture lecture) {
+		this.lecture = lecture;
+	}
+
+	public boolean hasConflictWith(Schedule schedule) {
+		boolean dayOfWeekConflict = this.getDayOfWeek() == schedule.getDayOfWeek();
+		boolean scheduleConflict = !((this.firstPeriod.getPeriodNumber() > schedule.lastPeriod.getPeriodNumber()) ||
+			(this.lastPeriod.getPeriodNumber() < schedule.firstPeriod.getPeriodNumber()));
+
+		return dayOfWeekConflict && scheduleConflict;
+	}
+
 }

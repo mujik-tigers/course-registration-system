@@ -19,7 +19,13 @@ public enum ResponseMessage {
 	RENEW_SESSION_DURATION_SUCCESS("세션 지속시간 갱신에 성공했습니다"),
 
 	// Lecture
-	LECTURE_SCHEDULE_FETCH_SUCCESS("강의 시간표 조회에 성공했습니다");
+	LECTURE_SCHEDULE_FETCH_SUCCESS("강의 시간표 조회에 성공했습니다"),
+	BASKET_STORING_COUNT_FETCH_SUCCESS("강의를 수강 바구니에 담은 사람 수 조회에 성공했습니다"),
+
+	// Basket
+	BASKET_FETCH_SUCCESS("수강 바구니 목록 조회에 성공했습니다"),
+	BASKET_ADD_SUCCESS("강의를 수강 바구니에 담기에 성공했습니다"),
+	BASKET_DELETE_SUCCESS("수강 바구니 삭제를 성공했습니다");
 
 	private final String message;
 
