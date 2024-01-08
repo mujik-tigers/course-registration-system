@@ -1,5 +1,7 @@
 package site.courseregistrationsystem.enrollment.presentation;
 
+import java.time.Year;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,7 @@ import site.courseregistrationsystem.enrollment.application.EnrollmentService;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
+import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.util.api.ApiResponse;
 import site.courseregistrationsystem.util.api.ResponseMessage;
 import site.courseregistrationsystem.util.resolver.Login;
@@ -29,14 +32,14 @@ public class EnrollmentController {
 	@PostMapping("/{lectureId}")
 	public ApiResponse<EnrolledLecture> enrollLecture(@Login Long studentPk, @PathVariable Long lectureId) {
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.ENROLL_LECTURE_SUCCESS.getMessage(),
-			enrollmentService.enrollLecture(studentPk, lectureId));
+			enrollmentService.enrollLecture(Year.now(), Semester.getCurrentSemester(), studentPk, lectureId));
 	}
 
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/fast/{lectureNumber}")
 	public ApiResponse<EnrolledLecture> enrollLectureByNumber(@Login Long studentPk, @PathVariable Integer lectureNumber) {
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.ENROLL_LECTURE_SUCCESS.getMessage(),
-			enrollmentService.enrollLectureByNumber(studentPk, lectureNumber));
+			enrollmentService.enrollLectureByNumber(Year.now(), Semester.getCurrentSemester(), studentPk, lectureNumber));
 	}
 
 	@DeleteMapping("/{enrollmentId}")
@@ -55,7 +58,7 @@ public class EnrollmentController {
 	@GetMapping("/{lectureId}/enrollment-count")
 	public ApiResponse<EnrollmentCapacity> fetchEnrollmentCapacity(@PathVariable Long lectureId) {
 		return ApiResponse.ok(ResponseMessage.ENROLLMENT_CAPACITY_FETCH_SUCCESS.getMessage(),
-			enrollmentService.fetchCountBy(lectureId));
+			enrollmentService.fetchCountBy(Year.now(), Semester.getCurrentSemester(), lectureId));
 	}
 
 }

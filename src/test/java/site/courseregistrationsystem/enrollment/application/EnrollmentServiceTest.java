@@ -65,12 +65,14 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
 		Subject subject = saveSubject("미술사", 2);
-		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
+
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
+		Lecture lecture = saveLecture(department, subject, openingYear, semester);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		// when
-		EnrolledLecture enrolledLecture = enrollmentService.enrollLectureByNumber(student.getId(),
-			lecture.getLectureNumber());
+		EnrolledLecture enrolledLecture = enrollmentService.enrollLectureByNumber(openingYear, semester, student.getId(), lecture.getLectureNumber());
 
 		// then
 		assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -83,11 +85,14 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
 		Subject subject = saveSubject("미술사", 2);
-		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
+
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
+		Lecture lecture = saveLecture(department, subject, openingYear, semester);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		// when
-		EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
+		EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture.getId());
 
 		// then
 		assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -105,7 +110,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		saveSchedule(pastLecture, DayOfWeek.MON, Period.ONE, Period.THREE);  // 작년 강의 개설
 
 		// when & then
-		assertThatThrownBy(() -> enrollmentService.enrollLecture(student.getId(), pastLecture.getId()))
+		assertThatThrownBy(() -> enrollmentService.enrollLecture(Year.of(2024), Semester.FIRST, student.getId(), pastLecture.getId()))
 			.isInstanceOf(LectureNotInCurrentSemesterException.class)
 			.hasMessage(ErrorType.LECTURE_NOT_IN_CURRENT_SEMESTER.getMessage());
 	}
@@ -118,11 +123,11 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Student student = saveStudent(department);
 
 		Subject subject1 = saveSubject("동양미술사", 3);
-		Lecture pastLecture = saveLecture(department, subject1, Year.of(2023), Semester.SECOND);
-		saveSchedule(pastLecture, DayOfWeek.MON, Period.ONE, Period.THREE);  // 작년 강의 개설
+		Lecture pastLecture = saveLecture(department, subject1, Year.of(2024), Semester.FIRST);
+		saveSchedule(pastLecture, DayOfWeek.MON, Period.ONE, Period.THREE);  // 지난 학기 강의 개설
 
 		// when & then
-		assertThatThrownBy(() -> enrollmentService.enrollLecture(student.getId(), pastLecture.getId()))
+		assertThatThrownBy(() -> enrollmentService.enrollLecture(Year.of(2024), Semester.SECOND, student.getId(), pastLecture.getId()))
 			.isInstanceOf(LectureNotInCurrentSemesterException.class)
 			.hasMessage(ErrorType.LECTURE_NOT_IN_CURRENT_SEMESTER.getMessage());
 	}
@@ -133,14 +138,15 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		// given
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
-		Year openingYear = Year.now();
-		Semester semester = Semester.getCurrentSemester();
+
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
 
 		int maxCredit = 18;
 		Subject subject1 = saveSubject("동양미술사", maxCredit);
 		Lecture lectureWithMaxCredits = saveLecture(department, subject1, openingYear, semester);  // 최대 학점을 갖는 강의를 생성
 		saveSchedule(lectureWithMaxCredits, DayOfWeek.MON, Period.ONE, Period.THREE);
-		enrollmentService.enrollLecture(student.getId(), lectureWithMaxCredits.getId());  // 최대 학점을 채워서 신청한 상황
+		enrollmentService.enrollLecture(openingYear, semester, student.getId(), lectureWithMaxCredits.getId());  // 최대 학점을 채워서 신청한 상황
 
 		int minCredit = 1;
 		Subject subject2 = saveSubject("서양미술사", minCredit);
@@ -148,7 +154,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		saveSchedule(lectureWithMinCredits, DayOfWeek.TUE, Period.ONE, Period.THREE);
 
 		// when & then
-		assertThatThrownBy(() -> enrollmentService.enrollLecture(student.getId(), lectureWithMinCredits.getId()))
+		assertThatThrownBy(() -> enrollmentService.enrollLecture(openingYear, semester, student.getId(), lectureWithMinCredits.getId()))
 			.isInstanceOf(CreditsLimitExceededException.class)
 			.hasMessage(ErrorType.SEMESTER_CREDIT_EXCEED.getMessage());
 	}
@@ -160,18 +166,19 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
 		Subject subject = saveSubject("미술사", 2);
-		Year openingYear = Year.now();
-		Semester semester = Semester.getCurrentSemester();
+
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
 
 		Lecture lectureOnMonday = saveLecture(department, subject, openingYear, semester);  // 과목은 동일하나 요일은 다른 강의 2개 생성
 		Lecture LectureOnFriday = saveLecture(department, subject, openingYear, semester);
 		saveSchedule(lectureOnMonday, DayOfWeek.MON, Period.ONE, Period.THREE);
 		saveSchedule(LectureOnFriday, DayOfWeek.FRI, Period.ONE, Period.THREE);
 
-		enrollmentService.enrollLecture(student.getId(), lectureOnMonday.getId());  // 월요일 강의를 이미 수강 신청한 상황
+		enrollmentService.enrollLecture(openingYear, semester, student.getId(), lectureOnMonday.getId());  // 월요일 강의를 이미 수강 신청한 상황
 
 		// when & then
-		assertThatThrownBy(() -> enrollmentService.enrollLecture(student.getId(), LectureOnFriday.getId()))
+		assertThatThrownBy(() -> enrollmentService.enrollLecture(openingYear, semester, student.getId(), LectureOnFriday.getId()))
 			.isInstanceOf(DuplicateEnrollmentException.class)
 			.hasMessage(ErrorType.ENROLLMENT_DUPLICATION.getMessage());
 	}
@@ -192,20 +199,21 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		// given
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
-		Year openingYear = Year.now();
-		Semester semester = Semester.getCurrentSemester();
+
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
 
 		Subject subject1 = saveSubject("동양미술사", 2);
 		Lecture lecture1 = saveLecture(department, subject1, openingYear, semester);
 		saveSchedule(lecture1, DayOfWeek.MON, Period.THREE, Period.FIVE);  // 월요일 3-5교시 수업 생성
-		enrollmentService.enrollLecture(student.getId(), lecture1.getId());  // 수업 신청
+		enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture1.getId());  // 수업 신청
 
 		Subject subject2 = saveSubject("서양미술사", 2);
 		Lecture lecture2 = saveLecture(department, subject2, openingYear, semester);
 		saveSchedule(lecture2, DayOfWeek.MON, firstPeriod, lastPeriod);  // 시간이 겹치도록 생성
 
 		// when & then
-		assertThatThrownBy(() -> enrollmentService.enrollLecture(student.getId(), lecture2.getId()))
+		assertThatThrownBy(() -> enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture2.getId()))
 			.isInstanceOf(ScheduleConflictException.class)
 			.hasMessage(ErrorType.SCHEDULE_CONFLICT.getMessage());
 	}
@@ -216,8 +224,9 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		// given
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
-		Year openingYear = Year.now();
-		Semester semester = Semester.getCurrentSemester();
+
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
 
 		return List.of(
 			dynamicTest("월요일 4-6교시 수업 수강 신청", () -> {
@@ -226,7 +235,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				saveSchedule(lecture, DayOfWeek.MON, Period.FOUR, Period.SIX);
 
 				// when
-				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture.getId());
 
 				// then
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -237,7 +246,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 				// when
-				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture.getId());
 
 				// then
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -248,7 +257,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				saveSchedule(lecture, DayOfWeek.TUE, Period.SIX, Period.NINE);
 
 				// when
-				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture.getId());
 
 				// then
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -259,7 +268,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				saveSchedule(lecture, DayOfWeek.WED, Period.TWO, Period.FOUR);
 
 				// when
-				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture.getId());
 
 				// then
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -270,7 +279,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				saveSchedule(lecture, DayOfWeek.MON, Period.SEVEN, Period.NINE);
 
 				// when
-				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(student.getId(), lecture.getId());
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture.getId());
 
 				// then
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -286,7 +295,9 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Student student = saveStudent(department);
 		Subject subject = saveSubject("미술사", 2);
 
-		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
+		Lecture lecture = saveLecture(department, subject, openingYear, semester);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		Enrollment enrollment = createEnrollment(lecture, student);
@@ -321,7 +332,10 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
 		Subject subject = saveSubject("미술사", 2);
-		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
+
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
+		Lecture lecture = saveLecture(department, subject, openingYear, semester);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		Enrollment enrollment = createEnrollment(lecture, student);
@@ -342,16 +356,19 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Department department = saveDepartment();
 		Student student = saveStudent(department);
 
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
+
 		Subject subject1 = saveSubject("미술사", 2);
-		Lecture lecture1 = saveLecture(department, subject1, Year.now(), Semester.getCurrentSemester());
+		Lecture lecture1 = saveLecture(department, subject1, openingYear, semester);
 		saveSchedule(lecture1, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		Subject subject2 = saveSubject("창의적사고", 2);
-		Lecture lecture2 = saveLecture(department, subject2, Year.now(), Semester.getCurrentSemester());
+		Lecture lecture2 = saveLecture(department, subject2, openingYear, semester);
 		saveSchedule(lecture2, DayOfWeek.THU, Period.ONE, Period.THREE);
 
 		Subject subject3 = saveSubject("철학개론", 3);
-		Lecture lecture3 = saveLecture(department, subject3, Year.now(), Semester.getCurrentSemester());
+		Lecture lecture3 = saveLecture(department, subject3, openingYear, semester);
 		saveSchedule(lecture3, DayOfWeek.FRI, Period.ONE, Period.THREE);
 
 		Enrollment enrollment1 = createEnrollment(lecture1, student);
@@ -378,8 +395,11 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Student student2 = saveStudent(department);
 		Student student3 = saveStudent(department);
 
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
+
 		Subject subject = saveSubject("미술사", 2);
-		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
+		Lecture lecture = saveLecture(department, subject, openingYear, semester);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		Enrollment enrollment1 = createEnrollment(lecture, student1);
@@ -391,7 +411,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		entityManager.persist(enrollment3);  // 수강 신청 3
 
 		// when
-		EnrollmentCapacity enrollmentCapacity = enrollmentService.fetchCountBy(lecture.getId());
+		EnrollmentCapacity enrollmentCapacity = enrollmentService.fetchCountBy(openingYear, semester, lecture.getId());
 
 		// then
 		assertThat(enrollmentCapacity.getCapacity()).isEqualTo(lecture.getTotalCapacity());

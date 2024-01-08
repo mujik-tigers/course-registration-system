@@ -81,8 +81,8 @@ public class Lecture {
 			.anyMatch(schedule -> lecture.getSchedules().stream().anyMatch(schedule::hasConflictWith));
 	}
 
-	public boolean isCurrentSemester() {
-		return openingYear.equals(Year.now()) && Semester.getCurrentSemester().equals(semester);
+	public boolean hasSameSemester(Year year, Semester semester) {
+		return this.openingYear.equals(year) && this.semester.equals(semester);
 	}
 
 	public Long fetchSubjectId() {

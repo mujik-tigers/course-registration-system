@@ -1,5 +1,6 @@
 package site.courseregistrationsystem.enrollment.application;
 
+import java.time.Year;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import site.courseregistrationsystem.exception.enrollment.ScheduleConflictExcept
 import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
 import site.courseregistrationsystem.exception.student.NonexistenceStudentException;
 import site.courseregistrationsystem.lecture.Lecture;
+import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
@@ -36,30 +38,30 @@ public class EnrollmentService {
 	private final LectureRepository lectureRepository;
 
 	@Transactional
-	public EnrolledLecture enrollLecture(Long studentPk, Long lectureId) {
+	public EnrolledLecture enrollLecture(Year year, Semester semester, Long studentPk, Long lectureId) {
 		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(NonexistenceLectureException::new);
 
-		Enrollment savedEnrollment = enroll(student, lecture);
+		Enrollment savedEnrollment = enroll(year, semester, student, lecture);
 
 		return new EnrolledLecture(savedEnrollment.fetchLectureId());
 	}
 
 	@Transactional
-	public EnrolledLecture enrollLectureByNumber(Long studentPk, Integer lectureNumber) {
+	public EnrolledLecture enrollLectureByNumber(Year year, Semester semester, Long studentPk, Integer lectureNumber) {
 		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 		Lecture lecture = lectureRepository.findByNumberWithSchedule(lectureNumber)
 			.orElseThrow(NonexistenceLectureException::new);
 
-		Enrollment savedEnrollment = enroll(student, lecture);
+		Enrollment savedEnrollment = enroll(year, semester, student, lecture);
 
 		return new EnrolledLecture(savedEnrollment.fetchLectureId());
 	}
 
-	private Enrollment enroll(Student student, Lecture lecture) {
+	private Enrollment enroll(Year year, Semester semester, Student student, Lecture lecture) {
 		List<Enrollment> enrollments = enrollmentRepository.findAllBy(student.getId());
 
-		checkLectureInCurrentSemester(lecture);
+		checkLectureInCurrentSemester(year, semester, lecture);
 		checkCreditsLimit(enrollments, lecture.fetchCredits());
 		checkDuplicateSubject(enrollments, lecture);
 		checkScheduleConflict(enrollments, lecture);
@@ -72,8 +74,8 @@ public class EnrollmentService {
 		return enrollmentRepository.save(newEnrollment);
 	}
 
-	private void checkLectureInCurrentSemester(Lecture lecture) {
-		if (!lecture.isCurrentSemester()) {
+	private void checkLectureInCurrentSemester(Year year, Semester semester, Lecture lecture) {
+		if (!lecture.hasSameSemester(year, semester)) {
 			throw new LectureNotInCurrentSemesterException();
 		}
 	}
@@ -128,10 +130,10 @@ public class EnrollmentService {
 		return new EnrolledLectures(enrolledLectures);
 	}
 
-	public EnrollmentCapacity fetchCountBy(Long lectureId) {
+	public EnrollmentCapacity fetchCountBy(Year year, Semester semester, Long lectureId) {
 		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(NonexistenceLectureException::new);
 
-		checkLectureInCurrentSemester(lecture);
+		checkLectureInCurrentSemester(year, semester, lecture);
 
 		int currentEnrollmentCount = enrollmentRepository.countByLecture(lecture);
 
