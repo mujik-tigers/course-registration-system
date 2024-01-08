@@ -12,7 +12,6 @@ import site.courseregistrationsystem.enrollment.dto.EnrolledLectureDetail;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
 import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentRepository;
-import site.courseregistrationsystem.exception.auth.UnauthorizedAccessException;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
@@ -26,7 +25,7 @@ import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class EnrollmentService {
 
@@ -36,6 +35,7 @@ public class EnrollmentService {
 	private final StudentRepository studentRepository;
 	private final LectureRepository lectureRepository;
 
+	@Transactional
 	public EnrolledLecture enrollLecture(Long studentPk, Long lectureId) {
 		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(NonexistenceLectureException::new);
@@ -45,6 +45,7 @@ public class EnrollmentService {
 		return new EnrolledLecture(savedEnrollment.fetchLectureId());
 	}
 
+	@Transactional
 	public EnrolledLecture enrollLectureByNumber(Long studentPk, Integer lectureNumber) {
 		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 		Lecture lecture = lectureRepository.findByNumberWithSchedule(lectureNumber)
@@ -106,18 +107,17 @@ public class EnrollmentService {
 		}
 	}
 
+	@Transactional
 	public void cancel(Long studentPk, Long enrollmentId) {
-		Enrollment enrollment = enrollmentRepository.findByIdWithStudent(enrollmentId)
-			.orElseThrow(EnrollmentNotFoundException::new);
+		studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 
-		if (!enrollment.fetchStudentPk().equals(studentPk)) {
-			throw new UnauthorizedAccessException();
+		int deleted = enrollmentRepository.deleteByIdAndStudent(enrollmentId, studentPk);
+
+		if (deleted == 0) {
+			throw new EnrollmentNotFoundException();
 		}
-
-		enrollmentRepository.deleteById(enrollmentId);
 	}
 
-	@Transactional(readOnly = true)
 	public EnrolledLectures fetchAll(Long studentPk) {
 		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 
@@ -128,7 +128,6 @@ public class EnrollmentService {
 		return new EnrolledLectures(enrolledLectures);
 	}
 
-	@Transactional(readOnly = true)
 	public EnrollmentCapacity fetchCountBy(Long lectureId) {
 		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(NonexistenceLectureException::new);
 

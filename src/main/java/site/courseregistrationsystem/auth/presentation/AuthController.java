@@ -42,8 +42,7 @@ public class AuthController {
 
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/session")
-	public ApiResponse<Void> renewSession(@CookieValue(value = SESSION_ID) Cookie sessionCookie,
-		HttpServletResponse response) {
+	public ApiResponse<Void> renewSession(@CookieValue(value = SESSION_ID) Cookie sessionCookie, HttpServletResponse response) {
 		StudentSession renewSession = sessionManager.renew(sessionCookie.getValue());
 
 		Cookie cookie = generateCookieBy(renewSession);

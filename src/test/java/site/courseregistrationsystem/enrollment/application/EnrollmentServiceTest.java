@@ -27,7 +27,6 @@ import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
 import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentRepository;
 import site.courseregistrationsystem.exception.ErrorType;
-import site.courseregistrationsystem.exception.auth.UnauthorizedAccessException;
 import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
@@ -290,11 +289,11 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
-		enrollmentService.enrollLecture(student.getId(), lecture.getId());
-		List<Enrollment> enrollments = enrollmentRepository.findAllBy(student.getId());
+		Enrollment enrollment = createEnrollment(lecture, student);
+		entityManager.persist(enrollment);
 
 		// when
-		enrollmentService.cancel(student.getId(), enrollments.get(0).getId());
+		enrollmentService.cancel(student.getId(), enrollment.getId());
 
 		// then
 		assertThat(enrollmentRepository.findAllBy(student.getId())).hasSize(0);
@@ -324,15 +323,16 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Subject subject = saveSubject("미술사", 2);
 		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
-		enrollmentService.enrollLecture(student.getId(), lecture.getId());  // student가 수강 신청 완료
-		List<Enrollment> enrollments = enrollmentRepository.findAllBy(student.getId());
+
+		Enrollment enrollment = createEnrollment(lecture, student);
+		entityManager.persist(enrollment);
 
 		Student otherStudent = saveStudent(department);  // otherStudent가 student의 수강 신청을 취소하려고 시도
 
 		// when & then
-		assertThatThrownBy(() -> enrollmentService.cancel(otherStudent.getId(), enrollments.get(0).getId()))
-			.isInstanceOf(UnauthorizedAccessException.class)
-			.hasMessage(ErrorType.UNAUTHORIZED_ACCESS.getMessage());
+		assertThatThrownBy(() -> enrollmentService.cancel(otherStudent.getId(), enrollment.getId()))
+			.isInstanceOf(EnrollmentNotFoundException.class)
+			.hasMessage(ErrorType.NONEXISTENT_ENROLLMENT.getMessage());
 	}
 
 	@Test
@@ -354,9 +354,13 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Lecture lecture3 = saveLecture(department, subject3, Year.now(), Semester.getCurrentSemester());
 		saveSchedule(lecture3, DayOfWeek.FRI, Period.ONE, Period.THREE);
 
-		enrollmentService.enrollLecture(student.getId(), lecture1.getId());  // 수강 신청 1
-		enrollmentService.enrollLecture(student.getId(), lecture2.getId());  // 수강 신청 2
-		enrollmentService.enrollLecture(student.getId(), lecture3.getId());  // 수강 신청 3
+		Enrollment enrollment1 = createEnrollment(lecture1, student);
+		Enrollment enrollment2 = createEnrollment(lecture2, student);
+		Enrollment enrollment3 = createEnrollment(lecture3, student);
+
+		entityManager.persist(enrollment1);  // 수강 신청 1
+		entityManager.persist(enrollment2);  // 수강 신청 2
+		entityManager.persist(enrollment3);  // 수강 신청 3
 
 		// when
 		EnrolledLectures enrolledLectures = enrollmentService.fetchAll(student.getId());
@@ -378,9 +382,13 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Lecture lecture = saveLecture(department, subject, Year.now(), Semester.getCurrentSemester());
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
-		enrollmentService.enrollLecture(student1.getId(), lecture.getId());  // 수강 신청 1
-		enrollmentService.enrollLecture(student2.getId(), lecture.getId());  // 수강 신청 2
-		enrollmentService.enrollLecture(student3.getId(), lecture.getId());  // 수강 신청 3
+		Enrollment enrollment1 = createEnrollment(lecture, student1);
+		Enrollment enrollment2 = createEnrollment(lecture, student2);
+		Enrollment enrollment3 = createEnrollment(lecture, student3);
+
+		entityManager.persist(enrollment1);  // 수강 신청 1
+		entityManager.persist(enrollment2);  // 수강 신청 2
+		entityManager.persist(enrollment3);  // 수강 신청 3
 
 		// when
 		EnrollmentCapacity enrollmentCapacity = enrollmentService.fetchCountBy(lecture.getId());
@@ -388,6 +396,10 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		// then
 		assertThat(enrollmentCapacity.getCapacity()).isEqualTo(lecture.getTotalCapacity());
 		assertThat(enrollmentCapacity.getCurrentEnrollmentCount()).isEqualTo(3);
+	}
+
+	private static Enrollment createEnrollment(Lecture lecture, Student student) {
+		return Enrollment.builder().lecture(lecture).student(student).build();
 	}
 
 	private Department saveDepartment() {

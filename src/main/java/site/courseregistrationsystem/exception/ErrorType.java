@@ -27,7 +27,7 @@ public enum ErrorType {
 	ENROLLMENT_DUPLICATION(HttpStatus.BAD_REQUEST, "중복된 과목을 수강 신청할 수 없습니다"),
 	SEMESTER_CREDIT_EXCEED(HttpStatus.BAD_REQUEST, "학기 내 신청 가능한 최대 학점을 초과했습니다"),
 	SCHEDULE_CONFLICT(HttpStatus.BAD_REQUEST, "다른 수업과 시간이 겹칩니다"),
-	NONEXISTENT_ENROLLMENT(HttpStatus.BAD_REQUEST, "해당 학기에 신청한 강의가 아닙니다"),
+	NONEXISTENT_ENROLLMENT(HttpStatus.BAD_REQUEST, "수강 신청 내역이 존재하지 않습니다"),
 	LECTURE_NOT_IN_CURRENT_SEMESTER(HttpStatus.BAD_REQUEST, "현재 학기에 개강하는 강의가 아닙니다");
 
 	private final HttpStatus status;

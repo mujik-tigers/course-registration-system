@@ -48,8 +48,10 @@ public class Schedule {
 			return false;
 		}
 
-		return !(this.firstPeriod.getPeriodNumber() > schedule.lastPeriod.getPeriodNumber() ||
-			this.lastPeriod.getPeriodNumber() < schedule.firstPeriod.getPeriodNumber());
+		boolean isBefore = this.firstPeriod.getPeriodNumber() > schedule.lastPeriod.getPeriodNumber();
+		boolean isAfter = this.lastPeriod.getPeriodNumber() < schedule.firstPeriod.getPeriodNumber();
+
+		return !(isBefore || isAfter);
 	}
 
 }
