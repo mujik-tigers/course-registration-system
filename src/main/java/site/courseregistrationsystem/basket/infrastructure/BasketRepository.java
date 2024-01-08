@@ -14,6 +14,9 @@ import site.courseregistrationsystem.student.Student;
 
 public interface BasketRepository extends JpaRepository<Basket, Long> {
 
+	@Query("select b from Basket b "
+		+ "join fetch b.lecture l "
+		+ "where b.student = :student")
 	List<Basket> findAllByStudent(Student student);
 
 	Optional<Basket> findByIdAndStudent(Long basketId, Student student);
@@ -22,6 +25,6 @@ public interface BasketRepository extends JpaRepository<Basket, Long> {
 	@Query("delete from Basket b where b = :basket")
 	void delete(@Param("basket") Basket basket);
 
-	List<Basket> findAllByLecture(Lecture lecture);
+	int countByLecture(Lecture lecture);
 
 }

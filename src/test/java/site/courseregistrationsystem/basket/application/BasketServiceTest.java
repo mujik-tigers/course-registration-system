@@ -48,7 +48,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 	private EntityManager entityManager;
 
 	@Test
-	@DisplayName("학생은 원하는 수업을 선택하여 수강 바구니에 담은 뒤, 담은 수업(Lecture)의 id 를 반환한다.")
+	@DisplayName("학생이 수강 바구니에 원하는 수업을 성공적으로 담으면, 담은 수업(Lecture)의 id 를 반환한다.")
 	void addLectureToBasket() throws Exception {
 		// given
 		Subject subject = create3CreditSubject("선형대수학");
@@ -187,7 +187,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 	}
 
 	@Test
-	@DisplayName("수강 바구니에 담은 수업둘 목록을 가져올 수 있다.")
+	@DisplayName("수강 바구니에 담은 수업들 목록을 가져올 수 있다.")
 	void fetchBasketList() throws Exception {
 		// given
 		Professor professor = createProfessor();

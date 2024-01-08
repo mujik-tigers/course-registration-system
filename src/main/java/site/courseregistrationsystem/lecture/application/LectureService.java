@@ -1,13 +1,10 @@
 package site.courseregistrationsystem.lecture.application;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import site.courseregistrationsystem.basket.Basket;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
 import site.courseregistrationsystem.lecture.Lecture;
@@ -39,9 +36,9 @@ public class LectureService {
 		Lecture lecture = lectureRepository.findById(lectureId)
 			.orElseThrow(NonexistenceLectureException::new);
 
-		List<Basket> baskets = basketRepository.findAllByLecture(lecture);
+		int basketCount = basketRepository.countByLecture(lecture);
 
-		return new BasketStoringCount(lecture.getTotalCapacity(), baskets.size());
+		return new BasketStoringCount(lecture.getTotalCapacity(), basketCount);
 	}
 
 }
