@@ -1,20 +1,34 @@
 package site.courseregistrationsystem.lecture.dto;
 
+import java.time.Year;
+
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
+import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.subject.SubjectDivision;
 
-@NoArgsConstructor
 @Getter
 public class LectureFilterOptions {
 
-	private SubjectDivision subjectDivision;
-	private Long departmentId;
-	private String subjectName;
+	@NotNull
+	private final Year openingYear;
+
+	@NotNull
+	private final Semester semester;
+
+	private final SubjectDivision subjectDivision;
+	private final Long departmentId;
+	private final String subjectName;
 
 	@Builder
-	private LectureFilterOptions(SubjectDivision subjectDivision, Long departmentId, String subjectName) {
+	@Jacksonized
+	private LectureFilterOptions(Year openingYear, Semester semester, SubjectDivision subjectDivision,
+		Long departmentId,
+		String subjectName) {
+		this.openingYear = openingYear;
+		this.semester = semester;
 		this.subjectDivision = subjectDivision;
 		this.departmentId = departmentId;
 		this.subjectName = subjectName;

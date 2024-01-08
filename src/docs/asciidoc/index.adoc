@@ -11,6 +11,8 @@ endif::[]
 :sectlinks:
 
 include::api/auth.adoc[]
+include::api/session.adoc[]
 include::api/clock.adoc[]
 include::api/student.adoc[]
 include::api/lecture.adoc[]
+include::api/enrollment.adoc[]

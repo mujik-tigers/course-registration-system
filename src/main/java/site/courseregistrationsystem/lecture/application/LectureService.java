@@ -11,16 +11,18 @@ import site.courseregistrationsystem.lecture.dto.LectureSchedulePage;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class LectureService {
 
 	private final LectureRepository lectureRepository;
-
-	@Transactional(readOnly = true)
+	
 	public LectureSchedulePage fetchLectureSchedule(Pageable pageable, LectureFilterOptions lectureFilterOptions) {
 		return new LectureSchedulePage(
 			lectureRepository.findMatchedLectures(
 					pageable,
+					lectureFilterOptions.getOpeningYear(),
+					lectureFilterOptions.getSemester(),
 					lectureFilterOptions.getSubjectDivision(),
 					lectureFilterOptions.getDepartmentId(),
 					lectureFilterOptions.getSubjectName())

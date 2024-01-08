@@ -12,12 +12,23 @@ public enum ErrorType {
 	NONEXISTENT_STUDENT_ID(HttpStatus.BAD_REQUEST, "존재하지 않는 학번입니다"),
 	NONEXISTENT_SESSION(HttpStatus.BAD_REQUEST, "존재하지 않는 세션입니다"),
 	NONEXISTENT_SESSION_COOKIE(HttpStatus.UNAUTHORIZED, "세션 쿠키가 없습니다"),
+	UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "해당 작업에 대한 권한이 없습니다"),
 
 	// Student,
 	NONEXISTENT_STUDENT(HttpStatus.BAD_REQUEST, "존재하지 않는 학생입니다"),
 
 	// AES256
-	AES256_SETTING_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "AES256 설정에 실패했습니다");
+	AES256_SETTING_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "AES256 설정에 실패했습니다"),
+
+	// Lecture
+	NONEXISTENT_LECTURE(HttpStatus.BAD_REQUEST, "존재하지 않는 수업입니다"),
+
+	// Enrollment
+	ENROLLMENT_DUPLICATION(HttpStatus.BAD_REQUEST, "중복된 과목을 수강 신청할 수 없습니다"),
+	SEMESTER_CREDIT_EXCEED(HttpStatus.BAD_REQUEST, "학기 내 신청 가능한 최대 학점을 초과했습니다"),
+	SCHEDULE_CONFLICT(HttpStatus.BAD_REQUEST, "다른 수업과 시간이 겹칩니다"),
+	NONEXISTENT_ENROLLMENT(HttpStatus.BAD_REQUEST, "수강 신청 내역이 존재하지 않습니다"),
+	LECTURE_NOT_IN_CURRENT_SEMESTER(HttpStatus.BAD_REQUEST, "현재 학기에 개강하는 강의가 아닙니다");
 
 	private final HttpStatus status;
 	private final String message;

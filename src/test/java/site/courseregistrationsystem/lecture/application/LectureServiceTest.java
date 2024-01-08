@@ -3,6 +3,7 @@ package site.courseregistrationsystem.lecture.application;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Year;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -16,6 +17,7 @@ import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.lecture.Lecture;
+import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.dto.LectureFilterOptions;
 import site.courseregistrationsystem.lecture.dto.LectureSchedulePage;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
@@ -39,18 +41,22 @@ class LectureServiceTest extends IntegrationTestSupport {
 	private EntityManager entityManager;
 
 	@Test
-	@DisplayName("검색 조건 없이 강의를 조회한다")
+	@DisplayName("개강년도와 학기 조건과 함께 강의를 조회한다")
 	void fetch() {
 		// given
 		Department department = saveDepartment("departmentName");
 		Professor professor = saveProfessor("professorName");
-		Subject subject = createSubject(department, SubjectDivision.MR, Grade.FRESHMAN, "subjectName", 3, 2);
+		Subject subject = createSubject(SubjectDivision.MR, "subjectName", 3, 2);
 		Subject savedSubject = saveSubject(subject);
-		List<Lecture> lectures = lectureRepository.saveAll(generateCopiedLectureFixtures(50, savedSubject, professor));
+		List<Lecture> lectures = lectureRepository.saveAll(
+			generateCopiedLectureFixtures(savedSubject, professor, department));
 		saveSchedules(generateScheduleFixtures(lectures));
 
 		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
-		LectureFilterOptions lectureFilterOptions = LectureFilterOptions.builder().build();
+		LectureFilterOptions lectureFilterOptions = LectureFilterOptions.builder()
+			.openingYear(Year.of(2024))
+			.semester(Semester.FIRST)
+			.build();
 
 		// when
 		LectureSchedulePage lectureSchedulePage = lectureService.fetchLectureSchedule(pageRequest,
@@ -75,20 +81,22 @@ class LectureServiceTest extends IntegrationTestSupport {
 		Professor professor = saveProfessor("남유진");
 
 		List<Subject> majorRequiredSubjects = saveSubjects(
-			generateSubjectFixtures(30, SubjectDivision.MR, department, "공예"));
+			generateSubjectFixtures(30, SubjectDivision.MR, "공예"));
 		List<Subject> generalRequiredSubjects = saveSubjects(
-			generateSubjectFixtures(10, SubjectDivision.GR, department, "역사"));
+			generateSubjectFixtures(10, SubjectDivision.GR, "역사"));
 
 		List<Lecture> matchedLectureFixtures = lectureRepository.saveAll(
-			generateLectureFixtures(majorRequiredSubjects, professor));
+			generateLectureFixtures(majorRequiredSubjects, professor, department));
 		List<Lecture> unmatchedLectureFixtures = lectureRepository.saveAll(
-			generateLectureFixtures(generalRequiredSubjects, professor));
+			generateLectureFixtures(generalRequiredSubjects, professor, department));
 
 		saveSchedules(generateScheduleFixtures(matchedLectureFixtures));
 		saveSchedules(generateScheduleFixtures(unmatchedLectureFixtures));
 
 		PageRequest pageRequest = PageRequest.of(0, 20, Sort.Direction.ASC, "id");
 		LectureFilterOptions lectureFilterOptions = LectureFilterOptions.builder()
+			.openingYear(Year.of(2024))
+			.semester(Semester.FIRST)
 			.subjectDivision(SubjectDivision.MR)
 			.departmentId(department.getId())
 			.subjectName("공예")
@@ -113,24 +121,24 @@ class LectureServiceTest extends IntegrationTestSupport {
 				lectureFilterOptions.getSubjectName()));
 	}
 
-	private List<Lecture> generateCopiedLectureFixtures(int size, Subject subjects, Professor professor) {
-		return IntStream.rangeClosed(1, size)
+	private List<Lecture> generateCopiedLectureFixtures(Subject subjects, Professor professor,
+		Department department) {
+		return IntStream.rangeClosed(1, 50)
 			.mapToObj(number -> createLecture(100100 + number, Integer.toString(100 + number), 10 + number, subjects,
-				professor))
+				professor, department))
 			.toList();
 	}
 
-	private List<Lecture> generateLectureFixtures(List<Subject> subjects, Professor professor) {
+	private List<Lecture> generateLectureFixtures(List<Subject> subjects, Professor professor, Department department) {
 		return IntStream.rangeClosed(1, subjects.size())
 			.mapToObj(number -> createLecture(100100 + number, Integer.toString(100 + number), 10 + number,
-				subjects.get(number - 1), professor))
+				subjects.get(number - 1), professor, department))
 			.toList();
 	}
 
-	private List<Subject> generateSubjectFixtures(int size, SubjectDivision subjectDivision, Department department,
-		String subjectName) {
+	private List<Subject> generateSubjectFixtures(int size, SubjectDivision subjectDivision, String subjectName) {
 		return IntStream.rangeClosed(1, size)
-			.mapToObj(number -> createSubject(department, subjectDivision, Grade.FRESHMAN, subjectName + number, 4, 3))
+			.mapToObj(number -> createSubject(subjectDivision, subjectName + number, 4, 3))
 			.toList();
 	}
 
@@ -146,23 +154,24 @@ class LectureServiceTest extends IntegrationTestSupport {
 	}
 
 	private static Lecture createLecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity,
-		Subject subject, Professor professor) {
+		Subject subject, Professor professor, Department department) {
 		return Lecture.builder()
+			.openingYear(Year.of(2024))
+			.semester(Semester.FIRST)
 			.lectureNumber(lectureNumber)
 			.lectureRoom(lectureRoom)
 			.totalCapacity(totalCapacity)
 			.subject(subject)
 			.professor(professor)
+			.department(department)
 			.build();
 	}
 
-	private static Subject createSubject(Department department, SubjectDivision subjectDivision, Grade targetGrade,
-		String name,
+	private static Subject createSubject(SubjectDivision subjectDivision, String name,
 		Integer hoursPerWeek, Integer credits) {
 		return Subject.builder()
-			.department(department)
 			.subjectDivision(subjectDivision)
-			.targetGrade(targetGrade)
+			.targetGrade(Grade.FRESHMAN)
 			.name(name)
 			.hoursPerWeek(hoursPerWeek)
 			.credits(credits)

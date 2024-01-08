@@ -16,10 +16,16 @@ public enum ResponseMessage {
 	CURRENT_SERVER_TIME_FETCH_SUCCESS("현재 서버 시간 조회에 성공했습니다"),
 
 	// Session
-	RENEW_SESSION_DURATION_SUCCESS("세션 지속시간 갱신에 성공했습니다"),
+	SESSION_RENEW_SUCCESS("세션 지속시간 갱신에 성공했습니다"),
 
 	// Lecture
-	LECTURE_SCHEDULE_FETCH_SUCCESS("강의 시간표 조회에 성공했습니다");
+	LECTURE_SCHEDULE_FETCH_SUCCESS("강의 시간표 조회에 성공했습니다"),
+
+	// Enrollment
+	ENROLL_LECTURE_SUCCESS("수강 신청이 성공적으로 완료되었습니다"),
+	ENROLLMENT_CANCEL_SUCCESS("수강 취소가 정상적으로 처리되었습니다"),
+	ENROLLMENT_FETCH_SUCCESS("수강 신청 내역 조회에 성공했습니다"),
+	ENROLLMENT_CAPACITY_FETCH_SUCCESS("현재 수강 신청 인원 조회에 성공했습니다");
 
 	private final String message;
 
