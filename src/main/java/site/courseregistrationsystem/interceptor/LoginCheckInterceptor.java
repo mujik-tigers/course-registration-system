@@ -1,6 +1,7 @@
 package site.courseregistrationsystem.interceptor;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import jakarta.servlet.http.Cookie;
