@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.courseregistrationsystem.department.Department;
@@ -32,13 +33,10 @@ public class Student {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Department department;
 
-	public Student(String studentId, String password) {
+	@Builder
+	private Student(String studentId, String password, String name, Grade grade, Department department) {
 		this.studentId = studentId;
 		this.password = password;
-	}
-
-	public Student(String studentId, String name, Grade grade, Department department) {
-		this.studentId = studentId;
 		this.name = name;
 		this.grade = grade;
 		this.department = department;

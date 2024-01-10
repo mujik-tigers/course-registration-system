@@ -38,7 +38,7 @@ class AuthServiceTest extends IntegrationTestSupport {
 		String password = "test1234!";
 
 		Student saved = saveStudent(studentId, password);
-		LoginForm loginForm = new LoginForm(studentId, password);
+		LoginForm loginForm = createLoginForm(studentId, password);
 
 		// when
 		StudentSession session = authService.login(loginForm);
@@ -58,8 +58,8 @@ class AuthServiceTest extends IntegrationTestSupport {
 		String password = "test1234!";
 		String wrongPassword = "test0123!";
 
-		Student saved = saveStudent(studentId, password);
-		LoginForm loginForm = new LoginForm(studentId, wrongPassword);
+		saveStudent(studentId, password);
+		LoginForm loginForm = createLoginForm(studentId, wrongPassword);
 
 		// when / then
 		assertThatThrownBy(() -> authService.login(loginForm))
@@ -67,11 +67,23 @@ class AuthServiceTest extends IntegrationTestSupport {
 			.hasMessage(ErrorType.INVALID_PASSWORD.getMessage());
 	}
 
+	private static LoginForm createLoginForm(String studentId, String password) {
+		return LoginForm.builder()
+			.studentId(studentId)
+			.password(password)
+			.build();
+	}
+
 	private Student saveStudent(String studentId, String password) {
 		String encryptedStudentId = aes256Manager.encrypt(studentId);
 		String encryptedPassword = BCryptManager.encrypt(password);
 
-		return studentRepository.save(new Student(encryptedStudentId, encryptedPassword));
+		Student student = Student.builder()
+			.studentId(encryptedStudentId)
+			.password(encryptedPassword)
+			.build();
+
+		return studentRepository.save(student);
 	}
 
 }

@@ -1,13 +1,12 @@
 package site.courseregistrationsystem.auth.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import site.courseregistrationsystem.validator.PasswordFormatCheck;
 import site.courseregistrationsystem.validator.StudentIdFormatCheck;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 public class LoginForm {
 
@@ -16,5 +15,11 @@ public class LoginForm {
 
 	@PasswordFormatCheck
 	private String password;
+
+	@Builder
+	private LoginForm(String studentId, String password) {
+		this.studentId = studentId;
+		this.password = password;
+	}
 
 }

@@ -3,15 +3,13 @@ package site.courseregistrationsystem.subject;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.student.Grade;
 
 @Entity
@@ -23,9 +21,6 @@ public class Subject {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	private Department department;
-
 	@Enumerated(EnumType.STRING)
 	private SubjectDivision subjectDivision;
 
@@ -36,9 +31,9 @@ public class Subject {
 	private Integer hoursPerWeek;
 	private Integer credits;
 
-	public Subject(Department department, SubjectDivision subjectDivision, Grade targetGrade, String name,
+	@Builder
+	private Subject(SubjectDivision subjectDivision, Grade targetGrade, String name,
 		Integer hoursPerWeek, Integer credits) {
-		this.department = department;
 		this.subjectDivision = subjectDivision;
 		this.targetGrade = targetGrade;
 		this.name = name;

@@ -5,13 +5,12 @@ import org.springframework.data.redis.core.TimeToLive;
 
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @RedisHash("session")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Getter
 public class StudentSession {
 
@@ -22,5 +21,12 @@ public class StudentSession {
 
 	@TimeToLive
 	private Long expiration;
+
+	@Builder
+	private StudentSession(String id, Long studentPk, Long expiration) {
+		this.id = id;
+		this.studentPk = studentPk;
+		this.expiration = expiration;
+	}
 
 }

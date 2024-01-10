@@ -30,8 +30,8 @@ public @interface PasswordFormatCheck {
 		private final Pattern pattern = Pattern.compile(PASSWORD_REGEX);
 
 		@Override
-		public boolean isValid(String studentId, ConstraintValidatorContext context) {
-			return studentId != null && pattern.matcher(studentId).matches();
+		public boolean isValid(String password, ConstraintValidatorContext context) {
+			return password != null && pattern.matcher(password).matches();
 		}
 	}
 
