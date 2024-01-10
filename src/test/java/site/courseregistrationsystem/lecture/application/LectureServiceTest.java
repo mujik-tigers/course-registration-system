@@ -17,9 +17,9 @@ import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.basket.Basket;
 import site.courseregistrationsystem.department.Department;
-import site.courseregistrationsystem.lecture.dto.BasketStoringCount;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.Semester;
+import site.courseregistrationsystem.lecture.dto.BasketStoringCount;
 import site.courseregistrationsystem.lecture.dto.LectureFilterOptions;
 import site.courseregistrationsystem.lecture.dto.LectureSchedulePage;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
@@ -136,7 +136,10 @@ class LectureServiceTest extends IntegrationTestSupport {
 		int STUDENT_COUNT = 15;
 
 		Subject subject = saveSubject(create3CreditSubject("미분적분학"));
-		Lecture lecture = lectureRepository.save(createLecture(subject, TOTAL_CAPACITY));
+
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
+		Lecture lecture = lectureRepository.save(createLecture(subject, TOTAL_CAPACITY, YEAR, SEMESTER));
 
 		for (int i = 0; i < STUDENT_COUNT; i++) {
 			Student student = studentRepository.save(createStudent());
@@ -145,7 +148,7 @@ class LectureServiceTest extends IntegrationTestSupport {
 		}
 
 		// when
-		BasketStoringCount basketStoringCount = lectureService.fetchBasketStoringCount(lecture.getId());
+		BasketStoringCount basketStoringCount = lectureService.fetchBasketStoringCount(YEAR, SEMESTER, lecture.getId());
 
 		// then
 		assertThat(basketStoringCount.getTotalCapacity()).isEqualTo(TOTAL_CAPACITY);
@@ -222,11 +225,13 @@ class LectureServiceTest extends IntegrationTestSupport {
 			.build();
 	}
 
-	private Lecture createLecture(Subject subject, int totalCapacity) {
+	private Lecture createLecture(Subject subject, int totalCapacity, Year year, Semester semester) {
 		return Lecture.builder()
 			.lectureNumber(5349)
 			.lectureRoom("법학관301")
 			.totalCapacity(totalCapacity)
+			.openingYear(year)
+			.semester(semester)
 			.subject(subject)
 			.build();
 	}

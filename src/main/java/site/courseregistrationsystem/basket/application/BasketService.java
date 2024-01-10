@@ -1,5 +1,6 @@
 package site.courseregistrationsystem.basket.application;
 
+import java.time.Year;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -13,9 +14,11 @@ import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
+import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
 import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
+import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
@@ -32,7 +35,7 @@ public class BasketService {
 	private final BasketRepository basketRepository;
 
 	@Transactional
-	public Long addLectureToBasket(Long studentPk, Long lectureId) {
+	public Long addLectureToBasket(Year year, Semester semester, Long studentPk, Long lectureId) {
 		Student student = getStudent(studentPk);
 
 		Lecture lectureForBasket = lectureRepository.findById(lectureId)
@@ -40,6 +43,7 @@ public class BasketService {
 
 		List<Basket> baskets = basketRepository.findAllByStudent(student);
 
+		checkLectureInCurrentSemester(year, semester, lectureForBasket);
 		checkSubjectInBasketDuplicated(baskets, lectureForBasket);
 		checkCreditLimitExceeded(baskets, lectureForBasket);
 		checkScheduleConflict(baskets, lectureForBasket);
@@ -79,6 +83,12 @@ public class BasketService {
 	private Student getStudent(Long studentPk) {
 		return studentRepository.findById(studentPk)
 			.orElseThrow(NonexistenceLectureException::new);
+	}
+
+	private void checkLectureInCurrentSemester(Year year, Semester semester, Lecture lecture) {
+		if (!lecture.hasSameSemester(year, semester)) {
+			throw new LectureNotInCurrentSemesterException();
+		}
 	}
 
 	private void checkSubjectInBasketDuplicated(List<Basket> baskets, Lecture lectureForBasket) {

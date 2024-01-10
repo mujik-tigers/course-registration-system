@@ -1,13 +1,17 @@
 package site.courseregistrationsystem.lecture.application;
 
+import java.time.Year;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
+import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
 import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
 import site.courseregistrationsystem.lecture.Lecture;
+import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.dto.BasketStoringCount;
 import site.courseregistrationsystem.lecture.dto.LectureDetail;
 import site.courseregistrationsystem.lecture.dto.LectureFilterOptions;
@@ -34,13 +38,20 @@ public class LectureService {
 				.map(LectureDetail::new));
 	}
 
-	public BasketStoringCount fetchBasketStoringCount(Long lectureId) {
+	public BasketStoringCount fetchBasketStoringCount(Year year, Semester semester, Long lectureId) {
 		Lecture lecture = lectureRepository.findById(lectureId)
 			.orElseThrow(NonexistenceLectureException::new);
 
-		int basketCount = basketRepository.countByLecture(lecture);
+		checkLectureInCurrentSemester(year, semester, lecture);
 
+		int basketCount = basketRepository.countByLecture(lecture);
 		return new BasketStoringCount(lecture.getTotalCapacity(), basketCount);
+	}
+
+	private void checkLectureInCurrentSemester(Year year, Semester semester, Lecture lecture) {
+		if (!lecture.hasSameSemester(year, semester)) {
+			throw new LectureNotInCurrentSemesterException();
+		}
 	}
 
 }

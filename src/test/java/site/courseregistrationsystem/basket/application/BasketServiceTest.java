@@ -2,6 +2,7 @@ package site.courseregistrationsystem.basket.application;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.time.Year;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -17,8 +18,10 @@ import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
+import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
+import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.professor.Professor;
 import site.courseregistrationsystem.schedule.DayOfWeek;
@@ -55,10 +58,13 @@ class BasketServiceTest extends IntegrationTestSupport {
 		entityManager.persist(subject);
 
 		Student savedStudent = studentRepository.save(createStudent());
-		Lecture savedLecture = lectureRepository.save(createLecture(subject));
+
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
+		Lecture savedLecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 
 		// when
-		Long basketSavedLectureId = basketService.addLectureToBasket(savedStudent.getId(), savedLecture.getId());
+		Long basketSavedLectureId = basketService.addLectureToBasket(YEAR, SEMESTER, savedStudent.getId(), savedLecture.getId());
 
 		// then
 		List<Basket> baskets = basketRepository.findAll();
@@ -78,14 +84,18 @@ class BasketServiceTest extends IntegrationTestSupport {
 		entityManager.persist(subject);
 
 		Student savedStudent = studentRepository.save(createStudent());
-		Lecture savedLecture = lectureRepository.save(createLecture(subject));
+
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
+		Lecture savedLecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 
 		basketRepository.save(createBasket(savedStudent, savedLecture));
 
-		Lecture duplicateSubjectLecture = lectureRepository.save(createLecture(subject));
+		Lecture duplicateSubjectLecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 
 		// when & then
-		assertThatThrownBy(() -> basketService.addLectureToBasket(savedStudent.getId(), duplicateSubjectLecture.getId()))
+		assertThatThrownBy(
+			() -> basketService.addLectureToBasket(YEAR, SEMESTER, savedStudent.getId(), duplicateSubjectLecture.getId()))
 			.isInstanceOf(DuplicateBasketException.class);
 	}
 
@@ -95,14 +105,16 @@ class BasketServiceTest extends IntegrationTestSupport {
 		// given
 		Student student = studentRepository.save(createStudent());
 		int LECTURE_COUNT = 6;
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
 
 		// when
 		for (int i = 0; i < LECTURE_COUNT; i++) {                                        // 주어진 학생이 18학점의 수업을 수강바구니에 담음
 			Subject subject = create3CreditSubject("선형대수학" + i);
 			entityManager.persist(subject);
-			Lecture lecture = lectureRepository.save(createLecture(subject));
+			Lecture lecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 
-			basketService.addLectureToBasket(student.getId(), lecture.getId());
+			basketService.addLectureToBasket(YEAR, SEMESTER, student.getId(), lecture.getId());
 		}
 
 		// then
@@ -116,20 +128,23 @@ class BasketServiceTest extends IntegrationTestSupport {
 		// given
 		Student student = studentRepository.save(createStudent());
 
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
+
 		for (int i = 0; i < 6; i++) {                                        // 주어진 학생이 18학점의 수업을 수강바구니에 담음
 			Subject subject = create3CreditSubject("선형대수학" + i);
 			entityManager.persist(subject);
-			Lecture lecture = lectureRepository.save(createLecture(subject));
+			Lecture lecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 
 			basketRepository.save(createBasket(student, lecture));
 		}
 
 		Subject subject = create3CreditSubject("법학입문");
 		entityManager.persist(subject);
-		Lecture lecture = lectureRepository.save(createLecture(subject));
+		Lecture lecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 
 		// when & then
-		assertThatThrownBy(() -> basketService.addLectureToBasket(student.getId(), lecture.getId()))
+		assertThatThrownBy(() -> basketService.addLectureToBasket(YEAR, SEMESTER, student.getId(), lecture.getId()))
 			.isInstanceOf(CreditLimitExceededException.class);
 	}
 
@@ -139,22 +154,25 @@ class BasketServiceTest extends IntegrationTestSupport {
 		// given
 		Student student = studentRepository.save(createStudent());
 
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
+
 		Subject subject1 = create3CreditSubject("선형대수학");
 		entityManager.persist(subject1);
-		Lecture savedLecture = lectureRepository.save(createLecture(subject1));
+		Lecture savedLecture = lectureRepository.save(createLecture(subject1, YEAR, SEMESTER));
 		entityManager.persist(createSchedule(savedLecture, DayOfWeek.MON, Period.ONE, Period.FIVE));
 		entityManager.persist(createBasket(student, savedLecture));
 
 		Subject subject2 = create3CreditSubject("미분적분학");
 		entityManager.persist(subject2);
-		Lecture lectureToAdd = lectureRepository.save(createLecture(subject2));
+		Lecture lectureToAdd = lectureRepository.save(createLecture(subject2, YEAR, SEMESTER));
 		entityManager.persist(createSchedule(lectureToAdd, DayOfWeek.THU, Period.ONE, Period.FIVE));
 
 		entityManager.flush();
 		entityManager.clear();
 
 		// when
-		basketService.addLectureToBasket(student.getId(), lectureToAdd.getId());
+		basketService.addLectureToBasket(YEAR, SEMESTER, student.getId(), lectureToAdd.getId());
 
 		// then
 		List<Basket> baskets = basketRepository.findAllByStudent(student);
@@ -167,22 +185,25 @@ class BasketServiceTest extends IntegrationTestSupport {
 		// given
 		Student student = studentRepository.save(createStudent());
 
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
+
 		Subject subject1 = create3CreditSubject("선형대수학");
 		entityManager.persist(subject1);
-		Lecture savedLecture = lectureRepository.save(createLecture(subject1));
+		Lecture savedLecture = lectureRepository.save(createLecture(subject1, YEAR, SEMESTER));
 		entityManager.persist(createSchedule(savedLecture, DayOfWeek.MON, Period.ONE, Period.FIVE));
 		entityManager.persist(createBasket(student, savedLecture));
 
 		Subject subject2 = create3CreditSubject("미분적분학");
 		entityManager.persist(subject2);
-		Lecture lectureToAdd = lectureRepository.save(createLecture(subject2));
+		Lecture lectureToAdd = lectureRepository.save(createLecture(subject2, YEAR, SEMESTER));
 		entityManager.persist(createSchedule(lectureToAdd, DayOfWeek.MON, Period.FIVE, Period.NINE));
 
 		entityManager.flush();
 		entityManager.clear();
 
 		// when & then
-		assertThatThrownBy(() -> basketService.addLectureToBasket(student.getId(), lectureToAdd.getId()))
+		assertThatThrownBy(() -> basketService.addLectureToBasket(YEAR, SEMESTER, student.getId(), lectureToAdd.getId()))
 			.isInstanceOf(ScheduleConflictException.class);
 	}
 
@@ -194,17 +215,20 @@ class BasketServiceTest extends IntegrationTestSupport {
 		entityManager.persist(professor);
 		Student student = studentRepository.save(createStudent());
 
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
+
 		String SUBJECT1_NAME = "선형대수학";                                        // 주어진 student 가 `선형대수학` 수업을 수강바구니에 담는 과정
 		Subject subject1 = create3CreditSubject(SUBJECT1_NAME);
 		entityManager.persist(subject1);
-		Lecture lecture1 = lectureRepository.save(createLecture(subject1, professor));
+		Lecture lecture1 = lectureRepository.save(createLecture(subject1, professor, YEAR, SEMESTER));
 		entityManager.persist(createSchedule(lecture1, DayOfWeek.MON, Period.ONE, Period.FIVE));
 		entityManager.persist(createBasket(student, lecture1));
 
 		String SUBJECT2_NAME = "미분적분학";                                        // 주어진 student 가 `미분적분학` 수업을 수강바구니에 담는 과정
 		Subject subject2 = create3CreditSubject(SUBJECT2_NAME);
 		entityManager.persist(subject2);
-		Lecture lecture2 = lectureRepository.save(createLecture(subject2, professor));
+		Lecture lecture2 = lectureRepository.save(createLecture(subject2, professor, YEAR, SEMESTER));
 		entityManager.persist(createSchedule(lecture2, DayOfWeek.THU, Period.ONE, Period.FIVE));
 		entityManager.persist(createBasket(student, lecture2));
 
@@ -245,7 +269,10 @@ class BasketServiceTest extends IntegrationTestSupport {
 		Student student = studentRepository.save(createStudent());
 		Subject subject = create3CreditSubject("미분적분학");
 		entityManager.persist(subject);
-		Lecture lecture = lectureRepository.save(createLecture(subject));
+
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
+		Lecture lecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 		Basket basket = basketRepository.save(createBasket(student, lecture));
 
 		// when
@@ -265,7 +292,10 @@ class BasketServiceTest extends IntegrationTestSupport {
 		Student student1 = studentRepository.save(createStudent());
 		Subject subject = create3CreditSubject("미분적분학");
 		entityManager.persist(subject);
-		Lecture lecture = lectureRepository.save(createLecture(subject));
+
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
+		Lecture lecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 		Basket basket = basketRepository.save(createBasket(student1, lecture));
 
 		Student student2 = studentRepository.save(createStudent());
@@ -273,6 +303,32 @@ class BasketServiceTest extends IntegrationTestSupport {
 		// when & then
 		assertThatThrownBy(() -> basketService.deleteBasket(student2.getId(), basket.getId()))
 			.isInstanceOf(NonexistenceBasketException.class);
+	}
+
+	@Test
+	@DisplayName("수강 바구니에 담으려는 강의의 진행 학기와 현재 신청학기가 일치하지 않는 경우 해당 강의를 담을 수 없다.")
+	void lectureAndCurrentSemesterDifferent() throws Exception {
+		// given
+		Student student = studentRepository.save(createStudent());
+		Subject subject = create3CreditSubject("미분적분학");
+		entityManager.persist(subject);
+
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
+		Lecture lecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
+
+		Year DIFFERENT_YEAR = Year.of(2025);
+		Semester DIFFERENT_SEMESTER = Semester.SECOND;
+
+		// when & then
+		assertThatThrownBy(() -> basketService.addLectureToBasket(DIFFERENT_YEAR, SEMESTER, student.getId(), lecture.getId()))
+			.isInstanceOf(LectureNotInCurrentSemesterException.class);
+
+		assertThatThrownBy(() -> basketService.addLectureToBasket(YEAR, DIFFERENT_SEMESTER, student.getId(), lecture.getId()))
+			.isInstanceOf(LectureNotInCurrentSemesterException.class);
+
+		assertThatThrownBy(() -> basketService.addLectureToBasket(DIFFERENT_YEAR, DIFFERENT_SEMESTER, student.getId(), lecture.getId()))
+			.isInstanceOf(LectureNotInCurrentSemesterException.class);
 	}
 
 	private Student createStudent() {
@@ -292,22 +348,26 @@ class BasketServiceTest extends IntegrationTestSupport {
 			.build();
 	}
 
-	private Lecture createLecture(Subject subject) {
+	private Lecture createLecture(Subject subject, Year year, Semester semester) {
 		return Lecture.builder()
 			.lectureNumber(5349)
 			.lectureRoom("법학관301")
 			.totalCapacity(40)
 			.subject(subject)
+			.openingYear(year)
+			.semester(semester)
 			.build();
 	}
 
-	private Lecture createLecture(Subject subject, Professor professor) {
+	private Lecture createLecture(Subject subject, Professor professor, Year year, Semester semester) {
 		return Lecture.builder()
 			.lectureNumber(5349)
 			.lectureRoom("법학관301")
 			.totalCapacity(40)
 			.subject(subject)
 			.professor(professor)
+			.openingYear(year)
+			.semester(semester)
 			.build();
 	}
 

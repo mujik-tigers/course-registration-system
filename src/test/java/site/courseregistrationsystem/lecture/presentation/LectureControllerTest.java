@@ -137,7 +137,7 @@ class LectureControllerTest extends RestDocsSupport {
 		int TOTAL_CAPACITY = 40;
 		int CURRENT_BASKET_STORING_COUNT = 15;
 
-		given(lectureService.fetchBasketStoringCount(anyLong()))
+		given(lectureService.fetchBasketStoringCount(any(), any(), anyLong()))
 			.willReturn(new BasketStoringCount(TOTAL_CAPACITY, CURRENT_BASKET_STORING_COUNT));
 
 		// when & then
@@ -171,7 +171,7 @@ class LectureControllerTest extends RestDocsSupport {
 
 		long LECTURE_ID = 1L;
 
-		given(lectureService.fetchBasketStoringCount(anyLong()))
+		given(lectureService.fetchBasketStoringCount(any(), any(), anyLong()))
 			.willThrow(new NonexistenceLectureException());
 
 		// when & then

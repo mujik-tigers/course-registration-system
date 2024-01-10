@@ -1,5 +1,7 @@
 package site.courseregistrationsystem.lecture.presentation;
 
+import java.time.Year;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.application.LectureService;
 import site.courseregistrationsystem.lecture.dto.BasketStoringCount;
 import site.courseregistrationsystem.lecture.dto.LectureFilterOptions;
@@ -30,7 +33,7 @@ public class LectureController {
 
 	@GetMapping("/lectures/{lectureId}/basket-count")
 	public ApiResponse<BasketStoringCount> fetchBasketStoringCount(@PathVariable Long lectureId) {
-		BasketStoringCount basketStoringCount = lectureService.fetchBasketStoringCount(lectureId);
+		BasketStoringCount basketStoringCount = lectureService.fetchBasketStoringCount(Year.now(), Semester.getCurrentSemester(), lectureId);
 
 		return ApiResponse.ok(ResponseMessage.BASKET_STORING_COUNT_FETCH_SUCCESS.getMessage(), basketStoringCount);
 	}

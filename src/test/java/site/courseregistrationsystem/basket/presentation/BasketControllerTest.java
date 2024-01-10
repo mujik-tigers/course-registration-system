@@ -45,7 +45,7 @@ class BasketControllerTest extends RestDocsSupport {
 
 		Long LECTURE_ID = 1L;
 
-		given(basketService.addLectureToBasket(anyLong(), anyLong()))
+		given(basketService.addLectureToBasket(any(), any(), anyLong(), anyLong()))
 			.willReturn(LECTURE_ID);
 
 		// when & then
@@ -77,7 +77,7 @@ class BasketControllerTest extends RestDocsSupport {
 
 		Long LECTURE_ID = 1L;
 
-		given(basketService.addLectureToBasket(anyLong(), anyLong()))
+		given(basketService.addLectureToBasket(any(), any(), anyLong(), anyLong()))
 			.willThrow(new DuplicateBasketException());
 
 		// when & then
@@ -107,7 +107,7 @@ class BasketControllerTest extends RestDocsSupport {
 
 		Long LECTURE_ID = 1L;
 
-		given(basketService.addLectureToBasket(anyLong(), anyLong()))
+		given(basketService.addLectureToBasket(any(), any(), anyLong(), anyLong()))
 			.willThrow(new CreditLimitExceededException());
 
 		// when & then
@@ -137,7 +137,7 @@ class BasketControllerTest extends RestDocsSupport {
 
 		Long LECTURE_ID = 1L;
 
-		given(basketService.addLectureToBasket(anyLong(), anyLong()))
+		given(basketService.addLectureToBasket(any(), any(), anyLong(), anyLong()))
 			.willThrow(new ScheduleConflictException());
 
 		// when & then
