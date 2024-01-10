@@ -15,9 +15,11 @@ import org.springframework.data.domain.Sort;
 
 import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
+import site.courseregistrationsystem.basket.Basket;
 import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.Semester;
+import site.courseregistrationsystem.lecture.dto.BasketStoringCount;
 import site.courseregistrationsystem.lecture.dto.LectureFilterOptions;
 import site.courseregistrationsystem.lecture.dto.LectureSchedulePage;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
@@ -26,6 +28,8 @@ import site.courseregistrationsystem.schedule.DayOfWeek;
 import site.courseregistrationsystem.schedule.Period;
 import site.courseregistrationsystem.schedule.Schedule;
 import site.courseregistrationsystem.student.Grade;
+import site.courseregistrationsystem.student.Student;
+import site.courseregistrationsystem.student.infrastructure.StudentRepository;
 import site.courseregistrationsystem.subject.Subject;
 import site.courseregistrationsystem.subject.SubjectDivision;
 
@@ -36,6 +40,9 @@ class LectureServiceTest extends IntegrationTestSupport {
 
 	@Autowired
 	private LectureRepository lectureRepository;
+
+	@Autowired
+	private StudentRepository studentRepository;
 
 	@Autowired
 	private EntityManager entityManager;
@@ -121,6 +128,33 @@ class LectureServiceTest extends IntegrationTestSupport {
 				lectureFilterOptions.getSubjectName()));
 	}
 
+	@Test
+	@DisplayName("특정 강의를 수강 바구니로 담은 사람 수를 확인한다.")
+	void calculateBasketStoringCount() throws Exception {
+		// given
+		int TOTAL_CAPACITY = 40;
+		int STUDENT_COUNT = 15;
+
+		Subject subject = saveSubject(create3CreditSubject("미분적분학"));
+
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
+		Lecture lecture = lectureRepository.save(createLecture(subject, TOTAL_CAPACITY, YEAR, SEMESTER));
+
+		for (int i = 0; i < STUDENT_COUNT; i++) {
+			Student student = studentRepository.save(createStudent());
+			Basket basket = createBasket(student, lecture);
+			entityManager.persist(basket);
+		}
+
+		// when
+		BasketStoringCount basketStoringCount = lectureService.fetchBasketStoringCount(YEAR, SEMESTER, lecture.getId());
+
+		// then
+		assertThat(basketStoringCount.getTotalCapacity()).isEqualTo(TOTAL_CAPACITY);
+		assertThat(basketStoringCount.getCurrentBasketStoringCount()).isEqualTo(STUDENT_COUNT);
+	}
+
 	private List<Lecture> generateCopiedLectureFixtures(Subject subjects, Professor professor,
 		Department department) {
 		return IntStream.rangeClosed(1, 50)
@@ -175,6 +209,37 @@ class LectureServiceTest extends IntegrationTestSupport {
 			.name(name)
 			.hoursPerWeek(hoursPerWeek)
 			.credits(credits)
+			.build();
+	}
+
+	private Student createStudent() {
+		return Student.builder().build();
+	}
+
+	private Subject create3CreditSubject(String name) {
+		return Subject.builder()
+			.name(name)
+			.credits(3)
+			.targetGrade(Grade.SENIOR)
+			.subjectDivision(SubjectDivision.GR)
+			.build();
+	}
+
+	private Lecture createLecture(Subject subject, int totalCapacity, Year year, Semester semester) {
+		return Lecture.builder()
+			.lectureNumber(5349)
+			.lectureRoom("법학관301")
+			.totalCapacity(totalCapacity)
+			.openingYear(year)
+			.semester(semester)
+			.subject(subject)
+			.build();
+	}
+
+	private Basket createBasket(Student student, Lecture lecture) {
+		return Basket.builder()
+			.student(student)
+			.lecture(lecture)
 			.build();
 	}
 

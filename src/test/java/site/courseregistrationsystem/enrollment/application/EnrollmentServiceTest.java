@@ -27,11 +27,11 @@ import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
 import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentRepository;
 import site.courseregistrationsystem.exception.ErrorType;
-import site.courseregistrationsystem.exception.enrollment.CreditsLimitExceededException;
+import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
 import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
-import site.courseregistrationsystem.exception.enrollment.ScheduleConflictException;
+import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
@@ -155,8 +155,8 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 
 		// when & then
 		assertThatThrownBy(() -> enrollmentService.enrollLecture(openingYear, semester, student.getId(), lectureWithMinCredits.getId()))
-			.isInstanceOf(CreditsLimitExceededException.class)
-			.hasMessage(ErrorType.SEMESTER_CREDIT_EXCEED.getMessage());
+			.isInstanceOf(CreditLimitExceededException.class)
+			.hasMessage(ErrorType.CREDIT_LIMIT_EXCEEDED.getMessage());
 	}
 
 	@Test

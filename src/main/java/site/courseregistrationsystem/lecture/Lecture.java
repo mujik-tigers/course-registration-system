@@ -76,9 +76,9 @@ public class Lecture {
 			.collect(Collectors.joining(", "));
 	}
 
-	public boolean hasScheduleConflict(Lecture lecture) {
+	public boolean hasScheduleConflict(Lecture lectureToAdd) {
 		return this.schedules.stream()
-			.anyMatch(schedule -> lecture.getSchedules().stream().anyMatch(schedule::hasConflictWith));
+			.anyMatch(schedule -> lectureToAdd.getSchedules().stream().anyMatch(scheduleToAdd -> schedule.hasConflictWith(scheduleToAdd)));
 	}
 
 	public boolean hasSameSemester(Year year, Semester semester) {
@@ -115,6 +115,11 @@ public class Lecture {
 
 	public String fetchProfessorName() {
 		return professor.getName();
+	}
+
+	public void addSchedule(Schedule schedule) {
+		schedules.add(schedule);
+		schedule.setLecture(this);
 	}
 
 }

@@ -43,13 +43,17 @@ public class Schedule {
 		this.lastPeriod = lastPeriod;
 	}
 
+	public void setLecture(Lecture lecture) {
+		this.lecture = lecture;
+	}
+
 	public boolean hasConflictWith(Schedule schedule) {
-		if (!this.dayOfWeek.equals(schedule.dayOfWeek)) {
+		if (this.getDayOfWeek() != schedule.getDayOfWeek()) {
 			return false;
 		}
 
-		boolean isBefore = this.firstPeriod.getPeriodNumber() > schedule.lastPeriod.getPeriodNumber();
-		boolean isAfter = this.lastPeriod.getPeriodNumber() < schedule.firstPeriod.getPeriodNumber();
+		boolean isBefore = this.lastPeriod.getPeriodNumber() < schedule.firstPeriod.getPeriodNumber();
+		boolean isAfter = this.firstPeriod.getPeriodNumber() > schedule.lastPeriod.getPeriodNumber();
 
 		return !(isBefore || isAfter);
 	}

@@ -20,6 +20,12 @@ public enum ResponseMessage {
 
 	// Lecture
 	LECTURE_SCHEDULE_FETCH_SUCCESS("강의 시간표 조회에 성공했습니다"),
+	BASKET_STORING_COUNT_FETCH_SUCCESS("강의를 수강 바구니에 담은 사람 수 조회에 성공했습니다"),
+
+	// Basket
+	BASKET_FETCH_SUCCESS("수강 바구니 목록 조회에 성공했습니다"),
+	BASKET_ADD_SUCCESS("강의를 수강 바구니에 담기에 성공했습니다"),
+	BASKET_DELETE_SUCCESS("수강 바구니 삭제를 성공했습니다"),
 
 	// Enrollment
 	ENROLL_LECTURE_SUCCESS("수강 신청이 성공적으로 완료되었습니다"),

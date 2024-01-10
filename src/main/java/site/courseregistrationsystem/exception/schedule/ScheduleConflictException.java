@@ -1,4 +1,4 @@
-package site.courseregistrationsystem.exception.enrollment;
+package site.courseregistrationsystem.exception.schedule;
 
 import site.courseregistrationsystem.exception.CustomException;
 import site.courseregistrationsystem.exception.ErrorType;

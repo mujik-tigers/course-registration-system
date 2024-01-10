@@ -39,12 +39,12 @@ class StudentServiceTest extends IntegrationTestSupport {
 		Grade grade = Grade.SENIOR;
 		Department department = saveDepartment("전기전자공학부");
 
-		Student student = new Student(
-			aes256Manager.encrypt(STUDENT_ID),
-			aes256Manager.encrypt(NAME),
-			grade,
-			department
-		);
+		Student student = Student.builder()
+			.studentId(aes256Manager.encrypt(STUDENT_ID))
+			.name(aes256Manager.encrypt(NAME))
+			.grade(grade)
+			.department(department)
+			.build();
 
 		Student savedStudent = studentRepository.save(student);
 

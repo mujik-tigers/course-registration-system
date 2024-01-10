@@ -2,7 +2,9 @@ package site.courseregistrationsystem;
 
 import static org.mockito.BDDMockito.*;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -16,10 +18,13 @@ import site.courseregistrationsystem.auth.application.AuthService;
 import site.courseregistrationsystem.auth.application.SessionManager;
 import site.courseregistrationsystem.auth.presentation.AuthController;
 import site.courseregistrationsystem.auth.presentation.CookieProperties;
+import site.courseregistrationsystem.basket.application.BasketService;
+import site.courseregistrationsystem.basket.presentation.BasketController;
 import site.courseregistrationsystem.clock.presentation.ClockController;
 import site.courseregistrationsystem.enrollment.application.EnrollmentService;
 import site.courseregistrationsystem.enrollment.presentation.EnrollmentController;
 import site.courseregistrationsystem.exception.auth.NonexistenceSessionException;
+import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.application.LectureService;
 import site.courseregistrationsystem.lecture.presentation.LectureController;
 import site.courseregistrationsystem.student.application.StudentService;
@@ -31,6 +36,7 @@ import site.courseregistrationsystem.util.encryption.Aes256Manager;
 	ClockController.class,
 	StudentController.class,
 	LectureController.class,
+	BasketController.class,
 	EnrollmentController.class
 })
 @AutoConfigureRestDocs
@@ -63,6 +69,11 @@ public abstract class RestDocsSupport {
 	@MockBean
 	protected EnrollmentService enrollmentService;
 
+	@MockBean
+	protected BasketService basketService;
+
+	protected MockedStatic<Semester> semester;
+
 	@BeforeEach
 	void setUp() {
 		String cookieName = "SESSIONID";
@@ -88,6 +99,15 @@ public abstract class RestDocsSupport {
 
 				throw new NonexistenceSessionException();
 			});
+
+		semester = mockStatic(Semester.class);
+		given(Semester.getCurrentSemester())
+			.willReturn(Semester.FIRST);
+	}
+
+	@AfterEach
+	void close() {
+		semester.close();
 	}
 
 }

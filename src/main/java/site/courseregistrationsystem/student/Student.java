@@ -33,14 +33,10 @@ public class Student {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Department department;
 
-	public Student(String studentId, String password) {
+	@Builder
+	private Student(String studentId, String password, String name, Grade grade, Department department) {
 		this.studentId = studentId;
 		this.password = password;
-	}
-
-	@Builder
-	public Student(String studentId, String name, Grade grade, Department department) {
-		this.studentId = studentId;
 		this.name = name;
 		this.grade = grade;
 		this.department = department;

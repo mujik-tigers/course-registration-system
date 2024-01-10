@@ -78,7 +78,12 @@ class AuthServiceTest extends IntegrationTestSupport {
 		String encryptedStudentId = aes256Manager.encrypt(studentId);
 		String encryptedPassword = BCryptManager.encrypt(password);
 
-		return studentRepository.save(new Student(encryptedStudentId, encryptedPassword));
+		Student student = Student.builder()
+			.studentId(encryptedStudentId)
+			.password(encryptedPassword)
+			.build();
+
+		return studentRepository.save(student);
 	}
 
 }
