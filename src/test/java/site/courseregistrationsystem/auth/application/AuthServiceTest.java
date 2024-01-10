@@ -58,7 +58,7 @@ class AuthServiceTest extends IntegrationTestSupport {
 		String password = "test1234!";
 		String wrongPassword = "test0123!";
 
-		Student saved = saveStudent(studentId, password);
+		saveStudent(studentId, password);
 		LoginForm loginForm = createLoginForm(studentId, wrongPassword);
 
 		// when / then

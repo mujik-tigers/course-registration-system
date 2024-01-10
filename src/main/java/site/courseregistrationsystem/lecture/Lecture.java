@@ -1,10 +1,13 @@
 package site.courseregistrationsystem.lecture;
 
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.professor.Professor;
 import site.courseregistrationsystem.schedule.Schedule;
 import site.courseregistrationsystem.subject.Subject;
@@ -31,6 +35,10 @@ public class Lecture {
 	private Integer lectureNumber;
 	private String lectureRoom;
 	private Integer totalCapacity;
+	private Year openingYear;
+
+	@Enumerated(EnumType.STRING)
+	private Semester semester;
 
 	@OneToMany(mappedBy = "lecture")
 	private List<Schedule> schedules = new ArrayList<>();
@@ -41,14 +49,20 @@ public class Lecture {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private Professor professor;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Department department;
+
 	@Builder
-	private Lecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity, Subject subject,
-		Professor professor) {
+	private Lecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity, Year openingYear,
+		Semester semester, Subject subject, Professor professor, Department department) {
 		this.lectureNumber = lectureNumber;
 		this.lectureRoom = lectureRoom;
 		this.totalCapacity = totalCapacity;
+		this.openingYear = openingYear;
+		this.semester = semester;
 		this.subject = subject;
 		this.professor = professor;
+		this.department = department;
 	}
 
 	public String generateSchedule() {
@@ -60,6 +74,19 @@ public class Lecture {
 					+ schedule.getLastPeriod().getPeriodNumber()
 					+ ")")
 			.collect(Collectors.joining(", "));
+	}
+
+	public boolean hasScheduleConflict(Lecture lectureToAdd) {
+		return this.schedules.stream()
+			.anyMatch(schedule -> lectureToAdd.getSchedules().stream().anyMatch(scheduleToAdd -> schedule.hasConflictWith(scheduleToAdd)));
+	}
+
+	public boolean hasSameSemester(Year year, Semester semester) {
+		return this.openingYear.equals(year) && this.semester.equals(semester);
+	}
+
+	public Long fetchSubjectId() {
+		return subject.getId();
 	}
 
 	public String fetchSubjectDivisionDescription() {
@@ -83,7 +110,7 @@ public class Lecture {
 	}
 
 	public String fetchDepartmentName() {
-		return subject.getDepartment().getName();
+		return department.getName();
 	}
 
 	public String fetchProfessorName() {
@@ -93,11 +120,6 @@ public class Lecture {
 	public void addSchedule(Schedule schedule) {
 		schedules.add(schedule);
 		schedule.setLecture(this);
-	}
-
-	public boolean hasScheduleConflict(Lecture lectureToAdd) {
-		return this.schedules.stream()
-			.anyMatch(schedule -> lectureToAdd.getSchedules().stream().anyMatch(scheduleToAdd -> schedule.hasConflictWith(scheduleToAdd)));
 	}
 
 }

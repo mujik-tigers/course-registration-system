@@ -44,7 +44,9 @@ class LectureControllerTest extends RestDocsSupport {
 
 		// when & then
 		mockMvc.perform(get("/lectures")
-				.cookie(sessionCookie))
+				.cookie(sessionCookie)
+				.param("openingYear", "2024")
+				.param("semester", "FIRST"))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(document("lecture-fetch-success",
@@ -73,6 +75,33 @@ class LectureControllerTest extends RestDocsSupport {
 					fieldWithPath("data.last").type(JsonFieldType.BOOLEAN).description("마지막 페이지라면 true"),
 					fieldWithPath("data.totalPages").type(JsonFieldType.NUMBER).description("총 페이지 개수"),
 					fieldWithPath("data.totalElements").type(JsonFieldType.NUMBER).description("총 데이터 개수")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("종합 강의 시간표 조회 : 필수 조건 부재")
+	void fetchFailFilterNull() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		// when & then
+		mockMvc.perform(get("/lectures")
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andDo(document("lecture-fetch-fail-filter-null",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.NULL).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.ARRAY).description("응답 데이터"),
+					fieldWithPath("data[].field").type(JsonFieldType.STRING).description("필드"),
+					fieldWithPath("data[].message").type(JsonFieldType.STRING).description("오류 메시지")
 				)
 			));
 	}

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.lecture.application.LectureService;
 import site.courseregistrationsystem.lecture.dto.BasketStoringCount;
@@ -22,7 +23,7 @@ public class LectureController {
 
 	@GetMapping("/lectures")
 	public ApiResponse<LectureSchedulePage> fetchLectureSchedule(
-		@PageableDefault(size = 20) Pageable pageable, LectureFilterOptions lectureFilterOptions) {
+		@PageableDefault(size = 20) Pageable pageable, @Valid LectureFilterOptions lectureFilterOptions) {
 		return ApiResponse.ok(ResponseMessage.LECTURE_SCHEDULE_FETCH_SUCCESS.getMessage(),
 			lectureService.fetchLectureSchedule(pageable, lectureFilterOptions));
 	}

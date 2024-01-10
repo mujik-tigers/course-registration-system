@@ -26,6 +26,8 @@ public class LectureService {
 		return new LectureSchedulePage(
 			lectureRepository.findMatchedLectures(
 					pageable,
+					lectureFilterOptions.getOpeningYear(),
+					lectureFilterOptions.getSemester(),
 					lectureFilterOptions.getSubjectDivision(),
 					lectureFilterOptions.getDepartmentId(),
 					lectureFilterOptions.getSubjectName())

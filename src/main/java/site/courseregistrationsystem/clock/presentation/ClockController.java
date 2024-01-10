@@ -15,6 +15,7 @@ public class ClockController {
 	@GetMapping("/clock/server")
 	public ApiResponse<CurrentServerTime> checkCurrentServerTime() {
 		CurrentServerTime currentServerTime = new CurrentServerTime(LocalDateTime.now());
+
 		return ApiResponse.ok(ResponseMessage.CURRENT_SERVER_TIME_FETCH_SUCCESS.getMessage(), currentServerTime);
 	}
 

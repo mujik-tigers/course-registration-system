@@ -21,8 +21,8 @@ import site.courseregistrationsystem.basket.dto.BasketDetail;
 import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
-import site.courseregistrationsystem.exception.basket.ExceededCreditLimitException;
 import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
+import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.professor.Professor;
@@ -108,7 +108,7 @@ class BasketControllerTest extends RestDocsSupport {
 		Long LECTURE_ID = 1L;
 
 		given(basketService.addLectureToBasket(anyLong(), anyLong()))
-			.willThrow(new ExceededCreditLimitException());
+			.willThrow(new CreditLimitExceededException());
 
 		// when & then
 		mockMvc.perform(post("/baskets/{lectureId}", LECTURE_ID)
@@ -273,7 +273,6 @@ class BasketControllerTest extends RestDocsSupport {
 			.subjectDivision(SubjectDivision.ME)
 			.credits(3)
 			.targetGrade(Grade.SENIOR)
-			.department(department)
 			.hoursPerWeek(3)
 			.build();
 
@@ -281,6 +280,7 @@ class BasketControllerTest extends RestDocsSupport {
 			.lectureNumber(lectureNumber)
 			.professor(professor)
 			.lectureRoom(lectureRoom)
+			.department(department)
 			.totalCapacity(40)
 			.subject(subject)
 			.build();

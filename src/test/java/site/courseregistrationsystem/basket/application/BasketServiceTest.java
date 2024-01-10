@@ -15,8 +15,8 @@ import site.courseregistrationsystem.basket.dto.BasketDetail;
 import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
-import site.courseregistrationsystem.exception.basket.ExceededCreditLimitException;
 import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
+import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
@@ -130,7 +130,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 
 		// when & then
 		assertThatThrownBy(() -> basketService.addLectureToBasket(student.getId(), lecture.getId()))
-			.isInstanceOf(ExceededCreditLimitException.class);
+			.isInstanceOf(CreditLimitExceededException.class);
 	}
 
 	@Test
