@@ -3,12 +3,14 @@ package site.courseregistrationsystem.auth.application;
 import static org.assertj.core.api.Assertions.*;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.auth.StudentSession;
+import site.courseregistrationsystem.auth.infrastructure.SessionStorage;
 import site.courseregistrationsystem.exception.ErrorType;
 import site.courseregistrationsystem.exception.auth.NonexistenceSessionException;
 
@@ -16,6 +18,14 @@ class SessionManagerTest extends IntegrationTestSupport {
 
 	@Autowired
 	private SessionManager sessionManager;
+
+	@Autowired
+	private SessionStorage sessionStorage;
+
+	@AfterEach
+	void clear() {
+		sessionStorage.deleteAll();
+	}
 
 	@Test
 	@DisplayName("세션 생성 시 길이 36의 세션 ID, 학생 PK, 3600의 만료 시간을 갖는다")

@@ -1,5 +1,6 @@
 package site.courseregistrationsystem.enrollment.presentation;
 
+import java.time.LocalDateTime;
 import java.time.Year;
 
 import org.springframework.http.HttpStatus;
@@ -32,14 +33,14 @@ public class EnrollmentController {
 	@PostMapping("/{lectureId}")
 	public ApiResponse<EnrolledLecture> enrollLecture(@Login Long studentPk, @PathVariable Long lectureId) {
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.ENROLL_LECTURE_SUCCESS.getMessage(),
-			enrollmentService.enrollLecture(Year.now(), Semester.getCurrentSemester(), studentPk, lectureId));
+			enrollmentService.enrollLecture(LocalDateTime.now(), studentPk, lectureId));
 	}
 
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/fast/{lectureNumber}")
 	public ApiResponse<EnrolledLecture> enrollLectureByNumber(@Login Long studentPk, @PathVariable Integer lectureNumber) {
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.ENROLL_LECTURE_SUCCESS.getMessage(),
-			enrollmentService.enrollLectureByNumber(Year.now(), Semester.getCurrentSemester(), studentPk, lectureNumber));
+			enrollmentService.enrollLectureByNumber(LocalDateTime.now(), studentPk, lectureNumber));
 	}
 
 	@DeleteMapping("/{enrollmentId}")
