@@ -22,14 +22,14 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 	private final CookieProperties cookieProperties;
 
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws
-		Exception {
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		if (CorsUtils.isPreFlightRequest(request))
 			return true;
 
 		Cookie sessionCookie = findSessionCookie(request.getCookies());
 		StudentSession session = sessionManager.fetch(sessionCookie.getValue());
 		request.setAttribute(ProjectConstant.STUDENT_PK, session.getStudentPk());
+		request.setAttribute(ProjectConstant.SESSION_TIME, session.getExpiration());
 
 		return true;
 	}
