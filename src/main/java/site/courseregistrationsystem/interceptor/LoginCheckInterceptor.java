@@ -24,6 +24,9 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws
 		Exception {
+		if (CorsUtils.isPreFlightRequest(request))
+			return true;
+
 		Cookie sessionCookie = findSessionCookie(request.getCookies());
 		StudentSession session = sessionManager.fetch(sessionCookie.getValue());
 		request.setAttribute(ProjectConstant.STUDENT_PK, session.getStudentPk());
