@@ -12,6 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.interceptor.LoginCheckInterceptor;
 import site.courseregistrationsystem.util.resolver.LoginArgumentResolver;
+import site.courseregistrationsystem.util.resolver.SessionTimeArgumentResolver;
 
 @Configuration
 @RequiredArgsConstructor
@@ -19,6 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
 
 	private final LoginCheckInterceptor loginCheckInterceptor;
 	private final LoginArgumentResolver loginArgumentResolver;
+	private final SessionTimeArgumentResolver sessionTimeArgumentResolver;
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
@@ -41,6 +43,7 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
 		resolvers.add(loginArgumentResolver);
+		resolvers.add(sessionTimeArgumentResolver);
 	}
 
 }
