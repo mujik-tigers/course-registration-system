@@ -3,7 +3,9 @@ package site.courseregistrationsystem.enrollment.application;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.*;
 import static org.junit.jupiter.params.provider.Arguments.*;
+import static org.mockito.ArgumentMatchers.*;
 
+import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +18,9 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
@@ -31,11 +35,14 @@ import site.courseregistrationsystem.exception.credit.CreditLimitExceededExcepti
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
 import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
+import site.courseregistrationsystem.exception.registration_period.InvalidEnrollmentTimeException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.professor.Professor;
+import site.courseregistrationsystem.registration.application.EnrollmentRegistrationPeriodService;
+import site.courseregistrationsystem.registration.dto.RegistrationDate;
 import site.courseregistrationsystem.schedule.DayOfWeek;
 import site.courseregistrationsystem.schedule.Period;
 import site.courseregistrationsystem.schedule.Schedule;
@@ -58,6 +65,11 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 	@Autowired
 	private EnrollmentRepository enrollmentRepository;
 
+	@SpyBean
+	private EnrollmentRegistrationPeriodService enrollmentRegistrationPeriodService;
+
+	private static final LocalDateTime CURRENT_REGISTRATION_TIME = LocalDateTime.of(2024, 1, 15, 9, 0, 0);
+
 	@Test
 	@DisplayName("빠른 수강 신청에 성공하면 신청된 강의의 PK를 반환한다")
 	void enrollFastSuccess() {
@@ -71,8 +83,14 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Lecture lecture = saveLecture(department, subject, openingYear, semester);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
+		RegistrationDate registrationDate = new RegistrationDate(openingYear.getValue(), semester.name());
+		BDDMockito.doReturn(registrationDate)
+			.when(enrollmentRegistrationPeriodService)
+			.validateEnrollmentRegistrationPeriod(any(), any());
+
 		// when
-		EnrolledLecture enrolledLecture = enrollmentService.enrollLectureByNumber(openingYear, semester, student.getId(), lecture.getLectureNumber());
+		EnrolledLecture enrolledLecture = enrollmentService.enrollLectureByNumber(CURRENT_REGISTRATION_TIME,
+			student.getId(), lecture.getLectureNumber());
 
 		// then
 		assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -91,8 +109,13 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Lecture lecture = saveLecture(department, subject, openingYear, semester);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
+		RegistrationDate registrationDate = new RegistrationDate(openingYear.getValue(), semester.name());
+		BDDMockito.doReturn(registrationDate)
+			.when(enrollmentRegistrationPeriodService)
+			.validateEnrollmentRegistrationPeriod(any(), any());
+
 		// when
-		EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture.getId());
+		EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId());
 
 		// then
 		assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -109,8 +132,13 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Lecture pastLecture = saveLecture(department, subject1, Year.of(2023), Semester.FIRST);
 		saveSchedule(pastLecture, DayOfWeek.MON, Period.ONE, Period.THREE);  // 작년 강의 개설
 
+		RegistrationDate registrationDate = new RegistrationDate(2024, "FIRST");
+		BDDMockito.doReturn(registrationDate)
+			.when(enrollmentRegistrationPeriodService)
+			.validateEnrollmentRegistrationPeriod(any(), any());
+
 		// when & then
-		assertThatThrownBy(() -> enrollmentService.enrollLecture(Year.of(2024), Semester.FIRST, student.getId(), pastLecture.getId()))
+		assertThatThrownBy(() -> enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), pastLecture.getId()))
 			.isInstanceOf(LectureNotInCurrentSemesterException.class)
 			.hasMessage(ErrorType.LECTURE_NOT_IN_CURRENT_SEMESTER.getMessage());
 	}
@@ -126,10 +154,38 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Lecture pastLecture = saveLecture(department, subject1, Year.of(2024), Semester.FIRST);
 		saveSchedule(pastLecture, DayOfWeek.MON, Period.ONE, Period.THREE);  // 지난 학기 강의 개설
 
+		RegistrationDate registrationDate = new RegistrationDate(2024, "SECOND");
+		BDDMockito.doReturn(registrationDate)
+			.when(enrollmentRegistrationPeriodService)
+			.validateEnrollmentRegistrationPeriod(any(), any());
+
 		// when & then
-		assertThatThrownBy(() -> enrollmentService.enrollLecture(Year.of(2024), Semester.SECOND, student.getId(), pastLecture.getId()))
+		assertThatThrownBy(() -> enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), pastLecture.getId()))
 			.isInstanceOf(LectureNotInCurrentSemesterException.class)
 			.hasMessage(ErrorType.LECTURE_NOT_IN_CURRENT_SEMESTER.getMessage());
+	}
+
+	@Test
+	@DisplayName("수강 신청 기간이 아닌 경우, 수강 신청을 진행할 수 없다.")
+	void invalidEnrollmentRegistrationTime() throws Exception {
+		// given
+		Department department = saveDepartment();
+		Student student = saveStudent(department);
+		Subject subject = saveSubject("미술사", 2);
+
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
+		Lecture lecture = saveLecture(department, subject, openingYear, semester);
+		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
+
+		BDDMockito.doThrow(new InvalidEnrollmentTimeException())
+			.when(enrollmentRegistrationPeriodService)
+			.validateEnrollmentRegistrationPeriod(any(), any());
+
+		// when & then
+		assertThatThrownBy(() -> enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId()))
+			.isInstanceOf(InvalidEnrollmentTimeException.class);
+
 	}
 
 	@Test
@@ -142,11 +198,16 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Year openingYear = Year.of(2024);
 		Semester semester = Semester.FIRST;
 
+		RegistrationDate registrationDate = new RegistrationDate(openingYear.getValue(), semester.name());
+		BDDMockito.doReturn(registrationDate)
+			.when(enrollmentRegistrationPeriodService)
+			.validateEnrollmentRegistrationPeriod(any(), any());
+
 		int maxCredit = 18;
 		Subject subject1 = saveSubject("동양미술사", maxCredit);
 		Lecture lectureWithMaxCredits = saveLecture(department, subject1, openingYear, semester);  // 최대 학점을 갖는 강의를 생성
 		saveSchedule(lectureWithMaxCredits, DayOfWeek.MON, Period.ONE, Period.THREE);
-		enrollmentService.enrollLecture(openingYear, semester, student.getId(), lectureWithMaxCredits.getId());  // 최대 학점을 채워서 신청한 상황
+		enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lectureWithMaxCredits.getId());  // 최대 학점을 채워서 신청한 상황
 
 		int minCredit = 1;
 		Subject subject2 = saveSubject("서양미술사", minCredit);
@@ -154,7 +215,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		saveSchedule(lectureWithMinCredits, DayOfWeek.TUE, Period.ONE, Period.THREE);
 
 		// when & then
-		assertThatThrownBy(() -> enrollmentService.enrollLecture(openingYear, semester, student.getId(), lectureWithMinCredits.getId()))
+		assertThatThrownBy(() -> enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lectureWithMinCredits.getId()))
 			.isInstanceOf(CreditLimitExceededException.class)
 			.hasMessage(ErrorType.CREDIT_LIMIT_EXCEEDED.getMessage());
 	}
@@ -175,10 +236,15 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		saveSchedule(lectureOnMonday, DayOfWeek.MON, Period.ONE, Period.THREE);
 		saveSchedule(LectureOnFriday, DayOfWeek.FRI, Period.ONE, Period.THREE);
 
-		enrollmentService.enrollLecture(openingYear, semester, student.getId(), lectureOnMonday.getId());  // 월요일 강의를 이미 수강 신청한 상황
+		RegistrationDate registrationDate = new RegistrationDate(openingYear.getValue(), semester.name());
+		BDDMockito.doReturn(registrationDate)
+			.when(enrollmentRegistrationPeriodService)
+			.validateEnrollmentRegistrationPeriod(any(), any());
+
+		enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lectureOnMonday.getId());  // 월요일 강의를 이미 수강 신청한 상황
 
 		// when & then
-		assertThatThrownBy(() -> enrollmentService.enrollLecture(openingYear, semester, student.getId(), LectureOnFriday.getId()))
+		assertThatThrownBy(() -> enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), LectureOnFriday.getId()))
 			.isInstanceOf(DuplicateEnrollmentException.class)
 			.hasMessage(ErrorType.ENROLLMENT_DUPLICATION.getMessage());
 	}
@@ -203,17 +269,22 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Year openingYear = Year.of(2024);
 		Semester semester = Semester.FIRST;
 
+		RegistrationDate registrationDate = new RegistrationDate(openingYear.getValue(), semester.name());
+		BDDMockito.doReturn(registrationDate)
+			.when(enrollmentRegistrationPeriodService)
+			.validateEnrollmentRegistrationPeriod(any(), any());
+
 		Subject subject1 = saveSubject("동양미술사", 2);
 		Lecture lecture1 = saveLecture(department, subject1, openingYear, semester);
 		saveSchedule(lecture1, DayOfWeek.MON, Period.THREE, Period.FIVE);  // 월요일 3-5교시 수업 생성
-		enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture1.getId());  // 수업 신청
+		enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture1.getId());  // 수업 신청
 
 		Subject subject2 = saveSubject("서양미술사", 2);
 		Lecture lecture2 = saveLecture(department, subject2, openingYear, semester);
 		saveSchedule(lecture2, DayOfWeek.MON, firstPeriod, lastPeriod);  // 시간이 겹치도록 생성
 
 		// when & then
-		assertThatThrownBy(() -> enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture2.getId()))
+		assertThatThrownBy(() -> enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture2.getId()))
 			.isInstanceOf(ScheduleConflictException.class)
 			.hasMessage(ErrorType.SCHEDULE_CONFLICT.getMessage());
 	}
@@ -228,6 +299,11 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Year openingYear = Year.of(2024);
 		Semester semester = Semester.FIRST;
 
+		RegistrationDate registrationDate = new RegistrationDate(openingYear.getValue(), semester.name());
+		BDDMockito.doReturn(registrationDate)
+			.when(enrollmentRegistrationPeriodService)
+			.validateEnrollmentRegistrationPeriod(any(), any());
+
 		return List.of(
 			dynamicTest("월요일 4-6교시 수업 수강 신청", () -> {
 				Subject subject = saveSubject("서양미술사", 3);
@@ -235,7 +311,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				saveSchedule(lecture, DayOfWeek.MON, Period.FOUR, Period.SIX);
 
 				// when
-				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture.getId());
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId());
 
 				// then
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -246,7 +322,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 				// when
-				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture.getId());
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId());
 
 				// then
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -257,7 +333,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				saveSchedule(lecture, DayOfWeek.TUE, Period.SIX, Period.NINE);
 
 				// when
-				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture.getId());
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId());
 
 				// then
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -268,7 +344,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				saveSchedule(lecture, DayOfWeek.WED, Period.TWO, Period.FOUR);
 
 				// when
-				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture.getId());
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId());
 
 				// then
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
@@ -279,7 +355,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 				saveSchedule(lecture, DayOfWeek.MON, Period.SEVEN, Period.NINE);
 
 				// when
-				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(openingYear, semester, student.getId(), lecture.getId());
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId());
 
 				// then
 				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());

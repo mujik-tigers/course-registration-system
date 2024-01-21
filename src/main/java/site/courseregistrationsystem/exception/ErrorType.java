@@ -24,7 +24,7 @@ public enum ErrorType {
 	DUPLICATE_BASKET(HttpStatus.BAD_REQUEST, "이미 수강바구니로 담은 강의입니다"),
 	NONEXISTENT_BASKET(HttpStatus.BAD_REQUEST, "수강바구니에 담지 않아 존재하지 않는 강의입니다"),
 
-	// Credit,
+	// Credit
 	CREDIT_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "학기 내 신청 가능한 최대 학점을 초과했습니다"),
 
 	// Schedule
@@ -35,6 +35,15 @@ public enum ErrorType {
 
 	// Semester
 	SEMESTER_INVALID(HttpStatus.BAD_REQUEST, "수강신청 기간이 아닙니다"),
+
+	// Registration Period
+	START_TIME_BEFORE_CURRENT_TIME(HttpStatus.BAD_REQUEST, "시작 시간이 현재 시간보다 앞에 있습니다"),
+	START_TIME_AFTER_END_TIME(HttpStatus.BAD_REQUEST, "시작 시간이 종료 시간보다 뒤에 있습니다"),
+	ENROLLMENT_REGISTRATION_PERIOD_NONEXISTENT(HttpStatus.BAD_REQUEST, "해당 학년을 만족하는 수강 신청 기간이 없습니다"),
+	COMMON_ENROLLMENT_REGISTRATION_PERIOD_NONEXISTENT(HttpStatus.BAD_REQUEST, "공통 학년 수강 신청 기간이 없습니다"),
+	ENROLLMENT_REGISTRATION_PERIOD_INVALID_TIME(HttpStatus.BAD_REQUEST, "지금은 수강 신청 기간이 아닙니다"),
+	BASKET_REGISTRATION_PERIOD_NONEXISTENT(HttpStatus.BAD_REQUEST, "등록된 수강 바구니 기간이 없습니다"),
+	BASKET_REGISTRATION_PERIOD_INVALID_TIME(HttpStatus.BAD_REQUEST, "지금은 수강 바구니 신청 기간이 아닙니다"),
 
 	// Enrollment
 	ENROLLMENT_DUPLICATION(HttpStatus.BAD_REQUEST, "중복된 과목을 수강 신청할 수 없습니다"),

@@ -2,6 +2,7 @@ package site.courseregistrationsystem.enrollment.application;
 
 import static site.courseregistrationsystem.util.ProjectConstant.*;
 
+import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
 
@@ -25,6 +26,8 @@ import site.courseregistrationsystem.exception.student.NonexistenceStudentExcept
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
+import site.courseregistrationsystem.registration.application.EnrollmentRegistrationPeriodService;
+import site.courseregistrationsystem.registration.dto.RegistrationDate;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
 
@@ -33,35 +36,38 @@ import site.courseregistrationsystem.student.infrastructure.StudentRepository;
 @RequiredArgsConstructor
 public class EnrollmentService {
 
+	private final EnrollmentRegistrationPeriodService enrollmentRegistrationPeriodService;
+
 	private final EnrollmentRepository enrollmentRepository;
 	private final StudentRepository studentRepository;
 	private final LectureRepository lectureRepository;
 
 	@Transactional
-	public EnrolledLecture enrollLecture(Year year, Semester semester, Long studentPk, Long lectureId) {
+	public EnrolledLecture enrollLecture(LocalDateTime now, Long studentPk, Long lectureId) {
 		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(NonexistenceLectureException::new);
 
-		Enrollment savedEnrollment = enroll(year, semester, student, lecture);
+		Enrollment savedEnrollment = enroll(now, student, lecture);
 
 		return new EnrolledLecture(savedEnrollment.fetchLectureId());
 	}
 
 	@Transactional
-	public EnrolledLecture enrollLectureByNumber(Year year, Semester semester, Long studentPk, Integer lectureNumber) {
+	public EnrolledLecture enrollLectureByNumber(LocalDateTime now, Long studentPk, Integer lectureNumber) {
 		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
 		Lecture lecture = lectureRepository.findByNumberWithSchedule(lectureNumber)
 			.orElseThrow(NonexistenceLectureException::new);
 
-		Enrollment savedEnrollment = enroll(year, semester, student, lecture);
+		Enrollment savedEnrollment = enroll(now, student, lecture);
 
 		return new EnrolledLecture(savedEnrollment.fetchLectureId());
 	}
 
-	private Enrollment enroll(Year year, Semester semester, Student student, Lecture lecture) {
+	private Enrollment enroll(LocalDateTime now, Student student, Lecture lecture) {
 		List<Enrollment> enrollments = enrollmentRepository.findAllBy(student.getId());
+		RegistrationDate registrationDate = enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(now, student.getGrade());
 
-		checkLectureInCurrentSemester(year, semester, lecture);
+		checkLectureInCurrentSemester(registrationDate.getYear(), registrationDate.getSemester(), lecture);
 		checkCreditsLimit(enrollments, lecture.fetchCredits());
 		checkDuplicateSubject(enrollments, lecture);
 		checkScheduleConflict(enrollments, lecture);

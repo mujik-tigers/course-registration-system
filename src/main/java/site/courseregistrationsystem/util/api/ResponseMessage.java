@@ -27,6 +27,10 @@ public enum ResponseMessage {
 	BASKET_ADD_SUCCESS("강의를 수강 바구니에 담기에 성공했습니다"),
 	BASKET_DELETE_SUCCESS("수강 바구니 삭제를 성공했습니다"),
 
+	// RegistrationPeriod
+	ENROLLMENT_REGISTRATION_PERIOD_SAVE_SUCCESS("수강 신청 기간 등록에 성공했습니다"),
+	BASKET_REGISTRATION_PERIOD_SAVE_SUCCESS("수강 바구니 신청 기간 등록에 성공했습니다"),
+
 	// Enrollment
 	ENROLL_LECTURE_SUCCESS("수강 신청이 성공적으로 완료되었습니다"),
 	ENROLLMENT_CANCEL_SUCCESS("수강 취소가 정상적으로 처리되었습니다"),
