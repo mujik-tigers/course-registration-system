@@ -1,13 +1,19 @@
 package site.courseregistrationsystem.basket.application;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 
+import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
@@ -19,11 +25,14 @@ import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
+import site.courseregistrationsystem.exception.registration_period.InvalidBasketTimeException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.professor.Professor;
+import site.courseregistrationsystem.registration.application.BasketRegistrationPeriodService;
+import site.courseregistrationsystem.registration.dto.RegistrationDate;
 import site.courseregistrationsystem.schedule.DayOfWeek;
 import site.courseregistrationsystem.schedule.Period;
 import site.courseregistrationsystem.schedule.Schedule;
@@ -50,6 +59,11 @@ class BasketServiceTest extends IntegrationTestSupport {
 	@Autowired
 	private EntityManager entityManager;
 
+	@SpyBean
+	private BasketRegistrationPeriodService basketRegistrationPeriodService;
+
+	private static final LocalDateTime CURRENT_REGISTRATION_TIME = LocalDateTime.of(2024, 1, 15, 9, 0, 0);
+
 	@Test
 	@DisplayName("학생이 수강 바구니에 원하는 수업을 성공적으로 담으면, 담은 수업(Lecture)의 id 를 반환한다.")
 	void addLectureToBasket() throws Exception {
@@ -61,10 +75,16 @@ class BasketServiceTest extends IntegrationTestSupport {
 
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
+
+		RegistrationDate registrationDate = new RegistrationDate(YEAR.getValue(), SEMESTER.name());
+		BDDMockito.doReturn(registrationDate)
+			.when(basketRegistrationPeriodService)
+			.validateBasketRegistrationPeriod(any());
+
 		Lecture savedLecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 
 		// when
-		Long basketSavedLectureId = basketService.addLectureToBasket(YEAR, SEMESTER, savedStudent.getId(), savedLecture.getId());
+		Long basketSavedLectureId = basketService.addLectureToBasket(CURRENT_REGISTRATION_TIME, savedStudent.getId(), savedLecture.getId());
 
 		// then
 		List<Basket> baskets = basketRepository.findAll();
@@ -87,6 +107,12 @@ class BasketServiceTest extends IntegrationTestSupport {
 
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
+
+		RegistrationDate registrationDate = new RegistrationDate(YEAR.getValue(), SEMESTER.name());
+		BDDMockito.doReturn(registrationDate)
+			.when(basketRegistrationPeriodService)
+			.validateBasketRegistrationPeriod(any());
+
 		Lecture savedLecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 
 		basketRepository.save(createBasket(savedStudent, savedLecture));
@@ -95,7 +121,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 
 		// when & then
 		assertThatThrownBy(
-			() -> basketService.addLectureToBasket(YEAR, SEMESTER, savedStudent.getId(), duplicateSubjectLecture.getId()))
+			() -> basketService.addLectureToBasket(CURRENT_REGISTRATION_TIME, savedStudent.getId(), duplicateSubjectLecture.getId()))
 			.isInstanceOf(DuplicateBasketException.class);
 	}
 
@@ -108,13 +134,18 @@ class BasketServiceTest extends IntegrationTestSupport {
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
 
+		RegistrationDate registrationDate = new RegistrationDate(YEAR.getValue(), SEMESTER.name());
+		BDDMockito.doReturn(registrationDate)
+			.when(basketRegistrationPeriodService)
+			.validateBasketRegistrationPeriod(any());
+
 		// when
 		for (int i = 0; i < LECTURE_COUNT; i++) {                                        // 주어진 학생이 18학점의 수업을 수강바구니에 담음
 			Subject subject = create3CreditSubject("선형대수학" + i);
 			entityManager.persist(subject);
 			Lecture lecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 
-			basketService.addLectureToBasket(YEAR, SEMESTER, student.getId(), lecture.getId());
+			basketService.addLectureToBasket(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId());
 		}
 
 		// then
@@ -131,6 +162,11 @@ class BasketServiceTest extends IntegrationTestSupport {
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
 
+		RegistrationDate registrationDate = new RegistrationDate(YEAR.getValue(), SEMESTER.name());
+		BDDMockito.doReturn(registrationDate)
+			.when(basketRegistrationPeriodService)
+			.validateBasketRegistrationPeriod(any());
+
 		for (int i = 0; i < 6; i++) {                                        // 주어진 학생이 18학점의 수업을 수강바구니에 담음
 			Subject subject = create3CreditSubject("선형대수학" + i);
 			entityManager.persist(subject);
@@ -144,7 +180,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 		Lecture lecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 
 		// when & then
-		assertThatThrownBy(() -> basketService.addLectureToBasket(YEAR, SEMESTER, student.getId(), lecture.getId()))
+		assertThatThrownBy(() -> basketService.addLectureToBasket(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId()))
 			.isInstanceOf(CreditLimitExceededException.class);
 	}
 
@@ -156,6 +192,11 @@ class BasketServiceTest extends IntegrationTestSupport {
 
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
+
+		RegistrationDate registrationDate = new RegistrationDate(YEAR.getValue(), SEMESTER.name());
+		BDDMockito.doReturn(registrationDate)
+			.when(basketRegistrationPeriodService)
+			.validateBasketRegistrationPeriod(any());
 
 		Subject subject1 = create3CreditSubject("선형대수학");
 		entityManager.persist(subject1);
@@ -172,7 +213,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 		entityManager.clear();
 
 		// when
-		basketService.addLectureToBasket(YEAR, SEMESTER, student.getId(), lectureToAdd.getId());
+		basketService.addLectureToBasket(CURRENT_REGISTRATION_TIME, student.getId(), lectureToAdd.getId());
 
 		// then
 		List<Basket> baskets = basketRepository.findAllByStudent(student);
@@ -187,6 +228,11 @@ class BasketServiceTest extends IntegrationTestSupport {
 
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
+
+		RegistrationDate registrationDate = new RegistrationDate(YEAR.getValue(), SEMESTER.name());
+		BDDMockito.doReturn(registrationDate)
+			.when(basketRegistrationPeriodService)
+			.validateBasketRegistrationPeriod(any());
 
 		Subject subject1 = create3CreditSubject("선형대수학");
 		entityManager.persist(subject1);
@@ -203,7 +249,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 		entityManager.clear();
 
 		// when & then
-		assertThatThrownBy(() -> basketService.addLectureToBasket(YEAR, SEMESTER, student.getId(), lectureToAdd.getId()))
+		assertThatThrownBy(() -> basketService.addLectureToBasket(CURRENT_REGISTRATION_TIME, student.getId(), lectureToAdd.getId()))
 			.isInstanceOf(ScheduleConflictException.class);
 	}
 
@@ -305,9 +351,10 @@ class BasketServiceTest extends IntegrationTestSupport {
 			.isInstanceOf(NonexistenceBasketException.class);
 	}
 
-	@Test
 	@DisplayName("수강 바구니에 담으려는 강의의 진행 학기와 현재 신청학기가 일치하지 않는 경우 해당 강의를 담을 수 없다.")
-	void lectureAndCurrentSemesterDifferent() throws Exception {
+	@CsvSource({"2024,SECOND", "2025,FIRST", "2025,SECOND"})
+	@ParameterizedTest
+	void lectureAndCurrentSemesterDifferent(int year, String semester) throws Exception {
 		// given
 		Student student = studentRepository.save(createStudent());
 		Subject subject = create3CreditSubject("미분적분학");
@@ -315,20 +362,40 @@ class BasketServiceTest extends IntegrationTestSupport {
 
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
+
 		Lecture lecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 
-		Year DIFFERENT_YEAR = Year.of(2025);
-		Semester DIFFERENT_SEMESTER = Semester.SECOND;
+		RegistrationDate registrationDate = new RegistrationDate(year, semester);
+		BDDMockito.doReturn(registrationDate)
+			.when(basketRegistrationPeriodService)
+			.validateBasketRegistrationPeriod(any());
 
 		// when & then
-		assertThatThrownBy(() -> basketService.addLectureToBasket(DIFFERENT_YEAR, SEMESTER, student.getId(), lecture.getId()))
+		assertThatThrownBy(() -> basketService.addLectureToBasket(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId()))
 			.isInstanceOf(LectureNotInCurrentSemesterException.class);
+	}
 
-		assertThatThrownBy(() -> basketService.addLectureToBasket(YEAR, DIFFERENT_SEMESTER, student.getId(), lecture.getId()))
-			.isInstanceOf(LectureNotInCurrentSemesterException.class);
+	@Test
+	@DisplayName("수강 바구니 신청 기간이 아닌 경우, 강의를 수강 바구니에 담을 수 없다.")
+	void invalidBasketRegistrationTime() throws Exception {
+		// given
+		Subject subject = create3CreditSubject("선형대수학");
+		entityManager.persist(subject);
 
-		assertThatThrownBy(() -> basketService.addLectureToBasket(DIFFERENT_YEAR, DIFFERENT_SEMESTER, student.getId(), lecture.getId()))
-			.isInstanceOf(LectureNotInCurrentSemesterException.class);
+		Student savedStudent = studentRepository.save(createStudent());
+
+		Year YEAR = Year.of(2024);
+		Semester SEMESTER = Semester.FIRST;
+
+		BDDMockito.doThrow(new InvalidBasketTimeException())
+			.when(basketRegistrationPeriodService)
+			.validateBasketRegistrationPeriod(any());
+
+		Lecture savedLecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
+
+		// when & then
+		assertThatThrownBy(() -> basketService.addLectureToBasket(CURRENT_REGISTRATION_TIME, savedStudent.getId(), savedLecture.getId()))
+			.isInstanceOf(InvalidBasketTimeException.class);
 	}
 
 	private Student createStudent() {

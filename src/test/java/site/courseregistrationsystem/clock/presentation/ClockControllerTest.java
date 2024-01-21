@@ -61,4 +61,30 @@ class ClockControllerTest extends RestDocsSupport {
 			));
 	}
 
+	@Test
+	@DisplayName("남은 세션 시간 조회 : 성공")
+	void fetchSeverRemainingTime() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		// when & then
+		mockMvc.perform(get("/clock/session")
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(document("server-remaining-time-fetch-success",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+					fieldWithPath("data.sessionRemainingTime").type(JsonFieldType.NUMBER).description("남은 세션 시간")
+				)
+			));
+	}
+
 }

@@ -23,6 +23,7 @@ import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
+import site.courseregistrationsystem.exception.registration_period.InvalidBasketTimeException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.professor.Professor;
@@ -45,7 +46,7 @@ class BasketControllerTest extends RestDocsSupport {
 
 		Long LECTURE_ID = 1L;
 
-		given(basketService.addLectureToBasket(any(), any(), anyLong(), anyLong()))
+		given(basketService.addLectureToBasket(any(), anyLong(), anyLong()))
 			.willReturn(LECTURE_ID);
 
 		// when & then
@@ -77,7 +78,7 @@ class BasketControllerTest extends RestDocsSupport {
 
 		Long LECTURE_ID = 1L;
 
-		given(basketService.addLectureToBasket(any(), any(), anyLong(), anyLong()))
+		given(basketService.addLectureToBasket(any(), anyLong(), anyLong()))
 			.willThrow(new DuplicateBasketException());
 
 		// when & then
@@ -107,7 +108,7 @@ class BasketControllerTest extends RestDocsSupport {
 
 		Long LECTURE_ID = 1L;
 
-		given(basketService.addLectureToBasket(any(), any(), anyLong(), anyLong()))
+		given(basketService.addLectureToBasket(any(), anyLong(), anyLong()))
 			.willThrow(new CreditLimitExceededException());
 
 		// when & then
@@ -137,7 +138,7 @@ class BasketControllerTest extends RestDocsSupport {
 
 		Long LECTURE_ID = 1L;
 
-		given(basketService.addLectureToBasket(any(), any(), anyLong(), anyLong()))
+		given(basketService.addLectureToBasket(any(), anyLong(), anyLong()))
 			.willThrow(new ScheduleConflictException());
 
 		// when & then
@@ -146,6 +147,36 @@ class BasketControllerTest extends RestDocsSupport {
 			.andDo(print())
 			.andExpect(status().isBadRequest())
 			.andDo(document("basket-save-conflict-fail",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
+				)
+			));
+	}
+
+	@Test
+	@DisplayName("수강 바구니 담기 : 실패 - 수강 바구니 신청 기간 아님")
+	void invalidBasketRegistrationTime() throws Exception {
+		// given
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		Long LECTURE_ID = 1L;
+
+		given(basketService.addLectureToBasket(any(), anyLong(), anyLong()))
+			.willThrow(new InvalidBasketTimeException());
+
+		// when & then
+		mockMvc.perform(post("/baskets/{lectureId}", LECTURE_ID)
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isBadRequest())
+			.andDo(document("basket-save-invalid-time-fail",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
 				responseFields(

@@ -1,5 +1,6 @@
 package site.courseregistrationsystem.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,7 +10,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import lombok.RequiredArgsConstructor;
-import site.courseregistrationsystem.auth.StudentSession;
 
 @Configuration
 @RequiredArgsConstructor
@@ -17,14 +17,17 @@ public class RedisConfig {
 
 	private final RedisProperties redisProperties;
 
+	@Value("${spring.data.redis.port}")
+	private int port;
+
 	@Bean
 	public RedisConnectionFactory redisConnectionFactory() {
-		return new LettuceConnectionFactory(redisProperties.getHost(), redisProperties.getPort());
+		return new LettuceConnectionFactory(redisProperties.getHost(), port);
 	}
 
 	@Bean
-	public RedisTemplate<String, StudentSession> redisTemplate() {
-		RedisTemplate<String, StudentSession> redisTemplate = new RedisTemplate<>();
+	public RedisTemplate<String, ?> redisTemplate() {
+		RedisTemplate<String, ?> redisTemplate = new RedisTemplate<>();
 		redisTemplate.setConnectionFactory(redisConnectionFactory());
 		redisTemplate.setKeySerializer(new StringRedisSerializer());
 		redisTemplate.setValueSerializer(new StringRedisSerializer());

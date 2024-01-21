@@ -1,5 +1,6 @@
 package site.courseregistrationsystem.basket.application;
 
+import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
 
@@ -20,6 +21,8 @@ import site.courseregistrationsystem.exception.schedule.ScheduleConflictExceptio
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
+import site.courseregistrationsystem.registration.application.BasketRegistrationPeriodService;
+import site.courseregistrationsystem.registration.dto.RegistrationDate;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
 import site.courseregistrationsystem.subject.Subject;
@@ -30,12 +33,14 @@ import site.courseregistrationsystem.util.ProjectConstant;
 @RequiredArgsConstructor
 public class BasketService {
 
+	private final BasketRegistrationPeriodService basketRegistrationPeriodService;
+
 	private final StudentRepository studentRepository;
 	private final LectureRepository lectureRepository;
 	private final BasketRepository basketRepository;
 
 	@Transactional
-	public Long addLectureToBasket(Year year, Semester semester, Long studentPk, Long lectureId) {
+	public Long addLectureToBasket(LocalDateTime now, Long studentPk, Long lectureId) {
 		Student student = getStudent(studentPk);
 
 		Lecture lectureForBasket = lectureRepository.findById(lectureId)
@@ -43,7 +48,9 @@ public class BasketService {
 
 		List<Basket> baskets = basketRepository.findAllByStudent(student);
 
-		checkLectureInCurrentSemester(year, semester, lectureForBasket);
+		RegistrationDate registrationDate = basketRegistrationPeriodService.validateBasketRegistrationPeriod(now);
+
+		checkLectureInCurrentSemester(registrationDate.getYear(), registrationDate.getSemester(), lectureForBasket);
 		checkSubjectInBasketDuplicated(baskets, lectureForBasket);
 		checkCreditLimitExceeded(baskets, lectureForBasket);
 		checkScheduleConflict(baskets, lectureForBasket);

@@ -1,6 +1,6 @@
 package site.courseregistrationsystem.basket.presentation;
 
-import java.time.Year;
+import java.time.LocalDateTime;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +13,6 @@ import site.courseregistrationsystem.basket.application.BasketService;
 import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.basket.dto.DeletedBasket;
 import site.courseregistrationsystem.basket.dto.SelectedLecture;
-import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.util.api.ApiResponse;
 import site.courseregistrationsystem.util.api.ResponseMessage;
 import site.courseregistrationsystem.util.resolver.Login;
@@ -26,7 +25,7 @@ public class BasketController {
 
 	@PostMapping("/baskets/{lectureId}")
 	public ApiResponse<SelectedLecture> addLectureToBasket(@Login Long studentPk, @PathVariable Long lectureId) {
-		Long selectedLectureId = basketService.addLectureToBasket(Year.now(), Semester.getCurrentSemester(), studentPk, lectureId);
+		Long selectedLectureId = basketService.addLectureToBasket(LocalDateTime.now(), studentPk, lectureId);
 		SelectedLecture selectedLecture = new SelectedLecture(selectedLectureId);
 
 		return ApiResponse.ok(ResponseMessage.BASKET_ADD_SUCCESS.getMessage(), selectedLecture);

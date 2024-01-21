@@ -18,6 +18,7 @@ import site.courseregistrationsystem.auth.StudentSession;
 import site.courseregistrationsystem.auth.application.AuthService;
 import site.courseregistrationsystem.auth.application.SessionManager;
 import site.courseregistrationsystem.auth.dto.LoginForm;
+import site.courseregistrationsystem.clock.dto.SessionRemainingTime;
 import site.courseregistrationsystem.util.api.ApiResponse;
 import site.courseregistrationsystem.util.api.ResponseMessage;
 
@@ -42,13 +43,14 @@ public class AuthController {
 
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/session")
-	public ApiResponse<Void> renewSession(@CookieValue(value = SESSION_ID) Cookie sessionCookie, HttpServletResponse response) {
+	public ApiResponse<SessionRemainingTime> renewSession(@CookieValue(value = SESSION_ID) Cookie sessionCookie, HttpServletResponse response) {
 		StudentSession renewSession = sessionManager.renew(sessionCookie.getValue());
+		SessionRemainingTime sessionRemainingTime = new SessionRemainingTime(renewSession.getExpiration());
 
 		Cookie cookie = generateCookieBy(renewSession);
 		response.addCookie(cookie);
 
-		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.SESSION_RENEW_SUCCESS.getMessage(), null);
+		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.SESSION_RENEW_SUCCESS.getMessage(), sessionRemainingTime);
 	}
 
 	@DeleteMapping("/logout")
