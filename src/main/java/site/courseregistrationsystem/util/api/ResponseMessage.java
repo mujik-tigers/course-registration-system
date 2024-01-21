@@ -17,6 +17,7 @@ public enum ResponseMessage {
 
 	// Session
 	SESSION_RENEW_SUCCESS("세션 지속시간 갱신에 성공했습니다"),
+	SESSION_REMAINING_TIME_FETCH_SUCCESS("남은 세션 시간 조회에 성공했습니다"),
 
 	// Lecture
 	LECTURE_SCHEDULE_FETCH_SUCCESS("강의 시간표 조회에 성공했습니다"),

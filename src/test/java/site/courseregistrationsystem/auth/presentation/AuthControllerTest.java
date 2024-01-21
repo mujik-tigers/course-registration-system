@@ -231,7 +231,8 @@ class AuthControllerTest extends RestDocsSupport {
 					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
 					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
 					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
-					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
+					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+					fieldWithPath("data.sessionRemainingTime").type(JsonFieldType.NUMBER).description("남은 세션 시간")
 				)
 			));
 	}
