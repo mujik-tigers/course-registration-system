@@ -19,7 +19,6 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import site.courseregistrationsystem.RestDocsSupport;
 import site.courseregistrationsystem.exception.registration_period.StartTimeAfterEndTimeException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeBeforeCurrentTimeException;
-import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.registration.dto.BasketRegistrationPeriodSaveForm;
 import site.courseregistrationsystem.registration.dto.EnrollmentRegistrationPeriodSaveForm;
 import site.courseregistrationsystem.student.Grade;
@@ -33,7 +32,7 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 17, 9, 30, 0);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 17, 10, 0, 0);
 
-		EnrollmentRegistrationPeriodSaveForm saveForm = new EnrollmentRegistrationPeriodSaveForm(Grade.FRESHMAN, startTime, endTime, Semester.FIRST);
+		EnrollmentRegistrationPeriodSaveForm saveForm = new EnrollmentRegistrationPeriodSaveForm(Grade.FRESHMAN, startTime, endTime);
 
 		// when & then
 		mockMvc.perform(post("/registration-period/enrollments")
@@ -47,8 +46,7 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 				requestFields(
 					fieldWithPath("grade").type(JsonFieldType.STRING).description("타겟 학년"),
 					fieldWithPath("startTime").type(JsonFieldType.VARIES).description("시작 시간"),
-					fieldWithPath("endTime").type(JsonFieldType.VARIES).description("종료 시간"),
-					fieldWithPath("semester").type(JsonFieldType.STRING).description("학기")
+					fieldWithPath("endTime").type(JsonFieldType.VARIES).description("종료 시간")
 				),
 				responseFields(
 					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
@@ -64,12 +62,12 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 	void invalidTimeEnrollmentRegistrationPeriod() throws Exception {
 		// given
 		doThrow(new StartTimeBeforeCurrentTimeException()).when(enrollmentRegistrationPeriodService)
-			.saveEnrollmentRegistrationPeriod(any(), any(), any(), any(), any());
+			.saveEnrollmentRegistrationPeriod(any(), any(), any(), any());
 
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 17, 9, 30, 0);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 17, 10, 0, 0);
 
-		EnrollmentRegistrationPeriodSaveForm saveForm = new EnrollmentRegistrationPeriodSaveForm(Grade.FRESHMAN, startTime, endTime, Semester.FIRST);
+		EnrollmentRegistrationPeriodSaveForm saveForm = new EnrollmentRegistrationPeriodSaveForm(Grade.FRESHMAN, startTime, endTime);
 
 		// when & then
 		mockMvc.perform(post("/registration-period/enrollments")
@@ -83,8 +81,7 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 				requestFields(
 					fieldWithPath("grade").type(JsonFieldType.STRING).description("타겟 학년"),
 					fieldWithPath("startTime").type(JsonFieldType.VARIES).description("시작 시간"),
-					fieldWithPath("endTime").type(JsonFieldType.VARIES).description("종료 시간"),
-					fieldWithPath("semester").type(JsonFieldType.STRING).description("학기")
+					fieldWithPath("endTime").type(JsonFieldType.VARIES).description("종료 시간")
 				),
 				responseFields(
 					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
@@ -100,12 +97,12 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 	void earlyEndTimeEnrollmentRegistrationPeriod() throws Exception {
 		// given
 		doThrow(new StartTimeAfterEndTimeException()).when(enrollmentRegistrationPeriodService)
-			.saveEnrollmentRegistrationPeriod(any(), any(), any(), any(), any());
+			.saveEnrollmentRegistrationPeriod(any(), any(), any(), any());
 
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 17, 9, 30, 0);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 17, 10, 0, 0);
 
-		EnrollmentRegistrationPeriodSaveForm saveForm = new EnrollmentRegistrationPeriodSaveForm(Grade.FRESHMAN, startTime, endTime, Semester.FIRST);
+		EnrollmentRegistrationPeriodSaveForm saveForm = new EnrollmentRegistrationPeriodSaveForm(Grade.FRESHMAN, startTime, endTime);
 
 		// when & then
 		mockMvc.perform(post("/registration-period/enrollments")
@@ -119,8 +116,7 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 				requestFields(
 					fieldWithPath("grade").type(JsonFieldType.STRING).description("타겟 학년"),
 					fieldWithPath("startTime").type(JsonFieldType.VARIES).description("시작 시간"),
-					fieldWithPath("endTime").type(JsonFieldType.VARIES).description("종료 시간"),
-					fieldWithPath("semester").type(JsonFieldType.STRING).description("학기")
+					fieldWithPath("endTime").type(JsonFieldType.VARIES).description("종료 시간")
 				),
 				responseFields(
 					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
@@ -138,7 +134,7 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 17, 9, 30, 0);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 17, 10, 0, 0);
 
-		BasketRegistrationPeriodSaveForm saveForm = new BasketRegistrationPeriodSaveForm(startTime, endTime, Semester.FIRST);
+		BasketRegistrationPeriodSaveForm saveForm = new BasketRegistrationPeriodSaveForm(startTime, endTime);
 
 		// when & then
 		mockMvc.perform(post("/registration-period/baskets")
@@ -151,8 +147,7 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 				preprocessResponse(prettyPrint()),
 				requestFields(
 					fieldWithPath("startTime").type(JsonFieldType.VARIES).description("시작 시간"),
-					fieldWithPath("endTime").type(JsonFieldType.VARIES).description("종료 시간"),
-					fieldWithPath("semester").type(JsonFieldType.STRING).description("학기")
+					fieldWithPath("endTime").type(JsonFieldType.VARIES).description("종료 시간")
 				),
 				responseFields(
 					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
@@ -168,12 +163,12 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 	void invalidTimeBasketRegistrationPeriod() throws Exception {
 		// given
 		doThrow(new StartTimeBeforeCurrentTimeException()).when(basketRegistrationPeriodService)
-			.saveBasketRegistrationPeriod(any(), any(), any(), any());
+			.saveBasketRegistrationPeriod(any(), any(), any());
 
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 17, 9, 30, 0);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 17, 10, 0, 0);
 
-		BasketRegistrationPeriodSaveForm saveForm = new BasketRegistrationPeriodSaveForm(startTime, endTime, Semester.FIRST);
+		BasketRegistrationPeriodSaveForm saveForm = new BasketRegistrationPeriodSaveForm(startTime, endTime);
 
 		// when & then
 		mockMvc.perform(post("/registration-period/baskets")
@@ -186,8 +181,7 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 				preprocessResponse(prettyPrint()),
 				requestFields(
 					fieldWithPath("startTime").type(JsonFieldType.VARIES).description("시작 시간"),
-					fieldWithPath("endTime").type(JsonFieldType.VARIES).description("종료 시간"),
-					fieldWithPath("semester").type(JsonFieldType.STRING).description("학기")
+					fieldWithPath("endTime").type(JsonFieldType.VARIES).description("종료 시간")
 				),
 				responseFields(
 					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
@@ -203,12 +197,12 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 	void earlyEndTimeBasketRegistrationPeriod() throws Exception {
 		// given
 		doThrow(new StartTimeAfterEndTimeException()).when(basketRegistrationPeriodService)
-			.saveBasketRegistrationPeriod(any(), any(), any(), any());
+			.saveBasketRegistrationPeriod(any(), any(), any());
 
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 17, 9, 30, 0);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 17, 10, 0, 0);
 
-		BasketRegistrationPeriodSaveForm saveForm = new BasketRegistrationPeriodSaveForm(startTime, endTime, Semester.FIRST);
+		BasketRegistrationPeriodSaveForm saveForm = new BasketRegistrationPeriodSaveForm(startTime, endTime);
 
 		// when & then
 		mockMvc.perform(post("/registration-period/baskets")
@@ -221,8 +215,7 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 				preprocessResponse(prettyPrint()),
 				requestFields(
 					fieldWithPath("startTime").type(JsonFieldType.VARIES).description("시작 시간"),
-					fieldWithPath("endTime").type(JsonFieldType.VARIES).description("종료 시간"),
-					fieldWithPath("semester").type(JsonFieldType.STRING).description("학기")
+					fieldWithPath("endTime").type(JsonFieldType.VARIES).description("종료 시간")
 				),
 				responseFields(
 					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),

@@ -3,6 +3,7 @@ package site.courseregistrationsystem.registration.application;
 import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -11,9 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import site.courseregistrationsystem.IntegrationTestSupport;
+import site.courseregistrationsystem.clock.Clock;
+import site.courseregistrationsystem.clock.application.ClockService;
+import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
 import site.courseregistrationsystem.exception.registration_period.InvalidEnrollmentTimeException;
 import site.courseregistrationsystem.exception.registration_period.NonexistenceCommonEnrollmentRegistrationPeriodException;
 import site.courseregistrationsystem.exception.registration_period.NonexistenceEnrollmentRegistrationPeriodException;
@@ -32,6 +38,9 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 
 	@Autowired
 	private EnrollmentRegistrationPeriodStorage enrollmentRegistrationPeriodStorage;
+
+	@SpyBean
+	private ClockService clockService;
 
 	@AfterEach
 	void clear() {
@@ -56,10 +65,9 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		LocalDateTime now = LocalDateTime.of(2024, 1, 15, 9, 0, 0);
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 16, 10, 0, 0);
-		Semester semester = Semester.FIRST;
 
 		// when
-		enrollmentRegistrationPeriodService.saveEnrollmentRegistrationPeriod(now, startTime, endTime, targetGrade, semester);
+		enrollmentRegistrationPeriodService.saveEnrollmentRegistrationPeriod(now, startTime, endTime, targetGrade);
 
 		// then
 		EnrollmentRegistrationPeriod registrationPeriod = enrollmentRegistrationPeriodStorage.findById(targetGrade.name()).get();
@@ -67,8 +75,6 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		assertThat(registrationPeriod.getStartTime()).isEqualTo(startTime);
 		assertThat(registrationPeriod.getEndTime()).isEqualTo(endTime);
 		assertThat(registrationPeriod.getTargetGrade()).isEqualTo(targetGrade.name());
-		assertThat(registrationPeriod.getSemester()).isEqualTo(semester.name());
-		assertThat(registrationPeriod.getYear()).isEqualTo(startTime.getYear());
 	}
 
 	@Test
@@ -79,10 +85,9 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 14, 9, 0, 0);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 16, 10, 0, 0);
 		Grade targetGrade = Grade.FRESHMAN;
-		Semester semester = Semester.FIRST;
 
 		// when & then
-		assertThatThrownBy(() -> enrollmentRegistrationPeriodService.saveEnrollmentRegistrationPeriod(now, startTime, endTime, targetGrade, semester))
+		assertThatThrownBy(() -> enrollmentRegistrationPeriodService.saveEnrollmentRegistrationPeriod(now, startTime, endTime, targetGrade))
 			.isInstanceOf(StartTimeBeforeCurrentTimeException.class);
 	}
 
@@ -94,10 +99,9 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 16, 10, 0, 0);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
 		Grade targetGrade = Grade.FRESHMAN;
-		Semester semester = Semester.FIRST;
 
 		// when & then
-		assertThatThrownBy(() -> enrollmentRegistrationPeriodService.saveEnrollmentRegistrationPeriod(now, startTime, endTime, targetGrade, semester))
+		assertThatThrownBy(() -> enrollmentRegistrationPeriodService.saveEnrollmentRegistrationPeriod(now, startTime, endTime, targetGrade))
 			.isInstanceOf(StartTimeAfterEndTimeException.class);
 	}
 
@@ -110,9 +114,14 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		Grade targetGrade = Grade.FRESHMAN;
 		Semester semester = Semester.FIRST;
 
-		saveRegistrationPeriod(startTime, endTime, targetGrade, semester);
+		saveRegistrationPeriod(startTime, endTime, targetGrade);
 
 		LocalDateTime currentRegistrationTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
+
+		CurrentYearAndSemester currentYearAndSemester = createCurrentYearAndSemester(Year.of(startTime.getYear()), semester);
+		BDDMockito.doReturn(currentYearAndSemester)
+			.when(clockService)
+			.fetchCurrentClock();
 
 		// when
 		RegistrationDate registrationDate = enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(currentRegistrationTime,
@@ -132,10 +141,15 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		Grade studentGrade = Grade.FRESHMAN;
 		Semester semester = Semester.FIRST;
 
-		saveRegistrationPeriod(startTime.plusDays(1), endTime.plusDays(1), Grade.FRESHMAN, semester);
-		saveRegistrationPeriod(startTime, endTime, Grade.COMMON, semester);
+		saveRegistrationPeriod(startTime.plusDays(1), endTime.plusDays(1), Grade.FRESHMAN);
+		saveRegistrationPeriod(startTime, endTime, Grade.COMMON);
 
 		LocalDateTime commonRegistrationTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
+
+		CurrentYearAndSemester currentYearAndSemester = createCurrentYearAndSemester(Year.of(startTime.getYear()), semester);
+		BDDMockito.doReturn(currentYearAndSemester)
+			.when(clockService)
+			.fetchCurrentClock();
 
 		// when
 		RegistrationDate registrationDate = enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(commonRegistrationTime,
@@ -155,11 +169,16 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		Grade targetGrade = Grade.FRESHMAN;
 		Semester semester = Semester.FIRST;
 
-		saveRegistrationPeriod(startTime, endTime, targetGrade, semester);
-		saveRegistrationPeriod(startTime.plusYears(1), endTime.plusYears(1), Grade.COMMON, semester);
+		saveRegistrationPeriod(startTime, endTime, targetGrade);
+		saveRegistrationPeriod(startTime.plusYears(1), endTime.plusYears(1), Grade.COMMON);
 
 		LocalDateTime earlyRegistrationTime = LocalDateTime.of(2024, 1, 16, 9, 29, 0);
 		LocalDateTime lateRegistrationTime = LocalDateTime.of(2024, 1, 16, 10, 1, 0);
+
+		CurrentYearAndSemester currentYearAndSemester = createCurrentYearAndSemester(Year.of(startTime.getYear()), semester);
+		BDDMockito.doReturn(currentYearAndSemester)
+			.when(clockService)
+			.fetchCurrentClock();
 
 		// when & then
 		assertThatThrownBy(() -> enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(earlyRegistrationTime, targetGrade))
@@ -177,11 +196,16 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 16, 10, 0, 0);
 		Semester semester = Semester.FIRST;
 
-		saveRegistrationPeriod(startTime, endTime, Grade.FRESHMAN, semester);
-		saveRegistrationPeriod(startTime.plusDays(1), endTime.plusDays(1), Grade.SOPHOMORE, semester);
-		saveRegistrationPeriod(startTime.plusYears(1), endTime.plusYears(1), Grade.COMMON, semester);
+		saveRegistrationPeriod(startTime, endTime, Grade.FRESHMAN);
+		saveRegistrationPeriod(startTime.plusDays(1), endTime.plusDays(1), Grade.SOPHOMORE);
+		saveRegistrationPeriod(startTime.plusYears(1), endTime.plusYears(1), Grade.COMMON);
 
 		LocalDateTime freshmanRegistrationTime = LocalDateTime.of(2024, 1, 16, 9, 45, 0);
+
+		CurrentYearAndSemester currentYearAndSemester = createCurrentYearAndSemester(Year.of(startTime.getYear()), semester);
+		BDDMockito.doReturn(currentYearAndSemester)
+			.when(clockService)
+			.fetchCurrentClock();
 
 		// when & then
 		enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(freshmanRegistrationTime, Grade.FRESHMAN);// 1학년에게는 적합한 수강신청기간
@@ -211,23 +235,35 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		Grade targetGrade = Grade.FRESHMAN;
 		Semester semester = Semester.FIRST;
 
-		saveRegistrationPeriod(startTime, endTime, targetGrade, semester);
+		saveRegistrationPeriod(startTime, endTime, targetGrade);
+
+		CurrentYearAndSemester currentYearAndSemester = createCurrentYearAndSemester(Year.of(startTime.getYear()), semester);
+		BDDMockito.doReturn(currentYearAndSemester)
+			.when(clockService)
+			.fetchCurrentClock();
 
 		// when & then
 		assertThatThrownBy(() -> enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(now, targetGrade))
 			.isInstanceOf(NonexistenceCommonEnrollmentRegistrationPeriodException.class);
 	}
 
-	private EnrollmentRegistrationPeriod saveRegistrationPeriod(LocalDateTime startTime, LocalDateTime endTime, Grade targetGrade,
-		Semester semester) {
+	private EnrollmentRegistrationPeriod saveRegistrationPeriod(LocalDateTime startTime, LocalDateTime endTime, Grade targetGrade) {
 		EnrollmentRegistrationPeriod registrationPeriod = EnrollmentRegistrationPeriod.builder()
 			.startTime(startTime)
 			.endTime(endTime)
 			.targetGrade(targetGrade)
-			.semester(semester)
 			.build();
 
 		return enrollmentRegistrationPeriodStorage.save(registrationPeriod);
+	}
+
+	private CurrentYearAndSemester createCurrentYearAndSemester(Year year, Semester semester) {
+		Clock clock = Clock.builder()
+			.year(year)
+			.semester(semester)
+			.build();
+
+		return new CurrentYearAndSemester(clock);
 	}
 
 }

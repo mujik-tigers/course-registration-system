@@ -3,13 +3,19 @@ package site.courseregistrationsystem.registration.application;
 import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDateTime;
+import java.time.Year;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import site.courseregistrationsystem.IntegrationTestSupport;
+import site.courseregistrationsystem.clock.Clock;
+import site.courseregistrationsystem.clock.application.ClockService;
+import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
 import site.courseregistrationsystem.exception.registration_period.InvalidBasketTimeException;
 import site.courseregistrationsystem.exception.registration_period.NonexistenceBasketRegistrationPeriodException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeAfterEndTimeException;
@@ -28,6 +34,9 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 	@Autowired
 	private BasketRegistrationPeriodStorage basketRegistrationPeriodStorage;
 
+	@SpyBean
+	private ClockService clockService;
+
 	@AfterEach
 	void clear() {
 		basketRegistrationPeriodStorage.deleteAll();
@@ -40,18 +49,15 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		LocalDateTime now = LocalDateTime.of(2024, 1, 15, 9, 0, 0);
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 16, 10, 0, 0);
-		Semester semester = Semester.FIRST;
 
 		// when
-		basketRegistrationPeriodService.saveBasketRegistrationPeriod(now, startTime, endTime, semester);
+		basketRegistrationPeriodService.saveBasketRegistrationPeriod(now, startTime, endTime);
 
 		// then
 		BasketRegistrationPeriod registrationPeriod = basketRegistrationPeriodStorage.findById(Grade.COMMON.name()).get();
 
 		assertThat(registrationPeriod.getStartTime()).isEqualTo(startTime);
 		assertThat(registrationPeriod.getEndTime()).isEqualTo(endTime);
-		assertThat(registrationPeriod.getSemester()).isEqualTo(semester.name());
-		assertThat(registrationPeriod.getYear()).isEqualTo(startTime.getYear());
 	}
 
 	@Test
@@ -61,10 +67,9 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		LocalDateTime now = LocalDateTime.of(2024, 1, 15, 9, 0, 0);
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 14, 9, 0, 0);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 16, 10, 0, 0);
-		Semester semester = Semester.FIRST;
 
 		// when & then
-		assertThatThrownBy(() -> basketRegistrationPeriodService.saveBasketRegistrationPeriod(now, startTime, endTime, semester))
+		assertThatThrownBy(() -> basketRegistrationPeriodService.saveBasketRegistrationPeriod(now, startTime, endTime))
 			.isInstanceOf(StartTimeBeforeCurrentTimeException.class);
 	}
 
@@ -75,10 +80,9 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		LocalDateTime now = LocalDateTime.of(2024, 1, 15, 9, 0, 0);
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 16, 10, 0, 0);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
-		Semester semester = Semester.FIRST;
 
 		// when & then
-		assertThatThrownBy(() -> basketRegistrationPeriodService.saveBasketRegistrationPeriod(now, startTime, endTime, semester))
+		assertThatThrownBy(() -> basketRegistrationPeriodService.saveBasketRegistrationPeriod(now, startTime, endTime))
 			.isInstanceOf(StartTimeAfterEndTimeException.class);
 	}
 
@@ -93,6 +97,11 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		saveRegistrationPeriod(startTime, endTime, semester);
 
 		LocalDateTime currentRegistrationTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
+
+		CurrentYearAndSemester currentYearAndSemester = createCurrentYearAndSemester(Year.of(startTime.getYear()), semester);
+		BDDMockito.doReturn(currentYearAndSemester)
+			.when(clockService)
+			.fetchCurrentClock();
 
 		// when
 		RegistrationDate registrationDate = basketRegistrationPeriodService.validateBasketRegistrationPeriod(currentRegistrationTime);
@@ -114,6 +123,11 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 
 		LocalDateTime earlyRegistrationTime = LocalDateTime.of(2024, 1, 16, 9, 29, 0);
 		LocalDateTime lateRegistrationTime = LocalDateTime.of(2024, 1, 16, 10, 1, 0);
+
+		CurrentYearAndSemester currentYearAndSemester = createCurrentYearAndSemester(Year.of(startTime.getYear()), semester);
+		BDDMockito.doReturn(currentYearAndSemester)
+			.when(clockService)
+			.fetchCurrentClock();
 
 		// when & then
 		assertThatThrownBy(() -> basketRegistrationPeriodService.validateBasketRegistrationPeriod(earlyRegistrationTime))
@@ -138,10 +152,18 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		BasketRegistrationPeriod registrationPeriod = BasketRegistrationPeriod.builder()
 			.startTime(startTime)
 			.endTime(endTime)
-			.semester(semester)
 			.build();
 
 		return basketRegistrationPeriodStorage.save(registrationPeriod);
+	}
+
+	private CurrentYearAndSemester createCurrentYearAndSemester(Year year, Semester semester) {
+		Clock clock = Clock.builder()
+			.year(year)
+			.semester(semester)
+			.build();
+
+		return new CurrentYearAndSemester(clock);
 	}
 
 }
