@@ -3,6 +3,7 @@ package site.courseregistrationsystem.auth.presentation;
 import static site.courseregistrationsystem.util.ProjectConstant.*;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,8 +36,8 @@ public class AuthController {
 	public ApiResponse<Void> login(@RequestBody @Valid LoginForm loginForm, HttpServletResponse response) {
 		StudentSession session = authService.login(loginForm);
 
-		Cookie cookie = generateCookieBy(session);
-		response.addCookie(cookie);
+		ResponseCookie cookie = generateCookieBy(session);
+		response.setHeader("Set-Cookie", cookie.toString());
 
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.LOGIN_SUCCESS.getMessage(), null);
 	}
@@ -47,8 +48,8 @@ public class AuthController {
 		StudentSession renewSession = sessionManager.renew(sessionCookie.getValue());
 		SessionRemainingTime sessionRemainingTime = new SessionRemainingTime(renewSession.getExpiration());
 
-		Cookie cookie = generateCookieBy(renewSession);
-		response.addCookie(cookie);
+		ResponseCookie cookie = generateCookieBy(renewSession);
+		response.setHeader("Set-Cookie", cookie.toString());
 
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.SESSION_RENEW_SUCCESS.getMessage(), sessionRemainingTime);
 	}
@@ -64,15 +65,15 @@ public class AuthController {
 		return ApiResponse.ok(ResponseMessage.LOGOUT_SUCCESS.getMessage(), null);
 	}
 
-	private Cookie generateCookieBy(StudentSession renewSession) {
-		Cookie cookie = new Cookie(cookieProperties.getName(), renewSession.getId());
-		cookie.setHttpOnly(true);
-		cookie.setSecure(true);
-		cookie.setDomain(cookieProperties.getDomain());
-		cookie.setPath(cookieProperties.getPath());
-		cookie.setMaxAge(cookieProperties.getExpiry());
-
-		return cookie;
+	private ResponseCookie generateCookieBy(StudentSession renewSession) {
+		return ResponseCookie.from(cookieProperties.getName(), renewSession.getId())
+			.domain(cookieProperties.getDomain())
+			.path(cookieProperties.getPath())
+			.maxAge(cookieProperties.getExpiry())
+			.httpOnly(true)
+			.secure(true)
+			.sameSite(cookieProperties.getSameSite())
+			.build();
 	}
 
 	private void invalidateCookie(Cookie sessionCookie) {

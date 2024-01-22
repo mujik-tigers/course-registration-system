@@ -14,5 +14,6 @@ public class CookieProperties {
 	private final String domain;
 	private final String path;
 	private final int expiry;
+	private final String sameSite;
 
 }
