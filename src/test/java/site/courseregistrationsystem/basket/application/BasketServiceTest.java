@@ -21,6 +21,8 @@ import site.courseregistrationsystem.basket.Basket;
 import site.courseregistrationsystem.basket.dto.BasketDetail;
 import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
+import site.courseregistrationsystem.clock.Clock;
+import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
 import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
@@ -76,7 +78,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
 
-		RegistrationDate registrationDate = new RegistrationDate(YEAR.getValue(), SEMESTER.name());
+		RegistrationDate registrationDate = createRegistrationDate(YEAR, SEMESTER);
 		BDDMockito.doReturn(registrationDate)
 			.when(basketRegistrationPeriodService)
 			.validateBasketRegistrationPeriod(any());
@@ -108,7 +110,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
 
-		RegistrationDate registrationDate = new RegistrationDate(YEAR.getValue(), SEMESTER.name());
+		RegistrationDate registrationDate = createRegistrationDate(YEAR, SEMESTER);
 		BDDMockito.doReturn(registrationDate)
 			.when(basketRegistrationPeriodService)
 			.validateBasketRegistrationPeriod(any());
@@ -134,7 +136,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
 
-		RegistrationDate registrationDate = new RegistrationDate(YEAR.getValue(), SEMESTER.name());
+		RegistrationDate registrationDate = createRegistrationDate(YEAR, SEMESTER);
 		BDDMockito.doReturn(registrationDate)
 			.when(basketRegistrationPeriodService)
 			.validateBasketRegistrationPeriod(any());
@@ -162,7 +164,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
 
-		RegistrationDate registrationDate = new RegistrationDate(YEAR.getValue(), SEMESTER.name());
+		RegistrationDate registrationDate = createRegistrationDate(YEAR, SEMESTER);
 		BDDMockito.doReturn(registrationDate)
 			.when(basketRegistrationPeriodService)
 			.validateBasketRegistrationPeriod(any());
@@ -193,7 +195,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
 
-		RegistrationDate registrationDate = new RegistrationDate(YEAR.getValue(), SEMESTER.name());
+		RegistrationDate registrationDate = createRegistrationDate(YEAR, SEMESTER);
 		BDDMockito.doReturn(registrationDate)
 			.when(basketRegistrationPeriodService)
 			.validateBasketRegistrationPeriod(any());
@@ -229,7 +231,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
 
-		RegistrationDate registrationDate = new RegistrationDate(YEAR.getValue(), SEMESTER.name());
+		RegistrationDate registrationDate = createRegistrationDate(YEAR, SEMESTER);
 		BDDMockito.doReturn(registrationDate)
 			.when(basketRegistrationPeriodService)
 			.validateBasketRegistrationPeriod(any());
@@ -365,7 +367,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 
 		Lecture lecture = lectureRepository.save(createLecture(subject, YEAR, SEMESTER));
 
-		RegistrationDate registrationDate = new RegistrationDate(year, semester);
+		RegistrationDate registrationDate = createRegistrationDate(Year.of(year), Semester.valueOf(semester));
 		BDDMockito.doReturn(registrationDate)
 			.when(basketRegistrationPeriodService)
 			.validateBasketRegistrationPeriod(any());
@@ -452,6 +454,15 @@ class BasketServiceTest extends IntegrationTestSupport {
 			.student(student)
 			.lecture(lecture)
 			.build();
+	}
+
+	private static RegistrationDate createRegistrationDate(Year year, Semester semester) {
+		Clock clock = Clock.builder()
+			.year(year)
+			.semester(semester)
+			.build();
+		CurrentYearAndSemester currentYearAndSemester = new CurrentYearAndSemester(clock);
+		return new RegistrationDate(currentYearAndSemester);
 	}
 
 }

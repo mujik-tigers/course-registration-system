@@ -24,6 +24,8 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
+import site.courseregistrationsystem.clock.Clock;
+import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
 import site.courseregistrationsystem.department.Department;
 import site.courseregistrationsystem.enrollment.Enrollment;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
@@ -83,7 +85,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Lecture lecture = saveLecture(department, subject, openingYear, semester);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
-		RegistrationDate registrationDate = new RegistrationDate(openingYear.getValue(), semester.name());
+		RegistrationDate registrationDate = createRegistrationDate(openingYear, semester);
 		BDDMockito.doReturn(registrationDate)
 			.when(enrollmentRegistrationPeriodService)
 			.validateEnrollmentRegistrationPeriod(any(), any());
@@ -109,7 +111,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Lecture lecture = saveLecture(department, subject, openingYear, semester);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
-		RegistrationDate registrationDate = new RegistrationDate(openingYear.getValue(), semester.name());
+		RegistrationDate registrationDate = createRegistrationDate(openingYear, semester);
 		BDDMockito.doReturn(registrationDate)
 			.when(enrollmentRegistrationPeriodService)
 			.validateEnrollmentRegistrationPeriod(any(), any());
@@ -132,7 +134,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Lecture pastLecture = saveLecture(department, subject1, Year.of(2023), Semester.FIRST);
 		saveSchedule(pastLecture, DayOfWeek.MON, Period.ONE, Period.THREE);  // 작년 강의 개설
 
-		RegistrationDate registrationDate = new RegistrationDate(2024, "FIRST");
+		RegistrationDate registrationDate = createRegistrationDate(Year.of(2024), Semester.FIRST);
 		BDDMockito.doReturn(registrationDate)
 			.when(enrollmentRegistrationPeriodService)
 			.validateEnrollmentRegistrationPeriod(any(), any());
@@ -154,7 +156,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Lecture pastLecture = saveLecture(department, subject1, Year.of(2024), Semester.FIRST);
 		saveSchedule(pastLecture, DayOfWeek.MON, Period.ONE, Period.THREE);  // 지난 학기 강의 개설
 
-		RegistrationDate registrationDate = new RegistrationDate(2024, "SECOND");
+		RegistrationDate registrationDate = createRegistrationDate(Year.of(2024), Semester.SECOND);
 		BDDMockito.doReturn(registrationDate)
 			.when(enrollmentRegistrationPeriodService)
 			.validateEnrollmentRegistrationPeriod(any(), any());
@@ -198,7 +200,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Year openingYear = Year.of(2024);
 		Semester semester = Semester.FIRST;
 
-		RegistrationDate registrationDate = new RegistrationDate(openingYear.getValue(), semester.name());
+		RegistrationDate registrationDate = createRegistrationDate(openingYear, semester);
 		BDDMockito.doReturn(registrationDate)
 			.when(enrollmentRegistrationPeriodService)
 			.validateEnrollmentRegistrationPeriod(any(), any());
@@ -236,7 +238,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		saveSchedule(lectureOnMonday, DayOfWeek.MON, Period.ONE, Period.THREE);
 		saveSchedule(LectureOnFriday, DayOfWeek.FRI, Period.ONE, Period.THREE);
 
-		RegistrationDate registrationDate = new RegistrationDate(openingYear.getValue(), semester.name());
+		RegistrationDate registrationDate = createRegistrationDate(openingYear, semester);
 		BDDMockito.doReturn(registrationDate)
 			.when(enrollmentRegistrationPeriodService)
 			.validateEnrollmentRegistrationPeriod(any(), any());
@@ -269,7 +271,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Year openingYear = Year.of(2024);
 		Semester semester = Semester.FIRST;
 
-		RegistrationDate registrationDate = new RegistrationDate(openingYear.getValue(), semester.name());
+		RegistrationDate registrationDate = createRegistrationDate(openingYear, semester);
 		BDDMockito.doReturn(registrationDate)
 			.when(enrollmentRegistrationPeriodService)
 			.validateEnrollmentRegistrationPeriod(any(), any());
@@ -299,7 +301,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Year openingYear = Year.of(2024);
 		Semester semester = Semester.FIRST;
 
-		RegistrationDate registrationDate = new RegistrationDate(openingYear.getValue(), semester.name());
+		RegistrationDate registrationDate = createRegistrationDate(openingYear, semester);
 		BDDMockito.doReturn(registrationDate)
 			.when(enrollmentRegistrationPeriodService)
 			.validateEnrollmentRegistrationPeriod(any(), any());
@@ -559,6 +561,15 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 			.lastPeriod(lastPeriod)
 			.build();
 		entityManager.persist(schedule);
+	}
+
+	private static RegistrationDate createRegistrationDate(Year year, Semester semester) {
+		Clock clock = Clock.builder()
+			.year(year)
+			.semester(semester)
+			.build();
+		CurrentYearAndSemester currentYearAndSemester = new CurrentYearAndSemester(clock);
+		return new RegistrationDate(currentYearAndSemester);
 	}
 
 }

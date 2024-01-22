@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.student.Grade;
 
 @NoArgsConstructor
@@ -16,6 +15,5 @@ public class EnrollmentRegistrationPeriodSaveForm {
 	private Grade grade;
 	private LocalDateTime startTime;
 	private LocalDateTime endTime;
-	private Semester semester;
 
 }

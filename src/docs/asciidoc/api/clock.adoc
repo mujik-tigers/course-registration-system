@@ -38,3 +38,28 @@ include::{snippets}/server-remaining-time-fetch-success/http-request.adoc[]
 
 include::{snippets}/server-remaining-time-fetch-success/http-response.adoc[]
 include::{snippets}/server-remaining-time-fetch-success/response-fields.adoc[]
+
+[[current-year-and-semester-fetch-success]]
+=== 현재 년도와 학기 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/current-year-and-semester-fetch-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/current-year-and-semester-fetch-success/http-response.adoc[]
+include::{snippets}/current-year-and-semester-fetch-success/response-fields.adoc[]
+
+[[current-year-and-semester-fetch-fail]]
+=== 현재 년도와 학기 조회 : 실패 - 등록 되지 않은 현재 시간 정보
+
+==== HTTP Request
+
+include::{snippets}/current-year-and-semester-fetch-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/current-year-and-semester-fetch-fail/http-response.adoc[]
+include::{snippets}/current-year-and-semester-fetch-fail/response-fields.adoc[]
+

@@ -9,7 +9,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.student.Grade;
 
 @RedisHash("enrollmentRegistrationPeriod")
@@ -21,16 +20,12 @@ public class EnrollmentRegistrationPeriod {
 	private String targetGrade;
 	private LocalDateTime startTime;
 	private LocalDateTime endTime;
-	private int year;
-	private String semester;
 
 	@Builder
-	private EnrollmentRegistrationPeriod(Grade targetGrade, LocalDateTime startTime, LocalDateTime endTime, Semester semester) {
+	private EnrollmentRegistrationPeriod(Grade targetGrade, LocalDateTime startTime, LocalDateTime endTime) {
 		this.targetGrade = targetGrade.name();
 		this.startTime = startTime;
 		this.endTime = endTime;
-		this.year = startTime.getYear();
-		this.semester = semester.name();
 	}
 
 	public boolean isWithinTimeRange(LocalDateTime now) {

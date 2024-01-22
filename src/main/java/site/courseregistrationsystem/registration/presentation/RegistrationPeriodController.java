@@ -26,8 +26,8 @@ public class RegistrationPeriodController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/registration-period/enrollments")
 	public ApiResponse<Void> saveEnrollmentRegistrationPeriod(@RequestBody EnrollmentRegistrationPeriodSaveForm saveForm) {
-		enrollmentRegistrationPeriodService.saveEnrollmentRegistrationPeriod(LocalDateTime.now(),
-			saveForm.getStartTime(), saveForm.getEndTime(), saveForm.getGrade(), saveForm.getSemester());
+		enrollmentRegistrationPeriodService.saveEnrollmentRegistrationPeriod(LocalDateTime.now(), saveForm.getStartTime(), saveForm.getEndTime(),
+			saveForm.getGrade());
 
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.ENROLLMENT_REGISTRATION_PERIOD_SAVE_SUCCESS.getMessage(), null);
 	}
@@ -35,8 +35,7 @@ public class RegistrationPeriodController {
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/registration-period/baskets")
 	public ApiResponse<Void> saveBasketRegistrationPeriod(@RequestBody BasketRegistrationPeriodSaveForm saveForm) {
-		basketRegistrationPeriodService.saveBasketRegistrationPeriod(LocalDateTime.now(),
-			saveForm.getStartTime(), saveForm.getEndTime(), saveForm.getSemester());
+		basketRegistrationPeriodService.saveBasketRegistrationPeriod(LocalDateTime.now(), saveForm.getStartTime(), saveForm.getEndTime());
 
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.BASKET_REGISTRATION_PERIOD_SAVE_SUCCESS.getMessage(), null);
 	}
