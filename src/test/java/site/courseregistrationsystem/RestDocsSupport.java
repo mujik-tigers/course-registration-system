@@ -18,6 +18,7 @@ import site.courseregistrationsystem.auth.presentation.AuthController;
 import site.courseregistrationsystem.auth.presentation.CookieProperties;
 import site.courseregistrationsystem.basket.application.BasketService;
 import site.courseregistrationsystem.basket.presentation.BasketController;
+import site.courseregistrationsystem.clock.application.ClockService;
 import site.courseregistrationsystem.clock.presentation.ClockController;
 import site.courseregistrationsystem.enrollment.application.EnrollmentService;
 import site.courseregistrationsystem.enrollment.presentation.EnrollmentController;
@@ -78,6 +79,9 @@ public abstract class RestDocsSupport {
 
 	@MockBean
 	protected BasketRegistrationPeriodService basketRegistrationPeriodService;
+
+	@MockBean
+	protected ClockService clockService;
 
 	@BeforeEach
 	void setUp() {

@@ -14,6 +14,7 @@ public enum ResponseMessage {
 
 	// Clock
 	CURRENT_SERVER_TIME_FETCH_SUCCESS("현재 서버 시간 조회에 성공했습니다"),
+	CURRENT_YEAR_AND_SEMESTER_FETCH_SUCCESS("현재 년도와 학기 조회에 성공했습니다"),
 
 	// Session
 	SESSION_RENEW_SUCCESS("세션 지속시간 갱신에 성공했습니다"),
