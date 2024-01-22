@@ -6,11 +6,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import site.courseregistrationsystem.clock.application.ClockService;
+import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
 import site.courseregistrationsystem.exception.registration_period.InvalidBasketTimeException;
 import site.courseregistrationsystem.exception.registration_period.NonexistenceBasketRegistrationPeriodException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeAfterEndTimeException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeBeforeCurrentTimeException;
-import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.registration.BasketRegistrationPeriod;
 import site.courseregistrationsystem.registration.dto.RegistrationDate;
 import site.courseregistrationsystem.registration.infrastructure.BasketRegistrationPeriodStorage;
@@ -21,16 +22,17 @@ import site.courseregistrationsystem.student.Grade;
 @RequiredArgsConstructor
 public class BasketRegistrationPeriodService {
 
+	private final ClockService clockService;
+
 	private final BasketRegistrationPeriodStorage basketRegistrationPeriodStorage;
 
 	@Transactional
-	public void saveBasketRegistrationPeriod(LocalDateTime now, LocalDateTime startTime, LocalDateTime endTime, Semester semester) {
+	public void saveBasketRegistrationPeriod(LocalDateTime now, LocalDateTime startTime, LocalDateTime endTime) {
 		checkInvalidTime(now, startTime, endTime);
 
 		BasketRegistrationPeriod basketRegistrationPeriod = BasketRegistrationPeriod.builder()
 			.startTime(startTime)
 			.endTime(endTime)
-			.semester(semester)
 			.build();
 
 		basketRegistrationPeriodStorage.save(basketRegistrationPeriod);
@@ -44,10 +46,8 @@ public class BasketRegistrationPeriodService {
 			throw new InvalidBasketTimeException();
 		}
 
-		return new RegistrationDate(
-			registrationPeriod.getYear(),
-			registrationPeriod.getSemester()
-		);
+		CurrentYearAndSemester currentYearAndSemester = clockService.fetchCurrentClock();
+		return new RegistrationDate(currentYearAndSemester);
 	}
 
 	private void checkInvalidTime(LocalDateTime now, LocalDateTime startTime, LocalDateTime endTime) {

@@ -9,7 +9,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.student.Grade;
 
 @RedisHash("basketRegistrationPeriod")
@@ -19,21 +18,18 @@ public class BasketRegistrationPeriod {
 
 	@Id
 	private String targetGrade = Grade.COMMON.name();
+
 	private LocalDateTime startTime;
 	private LocalDateTime endTime;
-	private int year;
-	private String semester;
 
 	public boolean isWithinTimeRange(LocalDateTime now) {
 		return startTime.compareTo(now) <= 0 && now.compareTo(endTime) <= 0;
 	}
 
 	@Builder
-	private BasketRegistrationPeriod(LocalDateTime startTime, LocalDateTime endTime, Semester semester) {
+	private BasketRegistrationPeriod(LocalDateTime startTime, LocalDateTime endTime) {
 		this.startTime = startTime;
 		this.endTime = endTime;
-		this.year = startTime.getYear();
-		this.semester = semester.name();
 	}
 
 }
