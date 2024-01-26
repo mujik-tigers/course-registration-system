@@ -7,6 +7,7 @@ import site.courseregistrationsystem.lecture.Lecture;
 @Getter
 public class BasketDetail {
 
+	private final Long id;
 	private final int targetGrade;
 	private final String subjectDivision;
 	private final Integer lectureNumber;
@@ -18,6 +19,7 @@ public class BasketDetail {
 	private final Integer totalCapacity;
 
 	public BasketDetail(Basket basket) {
+		this.id = basket.getId();
 		Lecture lecture = basket.getLecture();
 		this.targetGrade = lecture.fetchTargetGradeNumber();
 		this.subjectDivision = lecture.fetchSubjectDivisionDescription();
