@@ -7,7 +7,7 @@ import site.courseregistrationsystem.lecture.Lecture;
 @Getter
 public class BasketDetail {
 
-	private final Long id;
+	private Long id;
 	private final int targetGrade;
 	private final String subjectDivision;
 	private final Integer lectureNumber;
@@ -30,6 +30,10 @@ public class BasketDetail {
 		this.schedule = lecture.generateSchedule();
 		this.professorName = lecture.fetchProfessorName();
 		this.totalCapacity = lecture.getTotalCapacity();
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 }

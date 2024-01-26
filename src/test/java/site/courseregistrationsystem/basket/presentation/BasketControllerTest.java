@@ -329,7 +329,10 @@ class BasketControllerTest extends RestDocsSupport {
 			.lecture(lecture)
 			.build();
 
-		return new BasketDetail(basket);
+		BasketDetail basketDetail = new BasketDetail(basket);
+		basketDetail.setId(1L);
+
+		return basketDetail;
 	}
 
 }
