@@ -219,6 +219,7 @@ class BasketControllerTest extends RestDocsSupport {
 					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
 					fieldWithPath("data.baskets").type(JsonFieldType.ARRAY).description("수강 바구니 목록"),
+					fieldWithPath("data.baskets[].id").type(JsonFieldType.NUMBER).description("수강 바구니 신청 PK"),
 					fieldWithPath("data.baskets[].targetGrade").type(JsonFieldType.NUMBER).description("수강 학년"),
 					fieldWithPath("data.baskets[].subjectDivision").type(JsonFieldType.STRING).description("과목 분류"),
 					fieldWithPath("data.baskets[].lectureNumber").type(JsonFieldType.NUMBER).description("과목 번호"),
