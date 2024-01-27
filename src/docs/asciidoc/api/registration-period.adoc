@@ -79,4 +79,17 @@ include::{snippets}/basket-registration-period-save-fail-early-end-time/request-
 include::{snippets}/basket-registration-period-save-fail-early-end-time/http-response.adoc[]
 include::{snippets}/basket-registration-period-save-fail-early-end-time/response-fields.adoc[]
 
+[[basket-registration-period-fetch-success]]
+=== 수강 바구니 신청 기간 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/basket-registration-period-fetch-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/basket-registration-period-fetch-success/http-response.adoc[]
+include::{snippets}/basket-registration-period-fetch-success/response-fields.adoc[]
+
+
 

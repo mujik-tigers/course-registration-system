@@ -16,9 +16,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
+import jakarta.servlet.http.Cookie;
 import site.courseregistrationsystem.RestDocsSupport;
 import site.courseregistrationsystem.exception.registration_period.StartTimeAfterEndTimeException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeBeforeCurrentTimeException;
+import site.courseregistrationsystem.registration.BasketRegistrationPeriod;
 import site.courseregistrationsystem.registration.dto.BasketRegistrationPeriodSaveForm;
 import site.courseregistrationsystem.registration.dto.EnrollmentRegistrationPeriodSaveForm;
 import site.courseregistrationsystem.student.Grade;
@@ -128,6 +130,44 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 	}
 
 	@Test
+	@DisplayName("수강 바구니 신청 기간 조회 : 성공")
+	void fetchBasketRegistrationPeriod() throws Exception {
+		// given
+		LocalDateTime startTime = LocalDateTime.of(2024, 1, 17, 9, 30, 1);
+		LocalDateTime endTime = LocalDateTime.of(2024, 1, 17, 10, 0, 1);
+		BasketRegistrationPeriod basketRegistrationPeriod = createBasketRegistrationPeriod(startTime, endTime);
+
+		String COOKIE_NAME = "SESSIONID";
+		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
+		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
+
+		given(basketRegistrationPeriodService.fetchBasketRegistrationPeriod())
+			.willReturn(basketRegistrationPeriod);
+
+		// when & then
+		mockMvc.perform(get("/registration-period/baskets")
+				.cookie(sessionCookie))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.targetGrade").value(Grade.COMMON.name()))
+			.andExpect(jsonPath("$.data.startTime").value(basketRegistrationPeriod.getStartTime().toString()))
+			.andExpect(jsonPath("$.data.endTime").value(basketRegistrationPeriod.getEndTime().toString()))
+			.andDo(document("basket-registration-period-fetch-success",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				responseFields(
+					fieldWithPath("code").type(JsonFieldType.NUMBER).description("코드"),
+					fieldWithPath("status").type(JsonFieldType.STRING).description("상태"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("메시지"),
+					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+					fieldWithPath("data.targetGrade").type(JsonFieldType.STRING).description("타겟 학년"),
+					fieldWithPath("data.startTime").type(JsonFieldType.VARIES).description("시작 시간"),
+					fieldWithPath("data.endTime").type(JsonFieldType.VARIES).description("종료 시간")
+				)
+			));
+	}
+
+	@Test
 	@DisplayName("수강 바구니 신청 기간 추가 : 성공")
 	void saveBasketRegistrationPeriod() throws Exception {
 		// given
@@ -224,6 +264,13 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 					fieldWithPath("data").type(JsonFieldType.NULL).description("응답 데이터")
 				)
 			));
+	}
+
+	private static BasketRegistrationPeriod createBasketRegistrationPeriod(LocalDateTime startTime, LocalDateTime endTime) {
+		return BasketRegistrationPeriod.builder()
+			.startTime(startTime)
+			.endTime(endTime)
+			.build();
 	}
 
 }

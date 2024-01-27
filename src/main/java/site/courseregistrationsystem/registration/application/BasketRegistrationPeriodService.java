@@ -26,6 +26,11 @@ public class BasketRegistrationPeriodService {
 
 	private final BasketRegistrationPeriodStorage basketRegistrationPeriodStorage;
 
+	public BasketRegistrationPeriod fetchBasketRegistrationPeriod() {
+		return basketRegistrationPeriodStorage.findById(Grade.COMMON.name())
+			.orElseThrow(NonexistenceBasketRegistrationPeriodException::new);
+	}
+
 	@Transactional
 	public void saveBasketRegistrationPeriod(LocalDateTime now, LocalDateTime startTime, LocalDateTime endTime) {
 		checkInvalidTime(now, startTime, endTime);
@@ -59,5 +64,4 @@ public class BasketRegistrationPeriodService {
 			throw new StartTimeAfterEndTimeException();
 		}
 	}
-
 }
