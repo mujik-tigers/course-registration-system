@@ -14,6 +14,7 @@ import site.courseregistrationsystem.exception.registration_period.NonexistenceE
 import site.courseregistrationsystem.exception.registration_period.StartTimeAfterEndTimeException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeBeforeCurrentTimeException;
 import site.courseregistrationsystem.registration.EnrollmentRegistrationPeriod;
+import site.courseregistrationsystem.registration.dto.EnrollmentRegistrationPeriods;
 import site.courseregistrationsystem.registration.dto.RegistrationDate;
 import site.courseregistrationsystem.registration.infrastructure.EnrollmentRegistrationPeriodStorage;
 import site.courseregistrationsystem.student.Grade;
@@ -26,6 +27,10 @@ public class EnrollmentRegistrationPeriodService {
 	private final ClockService clockService;
 
 	private final EnrollmentRegistrationPeriodStorage enrollmentRegistrationPeriodStorage;
+
+	public EnrollmentRegistrationPeriods fetchEnrollmentRegistrationPeriods() {
+		return new EnrollmentRegistrationPeriods(enrollmentRegistrationPeriodStorage.findAll());
+	}
 
 	@Transactional
 	public void saveEnrollmentRegistrationPeriod(LocalDateTime now, LocalDateTime startTime, LocalDateTime endTime, Grade targetGrade) {

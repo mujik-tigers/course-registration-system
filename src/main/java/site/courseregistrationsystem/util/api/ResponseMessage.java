@@ -32,6 +32,7 @@ public enum ResponseMessage {
 	// RegistrationPeriod
 	BASKET_REGISTRATION_PERIOD_FETCH_SUCCESS("수강 바구니 신청 기간 조회에 성공했습니다"),
 	BASKET_REGISTRATION_PERIOD_SAVE_SUCCESS("수강 바구니 신청 기간 등록에 성공했습니다"),
+	ENROLLMENT_REGISTRATION_PERIOD_FETCH_SUCCESS("수강 신청 기간 조회에 성공했습니다"),
 	ENROLLMENT_REGISTRATION_PERIOD_SAVE_SUCCESS("수강 신청 기간 등록에 성공했습니다"),
 
 	// Enrollment

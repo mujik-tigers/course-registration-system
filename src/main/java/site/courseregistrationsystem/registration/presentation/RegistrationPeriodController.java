@@ -15,6 +15,7 @@ import site.courseregistrationsystem.registration.application.BasketRegistration
 import site.courseregistrationsystem.registration.application.EnrollmentRegistrationPeriodService;
 import site.courseregistrationsystem.registration.dto.BasketRegistrationPeriodSaveForm;
 import site.courseregistrationsystem.registration.dto.EnrollmentRegistrationPeriodSaveForm;
+import site.courseregistrationsystem.registration.dto.EnrollmentRegistrationPeriods;
 import site.courseregistrationsystem.util.api.ApiResponse;
 import site.courseregistrationsystem.util.api.ResponseMessage;
 
@@ -37,6 +38,12 @@ public class RegistrationPeriodController {
 		basketRegistrationPeriodService.saveBasketRegistrationPeriod(LocalDateTime.now(), saveForm.getStartTime(), saveForm.getEndTime());
 
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.BASKET_REGISTRATION_PERIOD_SAVE_SUCCESS.getMessage(), null);
+	}
+
+	@GetMapping("/registration-period/enrollments")
+	public ApiResponse<EnrollmentRegistrationPeriods> fetchEnrollmentRegistrationPeriods() {
+		EnrollmentRegistrationPeriods enrollmentRegistrationPeriods = enrollmentRegistrationPeriodService.fetchEnrollmentRegistrationPeriods();
+		return ApiResponse.ok(ResponseMessage.ENROLLMENT_REGISTRATION_PERIOD_FETCH_SUCCESS.getMessage(), enrollmentRegistrationPeriods);
 	}
 
 	@ResponseStatus(HttpStatus.CREATED)
