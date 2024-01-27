@@ -43,6 +43,22 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 	}
 
 	@Test
+	@DisplayName("수강 바구니 신청 기간을 조회할 수 있다.")
+	void basketFetch() throws Exception {
+		// given
+		LocalDateTime startTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
+		LocalDateTime endTime = LocalDateTime.of(2024, 1, 16, 10, 0, 0);
+		BasketRegistrationPeriod savedRegistrationPeriod = saveRegistrationPeriod(startTime, endTime);
+
+		// when
+		BasketRegistrationPeriod registrationPeriod = basketRegistrationPeriodService.fetchBasketRegistrationPeriod();
+
+		// then
+		assertThat(registrationPeriod.getStartTime()).isEqualTo(savedRegistrationPeriod.getStartTime());
+		assertThat(registrationPeriod.getEndTime()).isEqualTo(savedRegistrationPeriod.getEndTime());
+	}
+
+	@Test
 	@DisplayName("운영자는 수강 바구니 신청 시작시간, 종료시간, 신청 학기를 입력하여, 수강 바구니 신청기간을 등록한다.")
 	void saveBasketRegistrationPeriod() throws Exception {
 		// given
@@ -94,7 +110,7 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 16, 10, 0, 0);
 		Semester semester = Semester.FIRST;
 
-		saveRegistrationPeriod(startTime, endTime, semester);
+		saveRegistrationPeriod(startTime, endTime);
 
 		LocalDateTime currentRegistrationTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
 
@@ -119,7 +135,7 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 16, 10, 0, 0);
 		Semester semester = Semester.FIRST;
 
-		saveRegistrationPeriod(startTime, endTime, semester);
+		saveRegistrationPeriod(startTime, endTime);
 
 		LocalDateTime earlyRegistrationTime = LocalDateTime.of(2024, 1, 16, 9, 29, 0);
 		LocalDateTime lateRegistrationTime = LocalDateTime.of(2024, 1, 16, 10, 1, 0);
@@ -148,7 +164,7 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 			.isInstanceOf(NonexistenceBasketRegistrationPeriodException.class);
 	}
 
-	private BasketRegistrationPeriod saveRegistrationPeriod(LocalDateTime startTime, LocalDateTime endTime, Semester semester) {
+	private BasketRegistrationPeriod saveRegistrationPeriod(LocalDateTime startTime, LocalDateTime endTime) {
 		BasketRegistrationPeriod registrationPeriod = BasketRegistrationPeriod.builder()
 			.startTime(startTime)
 			.endTime(endTime)
