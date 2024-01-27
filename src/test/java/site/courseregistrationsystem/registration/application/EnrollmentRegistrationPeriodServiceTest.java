@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -27,6 +28,7 @@ import site.courseregistrationsystem.exception.registration_period.StartTimeAfte
 import site.courseregistrationsystem.exception.registration_period.StartTimeBeforeCurrentTimeException;
 import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.registration.EnrollmentRegistrationPeriod;
+import site.courseregistrationsystem.registration.dto.EnrollmentRegistrationPeriods;
 import site.courseregistrationsystem.registration.dto.RegistrationDate;
 import site.courseregistrationsystem.registration.infrastructure.EnrollmentRegistrationPeriodStorage;
 import site.courseregistrationsystem.student.Grade;
@@ -57,10 +59,34 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		);
 	}
 
+	@Test
+	@DisplayName("저장된 수강 신청 목록들을 조회할 수 있다.")
+	void fetchEnrollmentRegistrationPeriods() throws Exception {
+		// given
+		LocalDateTime startTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
+		LocalDateTime endTime = LocalDateTime.of(2024, 1, 16, 10, 0, 0);
+
+		EnrollmentRegistrationPeriod freshmanPeriod = saveRegistrationPeriod(startTime, endTime, Grade.FRESHMAN);
+		EnrollmentRegistrationPeriod sophoPeriod = saveRegistrationPeriod(startTime.plusDays(1), endTime.plusDays(1), Grade.SOPHOMORE);
+		EnrollmentRegistrationPeriod juniorPeriod = saveRegistrationPeriod(startTime.plusDays(2), endTime.plusDays(2), Grade.JUNIOR);
+		EnrollmentRegistrationPeriod seniorPeriod = saveRegistrationPeriod(startTime.plusDays(3), endTime.plusDays(3), Grade.SENIOR);
+		EnrollmentRegistrationPeriod commonPeriod = saveRegistrationPeriod(startTime.plusDays(4), endTime.plusDays(4), Grade.COMMON);
+
+		// when
+		EnrollmentRegistrationPeriods enrollmentRegistrationPeriods = enrollmentRegistrationPeriodService.fetchEnrollmentRegistrationPeriods();
+
+		// then
+		List<EnrollmentRegistrationPeriod> periods = enrollmentRegistrationPeriods.getEnrollmentRegistrationPeriods();
+		assertThat(periods.size()).isEqualTo(5);
+		assertThat(periods).usingRecursiveFieldByFieldElementComparator()
+			.containsExactlyInAnyOrder(freshmanPeriod, sophoPeriod, juniorPeriod, seniorPeriod, commonPeriod);
+
+	}
+
 	@DisplayName("운영자는 수강신청 시작시간, 수강신청 종료시간, 수강신청 대상 학년, 수강신청 학기를 입력하여, 수강신청 기간을 등록한다.")
 	@MethodSource("gradeType")
 	@ParameterizedTest
-	void saveEnrollmentRegistrationPeriod(Grade targetGrade) throws Exception {
+	void saveEnrollmentRegistrationPeriodSuccess(Grade targetGrade) throws Exception {
 		// given
 		LocalDateTime now = LocalDateTime.of(2024, 1, 15, 9, 0, 0);
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
