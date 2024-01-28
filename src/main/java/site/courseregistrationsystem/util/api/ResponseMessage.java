@@ -39,7 +39,10 @@ public enum ResponseMessage {
 	ENROLL_LECTURE_SUCCESS("수강 신청이 성공적으로 완료되었습니다"),
 	ENROLLMENT_CANCEL_SUCCESS("수강 취소가 정상적으로 처리되었습니다"),
 	ENROLLMENT_FETCH_SUCCESS("수강 신청 내역 조회에 성공했습니다"),
-	ENROLLMENT_CAPACITY_FETCH_SUCCESS("현재 수강 신청 인원 조회에 성공했습니다");
+	ENROLLMENT_CAPACITY_FETCH_SUCCESS("현재 수강 신청 인원 조회에 성공했습니다"),
+
+	// Department
+	DEPARTMENT_FETCH_SUCCESS("개설 학과 조회에 성공했습니다");
 
 	private final String message;
 
