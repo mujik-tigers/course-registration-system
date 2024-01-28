@@ -20,6 +20,8 @@ import site.courseregistrationsystem.basket.application.BasketService;
 import site.courseregistrationsystem.basket.presentation.BasketController;
 import site.courseregistrationsystem.clock.application.ClockService;
 import site.courseregistrationsystem.clock.presentation.ClockController;
+import site.courseregistrationsystem.department.application.DepartmentService;
+import site.courseregistrationsystem.department.presentation.DepartmentController;
 import site.courseregistrationsystem.enrollment.application.EnrollmentService;
 import site.courseregistrationsystem.enrollment.presentation.EnrollmentController;
 import site.courseregistrationsystem.exception.auth.NonexistenceSessionException;
@@ -39,7 +41,8 @@ import site.courseregistrationsystem.util.encryption.Aes256Manager;
 	LectureController.class,
 	BasketController.class,
 	EnrollmentController.class,
-	RegistrationPeriodController.class
+	RegistrationPeriodController.class,
+	DepartmentController.class
 })
 @AutoConfigureRestDocs
 public abstract class RestDocsSupport {
@@ -82,6 +85,9 @@ public abstract class RestDocsSupport {
 
 	@MockBean
 	protected ClockService clockService;
+
+	@MockBean
+	protected DepartmentService departmentService;
 
 	@BeforeEach
 	void setUp() {

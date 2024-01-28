@@ -15,11 +15,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.clock.Clock;
-import site.courseregistrationsystem.clock.application.ClockService;
 import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
 import site.courseregistrationsystem.exception.registration_period.InvalidEnrollmentTimeException;
 import site.courseregistrationsystem.exception.registration_period.NonexistenceCommonEnrollmentRegistrationPeriodException;
@@ -40,9 +38,6 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 
 	@Autowired
 	private EnrollmentRegistrationPeriodStorage enrollmentRegistrationPeriodStorage;
-
-	@SpyBean
-	private ClockService clockService;
 
 	@AfterEach
 	void clear() {
