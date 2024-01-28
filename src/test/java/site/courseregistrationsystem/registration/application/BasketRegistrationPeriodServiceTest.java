@@ -10,11 +10,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.clock.Clock;
-import site.courseregistrationsystem.clock.application.ClockService;
 import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
 import site.courseregistrationsystem.exception.registration_period.InvalidBasketTimeException;
 import site.courseregistrationsystem.exception.registration_period.NonexistenceBasketRegistrationPeriodException;
@@ -33,9 +31,6 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 
 	@Autowired
 	private BasketRegistrationPeriodStorage basketRegistrationPeriodStorage;
-
-	@SpyBean
-	private ClockService clockService;
 
 	@AfterEach
 	void clear() {
