@@ -49,6 +49,7 @@ public enum ErrorType {
 	ENROLLMENT_DUPLICATION(HttpStatus.BAD_REQUEST, "중복된 과목을 수강 신청할 수 없습니다"),
 	ENROLLMENT_NONEXISTENT(HttpStatus.BAD_REQUEST, "수강 신청 내역이 존재하지 않습니다"),
 	LECTURE_NOT_IN_CURRENT_SEMESTER(HttpStatus.BAD_REQUEST, "현재 학기에 개강하는 강의가 아닙니다"),
+	LECTURE_APPLICANTS_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "강의 정원을 초과했습니다"),
 
 	// Clock
 	CLOCK_NONEXISTENT(HttpStatus.BAD_REQUEST, "등록된 현재 년도-학기 정보가 없습니다");

@@ -19,10 +19,11 @@ import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentReposit
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
+import site.courseregistrationsystem.exception.enrollment.LectureApplicantsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
-import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
+import site.courseregistrationsystem.exception.lecture.LectureNotFoundException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
-import site.courseregistrationsystem.exception.student.NonexistenceStudentException;
+import site.courseregistrationsystem.exception.student.StudentNotFoundException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
@@ -44,8 +45,8 @@ public class EnrollmentService {
 
 	@Transactional
 	public EnrolledLecture enrollLecture(LocalDateTime now, Long studentPk, Long lectureId) {
-		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
-		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(NonexistenceLectureException::new);
+		Student student = studentRepository.findById(studentPk).orElseThrow(StudentNotFoundException::new);
+		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(LectureNotFoundException::new);
 
 		Enrollment savedEnrollment = enroll(now, student, lecture);
 
@@ -54,9 +55,9 @@ public class EnrollmentService {
 
 	@Transactional
 	public EnrolledLecture enrollLectureByNumber(LocalDateTime now, Long studentPk, Integer lectureNumber) {
-		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
+		Student student = studentRepository.findById(studentPk).orElseThrow(StudentNotFoundException::new);
 		Lecture lecture = lectureRepository.findByNumberWithSchedule(lectureNumber)
-			.orElseThrow(NonexistenceLectureException::new);
+			.orElseThrow(LectureNotFoundException::new);
 
 		Enrollment savedEnrollment = enroll(now, student, lecture);
 
@@ -68,6 +69,7 @@ public class EnrollmentService {
 		RegistrationDate registrationDate = enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(now, student.getGrade());
 
 		checkLectureInCurrentSemester(registrationDate.getYear(), registrationDate.getSemester(), lecture);
+		checkLectureApplicantsLimit(lecture);
 		checkCreditsLimit(enrollments, lecture.fetchCredits());
 		checkDuplicateSubject(enrollments, lecture);
 		checkScheduleConflict(enrollments, lecture);
@@ -83,6 +85,14 @@ public class EnrollmentService {
 	private void checkLectureInCurrentSemester(Year year, Semester semester, Lecture lecture) {
 		if (!lecture.hasSameSemester(year, semester)) {
 			throw new LectureNotInCurrentSemesterException();
+		}
+	}
+
+	private void checkLectureApplicantsLimit(Lecture lecture) {
+		int applicants = enrollmentRepository.countByLecture(lecture);
+
+		if (lecture.getTotalCapacity() < applicants + 1) {
+			throw new LectureApplicantsLimitExceededException();
 		}
 	}
 
@@ -119,7 +129,7 @@ public class EnrollmentService {
 
 	@Transactional
 	public void cancel(Long studentPk, Long enrollmentId) {
-		studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
+		studentRepository.findById(studentPk).orElseThrow(StudentNotFoundException::new);
 
 		int deleted = enrollmentRepository.deleteByIdAndStudent(enrollmentId, studentPk);
 
@@ -129,7 +139,7 @@ public class EnrollmentService {
 	}
 
 	public EnrolledLectures fetchAll(Long studentPk) {
-		Student student = studentRepository.findById(studentPk).orElseThrow(NonexistenceStudentException::new);
+		Student student = studentRepository.findById(studentPk).orElseThrow(StudentNotFoundException::new);
 
 		List<EnrolledLectureDetail> enrolledLectures = enrollmentRepository.findAllBy(student.getId()).stream()
 			.map(EnrolledLectureDetail::new)
@@ -139,7 +149,7 @@ public class EnrollmentService {
 	}
 
 	public EnrollmentCapacity fetchCountBy(Year year, Semester semester, Long lectureId) {
-		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(NonexistenceLectureException::new);
+		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(LectureNotFoundException::new);
 
 		checkLectureInCurrentSemester(year, semester, lecture);
 
