@@ -20,7 +20,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
@@ -43,7 +42,6 @@ import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.infrastructure.LectureRepository;
 import site.courseregistrationsystem.professor.Professor;
-import site.courseregistrationsystem.registration.application.EnrollmentRegistrationPeriodService;
 import site.courseregistrationsystem.registration.dto.RegistrationDate;
 import site.courseregistrationsystem.schedule.DayOfWeek;
 import site.courseregistrationsystem.schedule.Period;
@@ -66,9 +64,6 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 
 	@Autowired
 	private EnrollmentRepository enrollmentRepository;
-
-	@SpyBean
-	private EnrollmentRegistrationPeriodService enrollmentRegistrationPeriodService;
 
 	private static final LocalDateTime CURRENT_REGISTRATION_TIME = LocalDateTime.of(2024, 1, 15, 9, 0, 0);
 
