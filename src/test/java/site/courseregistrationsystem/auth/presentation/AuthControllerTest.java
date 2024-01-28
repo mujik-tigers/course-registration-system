@@ -19,7 +19,7 @@ import site.courseregistrationsystem.RestDocsSupport;
 import site.courseregistrationsystem.auth.StudentSession;
 import site.courseregistrationsystem.auth.dto.LoginForm;
 import site.courseregistrationsystem.exception.auth.InvalidPasswordException;
-import site.courseregistrationsystem.exception.auth.NonexistenceStudentIdException;
+import site.courseregistrationsystem.exception.auth.StudentIdNotFoundException;
 
 class AuthControllerTest extends RestDocsSupport {
 
@@ -76,7 +76,7 @@ class AuthControllerTest extends RestDocsSupport {
 		LoginForm loginForm = createLoginForm(studentId, password);
 
 		given(authService.login(any(LoginForm.class)))
-			.willThrow(new NonexistenceStudentIdException());
+			.willThrow(new StudentIdNotFoundException());
 
 		// when & then
 		mockMvc.perform(post("/login")

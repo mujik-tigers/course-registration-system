@@ -22,8 +22,8 @@ import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.clock.Clock;
 import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
+import site.courseregistrationsystem.exception.basket.BasketNotFoundException;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
-import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
 import site.courseregistrationsystem.exception.registration_period.InvalidBasketTimeException;
@@ -345,7 +345,7 @@ class BasketServiceTest extends IntegrationTestSupport {
 
 		// when & then
 		assertThatThrownBy(() -> basketService.deleteBasket(student2.getId(), basket.getId()))
-			.isInstanceOf(NonexistenceBasketException.class);
+			.isInstanceOf(BasketNotFoundException.class);
 	}
 
 	@DisplayName("수강 바구니에 담으려는 강의의 진행 학기와 현재 신청학기가 일치하지 않는 경우 해당 강의를 담을 수 없다.")

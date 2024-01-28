@@ -19,7 +19,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 
 import jakarta.servlet.http.Cookie;
 import site.courseregistrationsystem.RestDocsSupport;
-import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
+import site.courseregistrationsystem.exception.lecture.LectureNotFoundException;
 import site.courseregistrationsystem.lecture.dto.BasketStoringCount;
 import site.courseregistrationsystem.lecture.dto.LectureDetail;
 import site.courseregistrationsystem.lecture.dto.LectureSchedulePage;
@@ -172,7 +172,7 @@ class LectureControllerTest extends RestDocsSupport {
 		long LECTURE_ID = 1L;
 
 		given(lectureService.fetchBasketStoringCount(any(), any(), anyLong()))
-			.willThrow(new NonexistenceLectureException());
+			.willThrow(new LectureNotFoundException());
 
 		// when & then
 		mockMvc.perform(get("/lectures/{lectureId}/basket-count", LECTURE_ID)

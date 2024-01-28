@@ -19,9 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.clock.Clock;
 import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
+import site.courseregistrationsystem.exception.registration_period.CommonEnrollmentRegistrationPeriodNotFoundException;
+import site.courseregistrationsystem.exception.registration_period.EnrollmentRegistrationPeriodNotFoundException;
 import site.courseregistrationsystem.exception.registration_period.InvalidEnrollmentTimeException;
-import site.courseregistrationsystem.exception.registration_period.NonexistenceCommonEnrollmentRegistrationPeriodException;
-import site.courseregistrationsystem.exception.registration_period.NonexistenceEnrollmentRegistrationPeriodException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeAfterEndTimeException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeBeforeCurrentTimeException;
 import site.courseregistrationsystem.lecture.Semester;
@@ -243,7 +243,7 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 
 		// when & then
 		assertThatThrownBy(() -> enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(now, Grade.FRESHMAN))
-			.isInstanceOf(NonexistenceEnrollmentRegistrationPeriodException.class);
+			.isInstanceOf(EnrollmentRegistrationPeriodNotFoundException.class);
 	}
 
 	@Test
@@ -265,7 +265,7 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 
 		// when & then
 		assertThatThrownBy(() -> enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(now, targetGrade))
-			.isInstanceOf(NonexistenceCommonEnrollmentRegistrationPeriodException.class);
+			.isInstanceOf(CommonEnrollmentRegistrationPeriodNotFoundException.class);
 	}
 
 	private EnrollmentRegistrationPeriod saveRegistrationPeriod(LocalDateTime startTime, LocalDateTime endTime, Grade targetGrade) {

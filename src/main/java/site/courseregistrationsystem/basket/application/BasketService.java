@@ -12,11 +12,11 @@ import site.courseregistrationsystem.basket.Basket;
 import site.courseregistrationsystem.basket.dto.BasketDetail;
 import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
+import site.courseregistrationsystem.exception.basket.BasketNotFoundException;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
-import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
-import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
+import site.courseregistrationsystem.exception.lecture.LectureNotFoundException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.Semester;
@@ -44,7 +44,7 @@ public class BasketService {
 		Student student = getStudent(studentPk);
 
 		Lecture lectureForBasket = lectureRepository.findById(lectureId)
-			.orElseThrow(NonexistenceLectureException::new);
+			.orElseThrow(LectureNotFoundException::new);
 
 		List<Basket> baskets = basketRepository.findAllByStudent(student);
 
@@ -81,7 +81,7 @@ public class BasketService {
 		Student student = getStudent(studentPk);
 
 		Basket basket = basketRepository.findByIdAndStudent(basketId, student)
-			.orElseThrow(NonexistenceBasketException::new);
+			.orElseThrow(BasketNotFoundException::new);
 		basketRepository.delete(basket);
 
 		return basket.getId();
@@ -89,7 +89,7 @@ public class BasketService {
 
 	private Student getStudent(Long studentPk) {
 		return studentRepository.findById(studentPk)
-			.orElseThrow(NonexistenceLectureException::new);
+			.orElseThrow(LectureNotFoundException::new);
 	}
 
 	private void checkLectureInCurrentSemester(Year year, Semester semester, Lecture lecture) {

@@ -6,7 +6,7 @@ import site.courseregistrationsystem.exception.ErrorType;
 public class InvalidPasswordException extends CustomException {
 
 	public InvalidPasswordException() {
-		super(ErrorType.INVALID_PASSWORD);
+		super(ErrorType.PASSWORD_INVALID);
 	}
 
 }

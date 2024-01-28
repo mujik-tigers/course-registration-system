@@ -6,7 +6,7 @@ import site.courseregistrationsystem.exception.ErrorType;
 public class DuplicateBasketException extends CustomException {
 
 	public DuplicateBasketException() {
-		super(ErrorType.DUPLICATE_BASKET);
+		super(ErrorType.BASKET_DUPLICATION);
 	}
 
 }

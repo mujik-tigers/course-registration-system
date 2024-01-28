@@ -20,8 +20,8 @@ import site.courseregistrationsystem.basket.Basket;
 import site.courseregistrationsystem.basket.dto.BasketDetail;
 import site.courseregistrationsystem.basket.dto.BasketList;
 import site.courseregistrationsystem.department.Department;
+import site.courseregistrationsystem.exception.basket.BasketNotFoundException;
 import site.courseregistrationsystem.exception.basket.DuplicateBasketException;
-import site.courseregistrationsystem.exception.basket.NonexistenceBasketException;
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
 import site.courseregistrationsystem.exception.registration_period.InvalidBasketTimeException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
@@ -276,7 +276,7 @@ class BasketControllerTest extends RestDocsSupport {
 		Long DELETED_BASKET_ID = 1L;
 
 		given(basketService.deleteBasket(anyLong(), anyLong()))
-			.willThrow(new NonexistenceBasketException());
+			.willThrow(new BasketNotFoundException());
 
 		// when & then
 		mockMvc.perform(delete("/baskets/{basketId}", DELETED_BASKET_ID)

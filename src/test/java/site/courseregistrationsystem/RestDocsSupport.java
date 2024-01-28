@@ -24,7 +24,7 @@ import site.courseregistrationsystem.department.application.DepartmentService;
 import site.courseregistrationsystem.department.presentation.DepartmentController;
 import site.courseregistrationsystem.enrollment.application.EnrollmentService;
 import site.courseregistrationsystem.enrollment.presentation.EnrollmentController;
-import site.courseregistrationsystem.exception.auth.NonexistenceSessionException;
+import site.courseregistrationsystem.exception.auth.SessionNotFoundException;
 import site.courseregistrationsystem.lecture.application.LectureService;
 import site.courseregistrationsystem.lecture.presentation.LectureController;
 import site.courseregistrationsystem.registration.application.BasketRegistrationPeriodService;
@@ -112,7 +112,7 @@ public abstract class RestDocsSupport {
 						.build();
 				}
 
-				throw new NonexistenceSessionException();
+				throw new SessionNotFoundException();
 			});
 	}
 

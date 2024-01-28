@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.basket.infrastructure.BasketRepository;
 import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
-import site.courseregistrationsystem.exception.lecture.NonexistenceLectureException;
+import site.courseregistrationsystem.exception.lecture.LectureNotFoundException;
 import site.courseregistrationsystem.lecture.Lecture;
 import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.lecture.dto.BasketStoringCount;
@@ -40,7 +40,7 @@ public class LectureService {
 
 	public BasketStoringCount fetchBasketStoringCount(Year year, Semester semester, Long lectureId) {
 		Lecture lecture = lectureRepository.findById(lectureId)
-			.orElseThrow(NonexistenceLectureException::new);
+			.orElseThrow(LectureNotFoundException::new);
 
 		checkLectureInCurrentSemester(year, semester, lecture);
 

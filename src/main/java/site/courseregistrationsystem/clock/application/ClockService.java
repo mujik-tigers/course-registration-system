@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.clock.Clock;
 import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
 import site.courseregistrationsystem.clock.infrastructure.ClockStorage;
-import site.courseregistrationsystem.exception.clock.NonexistenceClockException;
+import site.courseregistrationsystem.exception.clock.ClockNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -18,7 +18,7 @@ public class ClockService {
 
 	public CurrentYearAndSemester fetchCurrentClock() {
 		Clock currentClock = clockStorage.findById(CLOCK_ID)
-			.orElseThrow(NonexistenceClockException::new);
+			.orElseThrow(ClockNotFoundException::new);
 
 		return new CurrentYearAndSemester(currentClock);
 	}
