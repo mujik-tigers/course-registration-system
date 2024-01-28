@@ -64,7 +64,7 @@ class AuthServiceTest extends IntegrationTestSupport {
 		// when / then
 		assertThatThrownBy(() -> authService.login(loginForm))
 			.isInstanceOf(InvalidPasswordException.class)
-			.hasMessage(ErrorType.INVALID_PASSWORD.getMessage());
+			.hasMessage(ErrorType.PASSWORD_INVALID.getMessage());
 	}
 
 	private static LoginForm createLoginForm(String studentId, String password) {

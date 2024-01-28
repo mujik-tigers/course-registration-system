@@ -395,7 +395,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		// when & then
 		assertThatThrownBy(() -> enrollmentService.cancel(student.getId(), invalidEnrollmentId))
 			.isInstanceOf(EnrollmentNotFoundException.class)
-			.hasMessage(ErrorType.NONEXISTENT_ENROLLMENT.getMessage());
+			.hasMessage(ErrorType.ENROLLMENT_NONEXISTENT.getMessage());
 	}
 
 	@Test
@@ -419,7 +419,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		// when & then
 		assertThatThrownBy(() -> enrollmentService.cancel(otherStudent.getId(), enrollment.getId()))
 			.isInstanceOf(EnrollmentNotFoundException.class)
-			.hasMessage(ErrorType.NONEXISTENT_ENROLLMENT.getMessage());
+			.hasMessage(ErrorType.ENROLLMENT_NONEXISTENT.getMessage());
 	}
 
 	@Test

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.department.Department;
-import site.courseregistrationsystem.exception.student.NonexistenceStudentException;
+import site.courseregistrationsystem.exception.student.StudentNotFoundException;
 import site.courseregistrationsystem.student.Grade;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.dto.StudentInformation;
@@ -66,7 +66,7 @@ class StudentServiceTest extends IntegrationTestSupport {
 
 		// when & then
 		assertThatThrownBy(() -> studentService.fetchStudentInformation(INVALID_STUDENT_PK))
-			.isInstanceOf(NonexistenceStudentException.class);
+			.isInstanceOf(StudentNotFoundException.class);
 	}
 
 	private Department saveDepartment(String departmentName) {

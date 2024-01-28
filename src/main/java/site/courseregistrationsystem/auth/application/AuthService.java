@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.auth.StudentSession;
 import site.courseregistrationsystem.auth.dto.LoginForm;
 import site.courseregistrationsystem.exception.auth.InvalidPasswordException;
-import site.courseregistrationsystem.exception.auth.NonexistenceStudentIdException;
+import site.courseregistrationsystem.exception.auth.StudentIdNotFoundException;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
 import site.courseregistrationsystem.util.encryption.Aes256Manager;
@@ -26,7 +26,7 @@ public class AuthService {
 	public StudentSession login(LoginForm loginForm) {
 		String encryptedStudentId = aes256Manager.encrypt(loginForm.getStudentId());
 		Student student = studentRepository.findByStudentId(encryptedStudentId)
-			.orElseThrow(NonexistenceStudentIdException::new);
+			.orElseThrow(StudentIdNotFoundException::new);
 
 		if (!BCryptManager.isMatch(loginForm.getPassword(), student.getPassword())) {
 			throw new InvalidPasswordException();

@@ -12,7 +12,7 @@ import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.auth.StudentSession;
 import site.courseregistrationsystem.auth.infrastructure.SessionStorage;
 import site.courseregistrationsystem.exception.ErrorType;
-import site.courseregistrationsystem.exception.auth.NonexistenceSessionException;
+import site.courseregistrationsystem.exception.auth.SessionNotFoundException;
 
 class SessionManagerTest extends IntegrationTestSupport {
 
@@ -69,8 +69,8 @@ class SessionManagerTest extends IntegrationTestSupport {
 
 		// then
 		assertThatThrownBy(() -> sessionManager.fetch(session.getId()))
-			.isInstanceOf(NonexistenceSessionException.class)
-			.hasMessage(ErrorType.NONEXISTENT_SESSION.getMessage());
+			.isInstanceOf(SessionNotFoundException.class)
+			.hasMessage(ErrorType.SESSION_NONEXISTENT.getMessage());
 	}
 
 	@Test
@@ -87,8 +87,8 @@ class SessionManagerTest extends IntegrationTestSupport {
 		assertThat(renewed.getId()).isNotEqualTo(session.getId());
 		assertThat(renewed.getStudentPk()).isEqualTo(session.getStudentPk());
 		assertThatThrownBy(() -> sessionManager.fetch(session.getId()))
-			.isInstanceOf(NonexistenceSessionException.class)
-			.hasMessage(ErrorType.NONEXISTENT_SESSION.getMessage());
+			.isInstanceOf(SessionNotFoundException.class)
+			.hasMessage(ErrorType.SESSION_NONEXISTENT.getMessage());
 	}
 
 }

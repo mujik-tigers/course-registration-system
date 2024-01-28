@@ -18,7 +18,7 @@ import jakarta.servlet.http.Cookie;
 import site.courseregistrationsystem.RestDocsSupport;
 import site.courseregistrationsystem.clock.Clock;
 import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
-import site.courseregistrationsystem.exception.clock.NonexistenceClockException;
+import site.courseregistrationsystem.exception.clock.ClockNotFoundException;
 import site.courseregistrationsystem.lecture.Semester;
 
 class ClockControllerTest extends RestDocsSupport {
@@ -141,7 +141,7 @@ class ClockControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		given(clockService.fetchCurrentClock())
-			.willThrow(new NonexistenceClockException());
+			.willThrow(new ClockNotFoundException());
 
 		// when & then
 		mockMvc.perform(get("/clock/current-year-and-semester")

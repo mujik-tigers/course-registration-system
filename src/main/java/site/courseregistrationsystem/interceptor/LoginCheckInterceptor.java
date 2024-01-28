@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.auth.StudentSession;
 import site.courseregistrationsystem.auth.application.SessionManager;
 import site.courseregistrationsystem.auth.presentation.CookieProperties;
-import site.courseregistrationsystem.exception.auth.NonexistenceSessionCookieException;
+import site.courseregistrationsystem.exception.auth.SessionCookieNotFoundException;
 import site.courseregistrationsystem.util.ProjectConstant;
 
 @Component
@@ -36,7 +36,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 
 	private Cookie findSessionCookie(Cookie[] cookies) {
 		if (cookies == null) {
-			throw new NonexistenceSessionCookieException();
+			throw new SessionCookieNotFoundException();
 		}
 
 		for (Cookie cookie : cookies) {
@@ -45,7 +45,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 			}
 		}
 
-		throw new NonexistenceSessionCookieException();
+		throw new SessionCookieNotFoundException();
 	}
 
 }
