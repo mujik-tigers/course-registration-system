@@ -1,0 +1,14 @@
+[[Department-API]]
+== Department API
+
+[[fetch-all-department-success]]
+=== 학과 목록 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/fetch-all-department-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/fetch-all-department-success/http-response.adoc[]
+include::{snippets}/fetch-all-department-success/response-fields.adoc[]
