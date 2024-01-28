@@ -35,6 +35,7 @@ import site.courseregistrationsystem.exception.ErrorType;
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
+import site.courseregistrationsystem.exception.enrollment.LectureApplicantsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
 import site.courseregistrationsystem.exception.registration_period.InvalidEnrollmentTimeException;
 import site.courseregistrationsystem.exception.schedule.ScheduleConflictException;
@@ -77,7 +78,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 
 		Year openingYear = Year.of(2024);
 		Semester semester = Semester.FIRST;
-		Lecture lecture = saveLecture(department, subject, openingYear, semester);
+		Lecture lecture = saveLecture(department, subject, openingYear, semester, 20);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		RegistrationDate registrationDate = createRegistrationDate(openingYear, semester);
@@ -103,7 +104,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 
 		Year openingYear = Year.of(2024);
 		Semester semester = Semester.FIRST;
-		Lecture lecture = saveLecture(department, subject, openingYear, semester);
+		Lecture lecture = saveLecture(department, subject, openingYear, semester, 20);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		RegistrationDate registrationDate = createRegistrationDate(openingYear, semester);
@@ -119,6 +120,70 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 	}
 
 	@Test
+	@DisplayName("강의의 정원을 초과하여 신청할 수 없다")
+	void enrollFailApplicantsLimitExceeded() {
+		// given
+		Department department = saveDepartment();
+		Student student = saveStudent(department);
+		Subject subject = saveSubject("미술사", 2);
+
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
+		Lecture lecture = saveLecture(department, subject, openingYear, semester, 0);  // 최대 정원이 0인 강의 개설
+		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
+
+		RegistrationDate registrationDate = createRegistrationDate(openingYear, semester);
+		BDDMockito.doReturn(registrationDate)
+			.when(enrollmentRegistrationPeriodService)
+			.validateEnrollmentRegistrationPeriod(any(), any());
+
+		// when & then
+		assertThatThrownBy(() -> enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId()))
+			.isInstanceOf(LectureApplicantsLimitExceededException.class)
+			.hasMessage(ErrorType.LECTURE_APPLICANTS_LIMIT_EXCEEDED.getMessage());
+	}
+
+	@TestFactory
+	@DisplayName("강의의 정원을 초과하면 예외가 발생하는 시나리오")
+	Collection<DynamicTest> enrollFailApplicantsLimitExceededScenario() {
+		// given
+		Department department = saveDepartment();
+		Subject subject = saveSubject("미술사", 2);
+
+		Year openingYear = Year.of(2024);
+		Semester semester = Semester.FIRST;
+		Lecture lecture = saveLecture(department, subject, openingYear, semester, 1);  // 최대 정원이 1인 강의 개설
+		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
+
+		RegistrationDate registrationDate = createRegistrationDate(openingYear, semester);
+		BDDMockito.doReturn(registrationDate)
+			.when(enrollmentRegistrationPeriodService)
+			.validateEnrollmentRegistrationPeriod(any(), any());
+
+		return List.of(
+			dynamicTest("한 학생이 수강신청에 성공하고 정원이 마감된다", () -> {
+				// given
+				Student student = saveStudent(department);
+
+				// when
+				EnrolledLecture enrolledLecture = enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId());
+
+				// then
+				assertThat(enrolledLecture.getEnrolledLectureId()).isEqualTo(lecture.getId());
+			}),
+			dynamicTest("다른 학생이 수강신청을 하려고 시도하는 경우 실패한다", () -> {
+				// given
+				Student student = saveStudent(department);
+
+				// when & then
+				assertThatThrownBy(() -> enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture.getId()))
+					.isInstanceOf(LectureApplicantsLimitExceededException.class)
+					.hasMessage(ErrorType.LECTURE_APPLICANTS_LIMIT_EXCEEDED.getMessage());
+			})
+		);
+	}
+
+	@Test
 	@DisplayName("지난 해의 강의를 신청할 수 없다")
 	void enrollFailPastYearLecture() {
 		// given
@@ -126,7 +191,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Student student = saveStudent(department);
 
 		Subject subject1 = saveSubject("동양미술사", 3);
-		Lecture pastLecture = saveLecture(department, subject1, Year.of(2023), Semester.FIRST);
+		Lecture pastLecture = saveLecture(department, subject1, Year.of(2023), Semester.FIRST, 20);
 		saveSchedule(pastLecture, DayOfWeek.MON, Period.ONE, Period.THREE);  // 작년 강의 개설
 
 		RegistrationDate registrationDate = createRegistrationDate(Year.of(2024), Semester.FIRST);
@@ -148,7 +213,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Student student = saveStudent(department);
 
 		Subject subject1 = saveSubject("동양미술사", 3);
-		Lecture pastLecture = saveLecture(department, subject1, Year.of(2024), Semester.FIRST);
+		Lecture pastLecture = saveLecture(department, subject1, Year.of(2024), Semester.FIRST, 20);
 		saveSchedule(pastLecture, DayOfWeek.MON, Period.ONE, Period.THREE);  // 지난 학기 강의 개설
 
 		RegistrationDate registrationDate = createRegistrationDate(Year.of(2024), Semester.SECOND);
@@ -172,7 +237,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 
 		Year openingYear = Year.of(2024);
 		Semester semester = Semester.FIRST;
-		Lecture lecture = saveLecture(department, subject, openingYear, semester);
+		Lecture lecture = saveLecture(department, subject, openingYear, semester, 20);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		BDDMockito.doThrow(new InvalidEnrollmentTimeException())
@@ -202,13 +267,13 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 
 		int maxCredit = 18;
 		Subject subject1 = saveSubject("동양미술사", maxCredit);
-		Lecture lectureWithMaxCredits = saveLecture(department, subject1, openingYear, semester);  // 최대 학점을 갖는 강의를 생성
+		Lecture lectureWithMaxCredits = saveLecture(department, subject1, openingYear, semester, 20);  // 최대 학점을 갖는 강의를 생성
 		saveSchedule(lectureWithMaxCredits, DayOfWeek.MON, Period.ONE, Period.THREE);
 		enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lectureWithMaxCredits.getId());  // 최대 학점을 채워서 신청한 상황
 
 		int minCredit = 1;
 		Subject subject2 = saveSubject("서양미술사", minCredit);
-		Lecture lectureWithMinCredits = saveLecture(department, subject2, openingYear, semester);  // 최소 학점을 갖는 강의를 생성
+		Lecture lectureWithMinCredits = saveLecture(department, subject2, openingYear, semester, 20);  // 최소 학점을 갖는 강의를 생성
 		saveSchedule(lectureWithMinCredits, DayOfWeek.TUE, Period.ONE, Period.THREE);
 
 		// when & then
@@ -228,8 +293,8 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Year openingYear = Year.of(2024);
 		Semester semester = Semester.FIRST;
 
-		Lecture lectureOnMonday = saveLecture(department, subject, openingYear, semester);  // 과목은 동일하나 요일은 다른 강의 2개 생성
-		Lecture LectureOnFriday = saveLecture(department, subject, openingYear, semester);
+		Lecture lectureOnMonday = saveLecture(department, subject, openingYear, semester, 20);  // 과목은 동일하나 요일은 다른 강의 2개 생성
+		Lecture LectureOnFriday = saveLecture(department, subject, openingYear, semester, 20);
 		saveSchedule(lectureOnMonday, DayOfWeek.MON, Period.ONE, Period.THREE);
 		saveSchedule(LectureOnFriday, DayOfWeek.FRI, Period.ONE, Period.THREE);
 
@@ -272,12 +337,12 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 			.validateEnrollmentRegistrationPeriod(any(), any());
 
 		Subject subject1 = saveSubject("동양미술사", 2);
-		Lecture lecture1 = saveLecture(department, subject1, openingYear, semester);
+		Lecture lecture1 = saveLecture(department, subject1, openingYear, semester, 20);
 		saveSchedule(lecture1, DayOfWeek.MON, Period.THREE, Period.FIVE);  // 월요일 3-5교시 수업 생성
 		enrollmentService.enrollLecture(CURRENT_REGISTRATION_TIME, student.getId(), lecture1.getId());  // 수업 신청
 
 		Subject subject2 = saveSubject("서양미술사", 2);
-		Lecture lecture2 = saveLecture(department, subject2, openingYear, semester);
+		Lecture lecture2 = saveLecture(department, subject2, openingYear, semester, 20);
 		saveSchedule(lecture2, DayOfWeek.MON, firstPeriod, lastPeriod);  // 시간이 겹치도록 생성
 
 		// when & then
@@ -304,7 +369,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		return List.of(
 			dynamicTest("월요일 4-6교시 수업 수강 신청", () -> {
 				Subject subject = saveSubject("서양미술사", 3);
-				Lecture lecture = saveLecture(department, subject, openingYear, semester);
+				Lecture lecture = saveLecture(department, subject, openingYear, semester, 20);
 				saveSchedule(lecture, DayOfWeek.MON, Period.FOUR, Period.SIX);
 
 				// when
@@ -315,7 +380,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 			}),
 			dynamicTest("월요일 1-3교시 수업 수강 신청", () -> {
 				Subject subject = saveSubject("동양미술사", 3);
-				Lecture lecture = saveLecture(department, subject, openingYear, semester);
+				Lecture lecture = saveLecture(department, subject, openingYear, semester, 20);
 				saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 				// when
@@ -326,7 +391,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 			}),
 			dynamicTest("화요일 6-9교시 수업 수강 신청", () -> {
 				Subject subject = saveSubject("금속공예기초", 4);
-				Lecture lecture = saveLecture(department, subject, openingYear, semester);
+				Lecture lecture = saveLecture(department, subject, openingYear, semester, 20);
 				saveSchedule(lecture, DayOfWeek.TUE, Period.SIX, Period.NINE);
 
 				// when
@@ -337,7 +402,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 			}),
 			dynamicTest("수요일 2-4교시 수업 수강 신청", () -> {
 				Subject subject = saveSubject("창의적사고", 4);
-				Lecture lecture = saveLecture(department, subject, openingYear, semester);
+				Lecture lecture = saveLecture(department, subject, openingYear, semester, 20);
 				saveSchedule(lecture, DayOfWeek.WED, Period.TWO, Period.FOUR);
 
 				// when
@@ -348,7 +413,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 			}),
 			dynamicTest("월요일 7-9교시 수업 수강 신청", () -> {
 				Subject subject = saveSubject("철학개론", 4);
-				Lecture lecture = saveLecture(department, subject, openingYear, semester);
+				Lecture lecture = saveLecture(department, subject, openingYear, semester, 20);
 				saveSchedule(lecture, DayOfWeek.MON, Period.SEVEN, Period.NINE);
 
 				// when
@@ -370,7 +435,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 
 		Year openingYear = Year.of(2024);
 		Semester semester = Semester.FIRST;
-		Lecture lecture = saveLecture(department, subject, openingYear, semester);
+		Lecture lecture = saveLecture(department, subject, openingYear, semester, 20);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		Enrollment enrollment = createEnrollment(lecture, student);
@@ -408,7 +473,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 
 		Year openingYear = Year.of(2024);
 		Semester semester = Semester.FIRST;
-		Lecture lecture = saveLecture(department, subject, openingYear, semester);
+		Lecture lecture = saveLecture(department, subject, openingYear, semester, 20);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		Enrollment enrollment = createEnrollment(lecture, student);
@@ -433,15 +498,15 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Semester semester = Semester.FIRST;
 
 		Subject subject1 = saveSubject("미술사", 2);
-		Lecture lecture1 = saveLecture(department, subject1, openingYear, semester);
+		Lecture lecture1 = saveLecture(department, subject1, openingYear, semester, 20);
 		saveSchedule(lecture1, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		Subject subject2 = saveSubject("창의적사고", 2);
-		Lecture lecture2 = saveLecture(department, subject2, openingYear, semester);
+		Lecture lecture2 = saveLecture(department, subject2, openingYear, semester, 20);
 		saveSchedule(lecture2, DayOfWeek.THU, Period.ONE, Period.THREE);
 
 		Subject subject3 = saveSubject("철학개론", 3);
-		Lecture lecture3 = saveLecture(department, subject3, openingYear, semester);
+		Lecture lecture3 = saveLecture(department, subject3, openingYear, semester, 20);
 		saveSchedule(lecture3, DayOfWeek.FRI, Period.ONE, Period.THREE);
 
 		Enrollment enrollment1 = createEnrollment(lecture1, student);
@@ -472,7 +537,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		Semester semester = Semester.FIRST;
 
 		Subject subject = saveSubject("미술사", 2);
-		Lecture lecture = saveLecture(department, subject, openingYear, semester);
+		Lecture lecture = saveLecture(department, subject, openingYear, semester, 20);
 		saveSchedule(lecture, DayOfWeek.MON, Period.ONE, Period.THREE);
 
 		Enrollment enrollment1 = createEnrollment(lecture, student1);
@@ -527,7 +592,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 		return subject;
 	}
 
-	private Lecture saveLecture(Department department, Subject subject, Year openingYear, Semester semester) {
+	private Lecture saveLecture(Department department, Subject subject, Year openingYear, Semester semester, int totalCapacity) {
 		Professor professor = new Professor("남유진");
 		entityManager.persist(professor);
 
@@ -539,7 +604,7 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 			.lectureRoom("다빈치관 401호")
 			.professor(professor)
 			.subject(subject)
-			.totalCapacity(20)
+			.totalCapacity(totalCapacity)
 			.build();
 
 		return lectureRepository.save(lecture);
