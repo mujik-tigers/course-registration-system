@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import site.courseregistrationsystem.exception.student.NonexistenceStudentException;
+import site.courseregistrationsystem.exception.student.StudentNotFoundException;
 import site.courseregistrationsystem.student.Student;
 import site.courseregistrationsystem.student.dto.StudentInformation;
 import site.courseregistrationsystem.student.infrastructure.StudentRepository;
@@ -21,7 +21,7 @@ public class StudentService {
 	@Transactional
 	public StudentInformation fetchStudentInformation(Long studentPk) {
 		Student student = studentRepository.findById(studentPk)
-			.orElseThrow(NonexistenceStudentException::new);
+			.orElseThrow(StudentNotFoundException::new);
 
 		return new StudentInformation(
 			aes256Manager.decrypt(student.getName()),

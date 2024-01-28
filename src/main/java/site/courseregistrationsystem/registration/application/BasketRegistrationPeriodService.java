@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.clock.application.ClockService;
 import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
+import site.courseregistrationsystem.exception.registration_period.BasketRegistrationPeriodNotFoundException;
 import site.courseregistrationsystem.exception.registration_period.InvalidBasketTimeException;
-import site.courseregistrationsystem.exception.registration_period.NonexistenceBasketRegistrationPeriodException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeAfterEndTimeException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeBeforeCurrentTimeException;
 import site.courseregistrationsystem.registration.BasketRegistrationPeriod;
@@ -28,7 +28,7 @@ public class BasketRegistrationPeriodService {
 
 	public BasketRegistrationPeriod fetchBasketRegistrationPeriod() {
 		return basketRegistrationPeriodStorage.findById(Grade.COMMON.name())
-			.orElseThrow(NonexistenceBasketRegistrationPeriodException::new);
+			.orElseThrow(BasketRegistrationPeriodNotFoundException::new);
 	}
 
 	@Transactional
@@ -45,7 +45,7 @@ public class BasketRegistrationPeriodService {
 
 	public RegistrationDate validateBasketRegistrationPeriod(LocalDateTime now) {
 		BasketRegistrationPeriod registrationPeriod = basketRegistrationPeriodStorage.findById(Grade.COMMON.name())
-			.orElseThrow(NonexistenceBasketRegistrationPeriodException::new);
+			.orElseThrow(BasketRegistrationPeriodNotFoundException::new);
 
 		if (!registrationPeriod.isWithinTimeRange(now)) {
 			throw new InvalidBasketTimeException();

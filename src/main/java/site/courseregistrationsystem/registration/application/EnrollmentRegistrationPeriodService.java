@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.clock.application.ClockService;
 import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
+import site.courseregistrationsystem.exception.registration_period.CommonEnrollmentRegistrationPeriodNotFoundException;
+import site.courseregistrationsystem.exception.registration_period.EnrollmentRegistrationPeriodNotFoundException;
 import site.courseregistrationsystem.exception.registration_period.InvalidEnrollmentTimeException;
-import site.courseregistrationsystem.exception.registration_period.NonexistenceCommonEnrollmentRegistrationPeriodException;
-import site.courseregistrationsystem.exception.registration_period.NonexistenceEnrollmentRegistrationPeriodException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeAfterEndTimeException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeBeforeCurrentTimeException;
 import site.courseregistrationsystem.registration.EnrollmentRegistrationPeriod;
@@ -47,7 +47,7 @@ public class EnrollmentRegistrationPeriodService {
 
 	public RegistrationDate validateEnrollmentRegistrationPeriod(LocalDateTime now, Grade grade) {
 		EnrollmentRegistrationPeriod registrationPeriodInGrade = enrollmentRegistrationPeriodStorage.findById(grade.name())
-			.orElseThrow(NonexistenceEnrollmentRegistrationPeriodException::new);
+			.orElseThrow(EnrollmentRegistrationPeriodNotFoundException::new);
 
 		CurrentYearAndSemester currentYearAndSemester = clockService.fetchCurrentClock();
 		if (registrationPeriodInGrade.isWithinTimeRange(now)) {
@@ -55,7 +55,7 @@ public class EnrollmentRegistrationPeriodService {
 		}
 
 		EnrollmentRegistrationPeriod registrationPeriodInCommon = enrollmentRegistrationPeriodStorage.findById(Grade.COMMON.name())
-			.orElseThrow(NonexistenceCommonEnrollmentRegistrationPeriodException::new);
+			.orElseThrow(CommonEnrollmentRegistrationPeriodNotFoundException::new);
 
 		if (registrationPeriodInCommon.isWithinTimeRange(now)) {
 			return new RegistrationDate(currentYearAndSemester);

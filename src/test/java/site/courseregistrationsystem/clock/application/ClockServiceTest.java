@@ -13,7 +13,7 @@ import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.clock.Clock;
 import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
 import site.courseregistrationsystem.clock.infrastructure.ClockStorage;
-import site.courseregistrationsystem.exception.clock.NonexistenceClockException;
+import site.courseregistrationsystem.exception.clock.ClockNotFoundException;
 import site.courseregistrationsystem.lecture.Semester;
 
 class ClockServiceTest extends IntegrationTestSupport {
@@ -56,7 +56,7 @@ class ClockServiceTest extends IntegrationTestSupport {
 	void nonexistenceClock() throws Exception {
 		// when & then
 		assertThatThrownBy(() -> clockService.fetchCurrentClock())
-			.isInstanceOf(NonexistenceClockException.class);
+			.isInstanceOf(ClockNotFoundException.class);
 	}
 
 }
