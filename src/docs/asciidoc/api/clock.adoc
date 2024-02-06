@@ -1,0 +1,65 @@
+[[Clock-API]]
+== Clock API
+
+[[current-server-time-fetch-success]]
+=== 서버 현재 시간 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/current-server-time-fetch-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/current-server-time-fetch-success/http-response.adoc[]
+include::{snippets}/current-server-time-fetch-success/response-fields.adoc[]
+
+[[current-server-time-fetch-fail]]
+=== 서버 현재 시간 조회 : 실패
+
+==== 세션 쿠키가 없는 경우, 즉 로그인하지 않은 회원은 서버 시간을 조회할 수 없다.
+
+==== HTTP Request
+
+include::{snippets}/current-server-time-fetch-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/current-server-time-fetch-fail/http-response.adoc[]
+include::{snippets}/current-server-time-fetch-fail/response-fields.adoc[]
+
+[[server-remaining-time-fetch-success]]
+=== 남은 세션 시간 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/server-remaining-time-fetch-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/server-remaining-time-fetch-success/http-response.adoc[]
+include::{snippets}/server-remaining-time-fetch-success/response-fields.adoc[]
+
+[[current-year-and-semester-fetch-success]]
+=== 현재 년도와 학기 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/current-year-and-semester-fetch-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/current-year-and-semester-fetch-success/http-response.adoc[]
+include::{snippets}/current-year-and-semester-fetch-success/response-fields.adoc[]
+
+[[current-year-and-semester-fetch-fail]]
+=== 현재 년도와 학기 조회 : 실패 - 등록 되지 않은 현재 시간 정보
+
+==== HTTP Request
+
+include::{snippets}/current-year-and-semester-fetch-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/current-year-and-semester-fetch-fail/http-response.adoc[]
+include::{snippets}/current-year-and-semester-fetch-fail/response-fields.adoc[]
+

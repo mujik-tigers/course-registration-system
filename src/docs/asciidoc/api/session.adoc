@@ -1,0 +1,28 @@
+[[Session-API]]
+== Session API
+
+[[session-renew-success]]
+=== 세션 지속 갱신 : 성공
+
+==== HTTP Request
+
+include::{snippets}/session-duration-renew-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/session-duration-renew-success/http-response.adoc[]
+include::{snippets}/session-duration-renew-success/response-fields.adoc[]
+
+[[session-renew-fail]]
+=== 세션 지속 갱신 : 실패
+
+==== 세션 쿠키가 없는 경우, 즉 로그인하지 않은 회원은 세션 지속 시간을 갱신할 수 없다.
+
+==== HTTP Request
+
+include::{snippets}/session-duration-renew-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/session-duration-renew-fail/http-response.adoc[]
+include::{snippets}/session-duration-renew-fail/response-fields.adoc[]

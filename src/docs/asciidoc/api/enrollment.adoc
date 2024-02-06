@@ -1,0 +1,146 @@
+[[Enrollment-API]]
+== Enrollment API
+
+[[fast-enrollment-success]]
+=== 빠른 수강 신청 : 성공
+
+==== HTTP Request
+
+include::{snippets}/fast-enrollment-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/fast-enrollment-success/http-response.adoc[]
+include::{snippets}/fast-enrollment-success/response-fields.adoc[]
+
+[[enrollment-success]]
+=== 수강 신청 : 성공
+
+==== HTTP Request
+
+include::{snippets}/enrollment-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/enrollment-success/http-response.adoc[]
+include::{snippets}/enrollment-success/response-fields.adoc[]
+
+[[enrollment-fail]]
+=== 수강 신청 : 실패 - 수강 신청 기간 아님
+
+==== HTTP Request
+
+include::{snippets}/enrollment-fail-invalid-semester/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/enrollment-fail-invalid-semester/http-response.adoc[]
+include::{snippets}/enrollment-fail-invalid-semester/response-fields.adoc[]
+
+[[enrollment-fail-past-lecture]]
+=== 수강 신청 : 지난 학기 강의 오류
+
+==== HTTP Request
+
+include::{snippets}/enrollment-fail-past-lecture/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/enrollment-fail-past-lecture/http-response.adoc[]
+include::{snippets}/enrollment-fail-past-lecture/response-fields.adoc[]
+
+[[enrollment-fail-credits-exceeded]]
+=== 수강 신청 : 학점 초과 실패
+
+==== HTTP Request
+
+include::{snippets}/enrollment-fail-credits-exceeded/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/enrollment-fail-credits-exceeded/http-response.adoc[]
+include::{snippets}/enrollment-fail-credits-exceeded/response-fields.adoc[]
+
+[[enrollment-fail-duplicated-subject]]
+=== 수강 신청 : 과목 중복 실패
+
+==== HTTP Request
+
+include::{snippets}/enrollment-fail-duplicated-subject/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/enrollment-fail-duplicated-subject/http-response.adoc[]
+include::{snippets}/enrollment-fail-duplicated-subject/response-fields.adoc[]
+
+[[enrollment-fail-schedule-conflict]]
+=== 수강 신청 : 시간 충돌 실패
+
+==== HTTP Request
+
+include::{snippets}/enrollment-fail-schedule-conflict/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/enrollment-fail-schedule-conflict/http-response.adoc[]
+include::{snippets}/enrollment-fail-schedule-conflict/response-fields.adoc[]
+
+[[enrollment-fail-cookie]]
+=== 수강 신청 : 쿠키 인증 실패
+
+==== HTTP Request
+
+include::{snippets}/enrollment-fail-cookie/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/enrollment-fail-cookie/http-response.adoc[]
+include::{snippets}/enrollment-fail-cookie/response-fields.adoc[]
+
+[[cancel-enrollment-success]]
+=== 수강 신청 취소 : 성공
+
+==== HTTP Request
+
+include::{snippets}/cancel-enrollment-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/cancel-enrollment-success/http-response.adoc[]
+include::{snippets}/cancel-enrollment-success/response-fields.adoc[]
+
+[[cancel-enrollment-fail]]
+=== 수강 신청 취소 : 미신청 강의 오류
+
+==== HTTP Request
+
+include::{snippets}/cancel-enrollment-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/cancel-enrollment-fail/http-response.adoc[]
+include::{snippets}/cancel-enrollment-fail/response-fields.adoc[]
+
+[[fetch-enrollments-success]]
+=== 수강 신청 내역 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/fetch-enrollments-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/fetch-enrollments-success/http-response.adoc[]
+include::{snippets}/fetch-enrollments-success/response-fields.adoc[]
+
+[[count-enrollments-success]]
+=== 수강 신청 인원 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/count-enrollments-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/count-enrollments-success/http-response.adoc[]
+include::{snippets}/count-enrollments-success/response-fields.adoc[]

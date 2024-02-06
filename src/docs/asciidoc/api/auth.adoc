@@ -1,0 +1,67 @@
+[[Authentication-API]]
+== Authentication API
+
+[[login-success]]
+=== 로그인 : 성공
+
+==== HTTP Request
+
+include::{snippets}/login-success/http-request.adoc[]
+include::{snippets}/login-success/request-fields.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/login-success/http-response.adoc[]
+include::{snippets}/login-success/response-fields.adoc[]
+
+[[login-fail-student-id]]
+=== 로그인 : 실패 - 존재하지 않는 학번
+
+==== HTTP Request
+
+include::{snippets}/login-fail-student-id/http-request.adoc[]
+include::{snippets}/login-fail-student-id/request-fields.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/login-fail-student-id/http-response.adoc[]
+include::{snippets}/login-fail-student-id/response-fields.adoc[]
+
+[[login-fail-password]]
+=== 로그인 : 실패 - 비밀번호 불일치
+
+==== HTTP Request
+
+include::{snippets}/login-fail-password/http-request.adoc[]
+include::{snippets}/login-fail-password/request-fields.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/login-fail-password/http-response.adoc[]
+include::{snippets}/login-fail-password/response-fields.adoc[]
+
+[[login-error]]
+=== 로그인 : 형식 오류
+
+==== HTTP Request
+
+include::{snippets}/login-error/http-request.adoc[]
+include::{snippets}/login-error/request-fields.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/login-error/http-response.adoc[]
+include::{snippets}/login-error/response-fields.adoc[]
+
+[[login-null]]
+=== 로그인 : 빈 요청 오류
+
+==== HTTP Request
+
+include::{snippets}/login-null/http-request.adoc[]
+include::{snippets}/login-null/request-fields.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/login-null/http-response.adoc[]
+include::{snippets}/login-null/response-fields.adoc[]

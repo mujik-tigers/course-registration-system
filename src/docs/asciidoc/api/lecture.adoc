@@ -1,0 +1,47 @@
+[[Lecture-API]]
+== Lecture API
+
+[[lecture-fetch-success]]
+=== 종합 강의 시간표 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/lecture-fetch-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/lecture-fetch-success/http-response.adoc[]
+include::{snippets}/lecture-fetch-success/response-fields.adoc[]
+
+=== 종합 강의 시간표 조회 : 쿠키 인증 실패
+
+==== HTTP Request
+
+include::{snippets}/lecture-fetch-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/lecture-fetch-fail/http-response.adoc[]
+include::{snippets}/lecture-fetch-fail/response-fields.adoc[]
+
+=== 수강 바구니 담은 사람 수 조회 : 성공
+
+==== HTTP Request
+
+include::{snippets}/storing-basket-count-fetch-success/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/storing-basket-count-fetch-success/http-response.adoc[]
+include::{snippets}/storing-basket-count-fetch-success/response-fields.adoc[]
+
+=== 수강 바구니 담은 사람 수 조회 : 실패 - 존재하지 않는 강의
+
+==== HTTP Request
+
+include::{snippets}/storing-basket-count-fetch-fail/http-request.adoc[]
+
+==== HTTP Response
+
+include::{snippets}/storing-basket-count-fetch-fail/http-response.adoc[]
+include::{snippets}/storing-basket-count-fetch-fail/response-fields.adoc[]
