@@ -6,7 +6,6 @@
 
 ## Members
 
-_[Team mujik-tigers Blog](https://velog.io/@on-and-off/posts)_  
 
 |<a href="https://github.com/ghkdgus29"><img src = "https://avatars.githubusercontent.com/u/91525492?v=4" width="120px;">|<a href="https://github.com/yeonise"><img src = "https://avatars.githubusercontent.com/u/105152276?v=4" width="120px;">|
 |:---:|:---:|
@@ -28,7 +27,9 @@ _[Team mujik-tigers Blog](https://velog.io/@on-and-off/posts)_
 
 <img src="https://img.shields.io/badge/Build-%23121011?style=for-the-badge"><img src="https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=Gradle&logoColor=white"><img src="https://img.shields.io/badge/8.5-515151?style=for-the-badge">
 
+![Nginx](https://img.shields.io/badge/nginx-65B741?style=for-the-badge&logo=nginx&logoColor=white)
 ![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?style=for-the-badge&logo=mysql&logoColor=white)
+![redis](https://img.shields.io/badge/redis-B31312?style=for-the-badge&logo=redis&logoColor=white)
 ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
 ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
 ![Apache Tomcat](https://img.shields.io/badge/apache%20tomcat-%23F8DC75.svg?style=for-the-badge&logo=apache-tomcat&logoColor=black)
@@ -65,3 +66,10 @@ _[Team mujik-tigers Blog](https://velog.io/@on-and-off/posts)_
 
 9. 로그아웃을 하면 메인으로 돌아갑니다.
 ![로그아웃](https://github.com/mujik-tigers/course-registration-system/assets/105152276/29f4d155-da9c-482f-92ed-230a4b582397)
+
+<br/>
+
+## 참고 링크
+
+### [mujik-tigers 프로젝트 블로그](https://velog.io/@on-and-off/series/course-registration-system)
+### [API 명세서](https://course-registration-system.site/docs/index.html)
