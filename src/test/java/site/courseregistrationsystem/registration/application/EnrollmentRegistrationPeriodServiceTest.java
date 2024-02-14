@@ -44,16 +44,6 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		enrollmentRegistrationPeriodStorage.deleteAll();
 	}
 
-	private static Stream<Arguments> gradeType() {
-		return Stream.of(
-			Arguments.of(Grade.COMMON),
-			Arguments.of(Grade.FRESHMAN),
-			Arguments.of(Grade.SOPHOMORE),
-			Arguments.of(Grade.JUNIOR),
-			Arguments.of(Grade.SENIOR)
-		);
-	}
-
 	@Test
 	@DisplayName("저장된 수강 신청 목록들을 조회할 수 있다.")
 	void fetchEnrollmentRegistrationPeriods() throws Exception {
@@ -76,6 +66,16 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		assertThat(periods).usingRecursiveFieldByFieldElementComparator()
 			.containsExactlyInAnyOrder(freshmanPeriod, sophoPeriod, juniorPeriod, seniorPeriod, commonPeriod);
 
+	}
+
+	private static Stream<Arguments> gradeType() {
+		return Stream.of(
+			Arguments.of(Grade.COMMON),
+			Arguments.of(Grade.FRESHMAN),
+			Arguments.of(Grade.SOPHOMORE),
+			Arguments.of(Grade.JUNIOR),
+			Arguments.of(Grade.SENIOR)
+		);
 	}
 
 	@DisplayName("운영자는 수강신청 시작시간, 수강신청 종료시간, 수강신청 대상 학년, 수강신청 학기를 입력하여, 수강신청 기간을 등록한다.")

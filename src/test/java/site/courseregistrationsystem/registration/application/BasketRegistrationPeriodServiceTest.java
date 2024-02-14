@@ -107,12 +107,12 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 
 		saveRegistrationPeriod(startTime, endTime);
 
-		LocalDateTime currentRegistrationTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
-
 		CurrentYearAndSemester currentYearAndSemester = createCurrentYearAndSemester(Year.of(startTime.getYear()), semester);
 		BDDMockito.doReturn(currentYearAndSemester)
 			.when(clockService)
 			.fetchCurrentClock();
+
+		LocalDateTime currentRegistrationTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
 
 		// when
 		RegistrationDate registrationDate = basketRegistrationPeriodService.validateBasketRegistrationPeriod(currentRegistrationTime);
