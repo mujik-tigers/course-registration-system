@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import site.courseregistrationsystem.enrollment.Enrollment;
-import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectureDetail;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
@@ -38,33 +37,12 @@ import site.courseregistrationsystem.student.infrastructure.StudentRepository;
 public class EnrollmentService {
 
 	private final EnrollmentRegistrationPeriodService enrollmentRegistrationPeriodService;
-
 	private final EnrollmentRepository enrollmentRepository;
 	private final StudentRepository studentRepository;
 	private final LectureRepository lectureRepository;
 
 	@Transactional
-	public EnrolledLecture enrollLecture(LocalDateTime now, Long studentPk, Long lectureId) {
-		Student student = studentRepository.findById(studentPk).orElseThrow(StudentNotFoundException::new);
-		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(LectureNotFoundException::new);
-
-		Enrollment savedEnrollment = enroll(now, student, lecture);
-
-		return new EnrolledLecture(savedEnrollment.fetchLectureId());
-	}
-
-	@Transactional
-	public EnrolledLecture enrollLectureByNumber(LocalDateTime now, Long studentPk, Integer lectureNumber) {
-		Student student = studentRepository.findById(studentPk).orElseThrow(StudentNotFoundException::new);
-		Lecture lecture = lectureRepository.findByNumberWithSchedule(lectureNumber)
-			.orElseThrow(LectureNotFoundException::new);
-
-		Enrollment savedEnrollment = enroll(now, student, lecture);
-
-		return new EnrolledLecture(savedEnrollment.fetchLectureId());
-	}
-
-	private Enrollment enroll(LocalDateTime now, Student student, Lecture lecture) {
+	public Enrollment enroll(LocalDateTime now, Student student, Lecture lecture) {
 		List<Enrollment> enrollments = enrollmentRepository.findAllBy(student.getId());
 		RegistrationDate registrationDate = enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(now, student.getGrade());
 
@@ -149,7 +127,7 @@ public class EnrollmentService {
 	}
 
 	public EnrollmentCapacity fetchCountBy(Year year, Semester semester, Long lectureId) {
-		Lecture lecture = lectureRepository.findWithSchedule(lectureId).orElseThrow(LectureNotFoundException::new);
+		Lecture lecture = lectureRepository.findByIdWithSubjectAndSchedule(lectureId).orElseThrow(LectureNotFoundException::new);
 
 		checkLectureInCurrentSemester(year, semester, lecture);
 
