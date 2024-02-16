@@ -21,7 +21,7 @@ import site.courseregistrationsystem.enrollment.dto.EnrolledLectureDetail;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
-import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
+import site.courseregistrationsystem.exception.enrollment.DuplicateSubjectException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
 import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
 import site.courseregistrationsystem.exception.registration_period.InvalidEnrollmentTimeException;
@@ -188,7 +188,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 
 		Long lectureId = 1L;
 		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
-			.willThrow(new DuplicateEnrollmentException());
+			.willThrow(new DuplicateSubjectException());
 
 		// when & then
 		mockMvc.perform(post("/enrollments/" + lectureId)

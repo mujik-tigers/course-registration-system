@@ -16,7 +16,7 @@ import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
 import site.courseregistrationsystem.enrollment.infrastructure.EnrollmentRepository;
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
-import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
+import site.courseregistrationsystem.exception.enrollment.DuplicateSubjectException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
 import site.courseregistrationsystem.exception.enrollment.LectureApplicantsLimitExceededException;
 import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
@@ -91,7 +91,7 @@ public class EnrollmentService {
 			.anyMatch(subject -> subject.equals(lecture.getSubject()));
 
 		if (isEnrollmentExist) {
-			throw new DuplicateEnrollmentException();
+			throw new DuplicateSubjectException();
 		}
 	}
 

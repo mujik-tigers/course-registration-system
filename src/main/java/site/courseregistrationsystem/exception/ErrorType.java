@@ -46,7 +46,7 @@ public enum ErrorType {
 	BASKET_REGISTRATION_PERIOD_INVALID_TIME(HttpStatus.BAD_REQUEST, "지금은 수강 바구니 신청 기간이 아닙니다"),
 
 	// Enrollment
-	ENROLLMENT_DUPLICATION(HttpStatus.BAD_REQUEST, "중복된 과목을 수강 신청할 수 없습니다"),
+	SUBJECT_DUPLICATION(HttpStatus.BAD_REQUEST, "중복된 과목을 수강 신청할 수 없습니다"),
 	ENROLLMENT_NONEXISTENT(HttpStatus.BAD_REQUEST, "수강 신청 내역이 존재하지 않습니다"),
 	LECTURE_NOT_IN_CURRENT_SEMESTER(HttpStatus.BAD_REQUEST, "현재 학기에 개강하는 강의가 아닙니다"),
 	LECTURE_APPLICANTS_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "강의 정원을 초과했습니다"),
