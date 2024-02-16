@@ -39,7 +39,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLectureByNumber(any(), anyLong(), anyInt()))
+		given(redissonEnrollmentLockFacade.enrollLectureByNumber(any(), anyLong(), anyInt()))
 			.willReturn(new EnrolledLecture(lectureId));
 
 		// when & then
@@ -70,7 +70,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLecture(any(), anyLong(), anyLong()))
+		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
 			.willReturn(new EnrolledLecture(lectureId));
 
 		// when & then
@@ -100,7 +100,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLecture(any(), anyLong(), anyLong()))
+		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
 			.willThrow(new InvalidEnrollmentTimeException());
 
 		// when & then
@@ -129,7 +129,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLecture(any(), anyLong(), anyLong()))
+		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
 			.willThrow(new LectureNotInCurrentSemesterException());
 
 		// when & then
@@ -158,7 +158,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLecture(any(), anyLong(), anyLong()))
+		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
 			.willThrow(new CreditLimitExceededException());
 
 		// when & then
@@ -187,7 +187,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLecture(any(), anyLong(), anyLong()))
+		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
 			.willThrow(new DuplicateEnrollmentException());
 
 		// when & then
@@ -216,7 +216,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLecture(any(), anyLong(), anyLong()))
+		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
 			.willThrow(new ScheduleConflictException());
 
 		// when & then
