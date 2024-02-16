@@ -23,6 +23,7 @@ import site.courseregistrationsystem.clock.presentation.ClockController;
 import site.courseregistrationsystem.department.application.DepartmentService;
 import site.courseregistrationsystem.department.presentation.DepartmentController;
 import site.courseregistrationsystem.enrollment.application.EnrollmentService;
+import site.courseregistrationsystem.enrollment.facade.RedissonEnrollmentLockFacade;
 import site.courseregistrationsystem.enrollment.presentation.EnrollmentController;
 import site.courseregistrationsystem.exception.auth.SessionNotFoundException;
 import site.courseregistrationsystem.lecture.application.LectureService;
@@ -32,7 +33,6 @@ import site.courseregistrationsystem.registration.application.EnrollmentRegistra
 import site.courseregistrationsystem.registration.presentation.RegistrationPeriodController;
 import site.courseregistrationsystem.student.application.StudentService;
 import site.courseregistrationsystem.student.presentation.StudentController;
-import site.courseregistrationsystem.util.encryption.Aes256Manager;
 
 @WebMvcTest(controllers = {
 	AuthController.class,
@@ -63,9 +63,6 @@ public abstract class RestDocsSupport {
 	protected StudentService studentService;
 
 	@MockBean
-	protected Aes256Manager aes256Manager;
-
-	@MockBean
 	protected SessionManager sessionManager;
 
 	@MockBean
@@ -88,6 +85,9 @@ public abstract class RestDocsSupport {
 
 	@MockBean
 	protected DepartmentService departmentService;
+
+	@MockBean
+	protected RedissonEnrollmentLockFacade redissonEnrollmentLockFacade;
 
 	@BeforeEach
 	void setUp() {
