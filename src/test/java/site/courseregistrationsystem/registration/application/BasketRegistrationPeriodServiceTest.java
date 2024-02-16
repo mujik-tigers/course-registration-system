@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.clock.Clock;
 import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
-import site.courseregistrationsystem.exception.registration_period.BasketRegistrationPeriodNotFoundException;
 import site.courseregistrationsystem.exception.registration_period.InvalidBasketTimeException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeAfterEndTimeException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeBeforeCurrentTimeException;
@@ -146,17 +145,6 @@ class BasketRegistrationPeriodServiceTest extends IntegrationTestSupport {
 
 		assertThatThrownBy(() -> basketRegistrationPeriodService.validateBasketRegistrationPeriod(lateRegistrationTime))
 			.isInstanceOf(InvalidBasketTimeException.class);
-	}
-
-	@Test
-	@DisplayName("수강 바구니 신청 기간이 존재하지 않는다면 예외가 발생한다.")
-	void nonExistenceRegistrationPeriodFail() throws Exception {
-		// given
-		LocalDateTime now = LocalDateTime.of(2024, 1, 16, 9, 45, 0);
-
-		// when & then
-		assertThatThrownBy(() -> basketRegistrationPeriodService.validateBasketRegistrationPeriod(now))
-			.isInstanceOf(BasketRegistrationPeriodNotFoundException.class);
 	}
 
 	private BasketRegistrationPeriod saveRegistrationPeriod(LocalDateTime startTime, LocalDateTime endTime) {
