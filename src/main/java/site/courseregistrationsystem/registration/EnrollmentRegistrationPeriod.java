@@ -18,6 +18,7 @@ public class EnrollmentRegistrationPeriod {
 
 	@Id
 	private String targetGrade;
+
 	private LocalDateTime startTime;
 	private LocalDateTime endTime;
 

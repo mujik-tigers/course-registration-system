@@ -19,8 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import site.courseregistrationsystem.IntegrationTestSupport;
 import site.courseregistrationsystem.clock.Clock;
 import site.courseregistrationsystem.clock.dto.CurrentYearAndSemester;
-import site.courseregistrationsystem.exception.registration_period.CommonEnrollmentRegistrationPeriodNotFoundException;
-import site.courseregistrationsystem.exception.registration_period.EnrollmentRegistrationPeriodNotFoundException;
 import site.courseregistrationsystem.exception.registration_period.InvalidEnrollmentTimeException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeAfterEndTimeException;
 import site.courseregistrationsystem.exception.registration_period.StartTimeBeforeCurrentTimeException;
@@ -42,16 +40,6 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 	@AfterEach
 	void clear() {
 		enrollmentRegistrationPeriodStorage.deleteAll();
-	}
-
-	private static Stream<Arguments> gradeType() {
-		return Stream.of(
-			Arguments.of(Grade.COMMON),
-			Arguments.of(Grade.FRESHMAN),
-			Arguments.of(Grade.SOPHOMORE),
-			Arguments.of(Grade.JUNIOR),
-			Arguments.of(Grade.SENIOR)
-		);
 	}
 
 	@Test
@@ -76,6 +64,16 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 		assertThat(periods).usingRecursiveFieldByFieldElementComparator()
 			.containsExactlyInAnyOrder(freshmanPeriod, sophoPeriod, juniorPeriod, seniorPeriod, commonPeriod);
 
+	}
+
+	private static Stream<Arguments> gradeType() {
+		return Stream.of(
+			Arguments.of(Grade.COMMON),
+			Arguments.of(Grade.FRESHMAN),
+			Arguments.of(Grade.SOPHOMORE),
+			Arguments.of(Grade.JUNIOR),
+			Arguments.of(Grade.SENIOR)
+		);
 	}
 
 	@DisplayName("운영자는 수강신청 시작시간, 수강신청 종료시간, 수강신청 대상 학년, 수강신청 학기를 입력하여, 수강신청 기간을 등록한다.")
@@ -233,39 +231,6 @@ class EnrollmentRegistrationPeriodServiceTest extends IntegrationTestSupport {
 
 		assertThatThrownBy(() -> enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(freshmanRegistrationTime, Grade.SOPHOMORE))
 			.isInstanceOf(InvalidEnrollmentTimeException.class);        // 2학년에게는 적합한 수강신청 기간이 아님
-	}
-
-	@Test
-	@DisplayName("수강신청 기간이 존재하지 않는다면 예외가 발생한다.")
-	void nonExistenceRegistrationPeriodFail() throws Exception {
-		// given
-		LocalDateTime now = LocalDateTime.of(2024, 1, 16, 9, 45, 0);
-
-		// when & then
-		assertThatThrownBy(() -> enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(now, Grade.FRESHMAN))
-			.isInstanceOf(EnrollmentRegistrationPeriodNotFoundException.class);
-	}
-
-	@Test
-	@DisplayName("학생의 현재 수강신청 시간이, 등록된 학년 수강신청 기간에 부합하지 않고, 공통 수강신청 기간이 존재하지 않는다면 예외가 발생한다.")
-	void nonExistenceCommonRegistrationPeriodFail() throws Exception {
-		// given
-		LocalDateTime now = LocalDateTime.of(2024, 1, 17, 9, 40, 0);
-		LocalDateTime startTime = LocalDateTime.of(2024, 1, 16, 9, 30, 0);
-		LocalDateTime endTime = LocalDateTime.of(2024, 1, 16, 10, 0, 0);
-		Grade targetGrade = Grade.FRESHMAN;
-		Semester semester = Semester.FIRST;
-
-		saveRegistrationPeriod(startTime, endTime, targetGrade);
-
-		CurrentYearAndSemester currentYearAndSemester = createCurrentYearAndSemester(Year.of(startTime.getYear()), semester);
-		BDDMockito.doReturn(currentYearAndSemester)
-			.when(clockService)
-			.fetchCurrentClock();
-
-		// when & then
-		assertThatThrownBy(() -> enrollmentRegistrationPeriodService.validateEnrollmentRegistrationPeriod(now, targetGrade))
-			.isInstanceOf(CommonEnrollmentRegistrationPeriodNotFoundException.class);
 	}
 
 	private EnrollmentRegistrationPeriod saveRegistrationPeriod(LocalDateTime startTime, LocalDateTime endTime, Grade targetGrade) {

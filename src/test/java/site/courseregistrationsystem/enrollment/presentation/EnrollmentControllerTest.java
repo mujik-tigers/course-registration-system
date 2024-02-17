@@ -48,6 +48,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 				.cookie(sessionCookie))
 			.andDo(print())
 			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.data.enrolledLectureId").value(lectureId))
 			.andDo(document("fast-enrollment-success",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
@@ -78,6 +79,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 				.cookie(sessionCookie))
 			.andDo(print())
 			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.data.enrolledLectureId").value(lectureId))
 			.andDo(document("enrollment-success",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
@@ -377,15 +379,19 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
+		int CAPACITY = 20;
+		int ENROLLMENT_COUNT = 12;
 
 		given(enrollmentService.fetchCountBy(any(), any(), anyLong()))
-			.willReturn(new EnrollmentCapacity(20, 12));
+			.willReturn(new EnrollmentCapacity(CAPACITY, ENROLLMENT_COUNT));
 
 		// when & then
 		mockMvc.perform(get("/enrollments/" + lectureId + "/enrollment-count")
 				.cookie(sessionCookie))
 			.andDo(print())
 			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.capacity").value(CAPACITY))
+			.andExpect(jsonPath("$.data.currentEnrollmentCount").value(ENROLLMENT_COUNT))
 			.andDo(document("count-enrollments-success",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),

@@ -39,8 +39,6 @@ public enum ErrorType {
 	// Registration Period
 	START_TIME_BEFORE_CURRENT_TIME(HttpStatus.BAD_REQUEST, "시작 시간이 현재 시간보다 앞에 있습니다"),
 	START_TIME_AFTER_END_TIME(HttpStatus.BAD_REQUEST, "시작 시간이 종료 시간보다 뒤에 있습니다"),
-	ENROLLMENT_REGISTRATION_PERIOD_NONEXISTENT(HttpStatus.BAD_REQUEST, "해당 학년을 만족하는 수강 신청 기간이 없습니다"),
-	COMMON_ENROLLMENT_REGISTRATION_PERIOD_NONEXISTENT(HttpStatus.BAD_REQUEST, "공통 학년 수강 신청 기간이 없습니다"),
 	ENROLLMENT_REGISTRATION_PERIOD_INVALID_TIME(HttpStatus.BAD_REQUEST, "지금은 수강 신청 기간이 아닙니다"),
 	BASKET_REGISTRATION_PERIOD_NONEXISTENT(HttpStatus.BAD_REQUEST, "등록된 수강 바구니 기간이 없습니다"),
 	BASKET_REGISTRATION_PERIOD_INVALID_TIME(HttpStatus.BAD_REQUEST, "지금은 수강 바구니 신청 기간이 아닙니다"),
