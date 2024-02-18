@@ -10,13 +10,15 @@ import site.courseregistrationsystem.lecture.Lecture;
 public interface LectureRepository extends JpaRepository<Lecture, Long>, LectureRepositoryCustom {
 
 	@Query("SELECT l FROM Lecture l "
+		+ "JOIN FETCH l.subject "
 		+ "JOIN FETCH l.schedules "
 		+ "WHERE l.id = :lectureId")
-	Optional<Lecture> findWithSchedule(Long lectureId);
+	Optional<Lecture> findByIdWithSubjectAndSchedule(Long lectureId);
 
 	@Query("SELECT l FROM Lecture l "
+		+ "JOIN FETCH l.subject "
 		+ "JOIN FETCH l.schedules "
 		+ "WHERE l.lectureNumber = :lectureNumber")
-	Optional<Lecture> findByNumberWithSchedule(Integer lectureNumber);
+	Optional<Lecture> findByNumberWithSubjectAndSchedule(Integer lectureNumber);
 
 }
