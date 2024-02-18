@@ -139,13 +139,9 @@ class LectureServiceTest extends IntegrationTestSupport {
 
 		Year YEAR = Year.of(2024);
 		Semester SEMESTER = Semester.FIRST;
-		Lecture lecture = lectureRepository.save(createLecture(subject, TOTAL_CAPACITY, YEAR, SEMESTER));
+		Lecture lecture = saveLecture(subject, TOTAL_CAPACITY, YEAR, SEMESTER);
 
-		for (int i = 0; i < STUDENT_COUNT; i++) {
-			Student student = studentRepository.save(createStudent());
-			Basket basket = createBasket(student, lecture);
-			entityManager.persist(basket);
-		}
+		numberOfStudentsAddLectureToBasket(STUDENT_COUNT, lecture);
 
 		// when
 		BasketStoringCount basketStoringCount = lectureService.fetchBasketStoringCount(YEAR, SEMESTER, lecture.getId());
@@ -155,17 +151,24 @@ class LectureServiceTest extends IntegrationTestSupport {
 		assertThat(basketStoringCount.getCurrentBasketStoringCount()).isEqualTo(STUDENT_COUNT);
 	}
 
+	private void numberOfStudentsAddLectureToBasket(int STUDENT_COUNT, Lecture lecture) {
+		for (int i = 0; i < STUDENT_COUNT; i++) {
+			Student student = saveStudent();
+			saveBasket(student, lecture);
+		}
+	}
+
 	private List<Lecture> generateCopiedLectureFixtures(Subject subjects, Professor professor,
 		Department department) {
 		return IntStream.rangeClosed(1, 50)
-			.mapToObj(number -> createLecture(100100 + number, Integer.toString(100 + number), 10 + number, subjects,
+			.mapToObj(number -> saveLecture(100100 + number, Integer.toString(100 + number), 10 + number, subjects,
 				professor, department))
 			.toList();
 	}
 
 	private List<Lecture> generateLectureFixtures(List<Subject> subjects, Professor professor, Department department) {
 		return IntStream.rangeClosed(1, subjects.size())
-			.mapToObj(number -> createLecture(100100 + number, Integer.toString(100 + number), 10 + number,
+			.mapToObj(number -> saveLecture(100100 + number, Integer.toString(100 + number), 10 + number,
 				subjects.get(number - 1), professor, department))
 			.toList();
 	}
@@ -187,7 +190,7 @@ class LectureServiceTest extends IntegrationTestSupport {
 			.toList();
 	}
 
-	private static Lecture createLecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity,
+	private static Lecture saveLecture(Integer lectureNumber, String lectureRoom, Integer totalCapacity,
 		Subject subject, Professor professor, Department department) {
 		return Lecture.builder()
 			.openingYear(Year.of(2024))
@@ -212,8 +215,11 @@ class LectureServiceTest extends IntegrationTestSupport {
 			.build();
 	}
 
-	private Student createStudent() {
-		return Student.builder().build();
+	private Student saveStudent() {
+		Student student = Student.builder().build();
+
+		entityManager.persist(student);
+		return student;
 	}
 
 	private Subject create3CreditSubject(String name) {
@@ -225,8 +231,8 @@ class LectureServiceTest extends IntegrationTestSupport {
 			.build();
 	}
 
-	private Lecture createLecture(Subject subject, int totalCapacity, Year year, Semester semester) {
-		return Lecture.builder()
+	private Lecture saveLecture(Subject subject, int totalCapacity, Year year, Semester semester) {
+		Lecture lecture = Lecture.builder()
 			.lectureNumber(5349)
 			.lectureRoom("법학관301")
 			.totalCapacity(totalCapacity)
@@ -234,13 +240,19 @@ class LectureServiceTest extends IntegrationTestSupport {
 			.semester(semester)
 			.subject(subject)
 			.build();
+
+		entityManager.persist(lecture);
+		return lecture;
 	}
 
-	private Basket createBasket(Student student, Lecture lecture) {
-		return Basket.builder()
+	private Basket saveBasket(Student student, Lecture lecture) {
+		Basket basket = Basket.builder()
 			.student(student)
 			.lecture(lecture)
 			.build();
+
+		entityManager.persist(basket);
+		return basket;
 	}
 
 	private Department saveDepartment(String departmentName) {

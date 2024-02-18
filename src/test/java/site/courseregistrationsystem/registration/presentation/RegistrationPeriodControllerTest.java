@@ -37,14 +37,7 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 		LocalDateTime startTime = LocalDateTime.of(2024, 1, 17, 9, 30, 1);
 		LocalDateTime endTime = LocalDateTime.of(2024, 1, 17, 10, 0, 1);
 
-		EnrollmentRegistrationPeriod freshmanPeriod = createEnrollmentRegistrationPeriod(startTime, endTime, Grade.FRESHMAN);
-		EnrollmentRegistrationPeriod sophoPeriod = createEnrollmentRegistrationPeriod(startTime.plusDays(1), endTime.plusDays(1), Grade.SOPHOMORE);
-		EnrollmentRegistrationPeriod juniorPeriod = createEnrollmentRegistrationPeriod(startTime.plusDays(2), endTime.plusDays(2), Grade.JUNIOR);
-		EnrollmentRegistrationPeriod seniorPeriod = createEnrollmentRegistrationPeriod(startTime.plusDays(3), endTime.plusDays(3), Grade.SENIOR);
-		EnrollmentRegistrationPeriod commonPeriod = createEnrollmentRegistrationPeriod(startTime.plusDays(4), endTime.plusDays(4), Grade.COMMON);
-
-		EnrollmentRegistrationPeriods enrollmentRegistrationPeriods = new EnrollmentRegistrationPeriods(
-			List.of(freshmanPeriod, sophoPeriod, juniorPeriod, seniorPeriod, commonPeriod));
+		EnrollmentRegistrationPeriods enrollmentRegistrationPeriods = createEnrollmentRegistrationPeriods(startTime, endTime);
 
 		String COOKIE_NAME = "SESSIONID";
 		String COOKIE_VALUE = "03166dc4-2c82-4e55-85f5-f47919f367a6";
@@ -326,6 +319,16 @@ class RegistrationPeriodControllerTest extends RestDocsSupport {
 			.startTime(startTime)
 			.endTime(endTime)
 			.build();
+	}
+
+	private EnrollmentRegistrationPeriods createEnrollmentRegistrationPeriods(LocalDateTime startTime, LocalDateTime endTime) {
+		EnrollmentRegistrationPeriod freshmanPeriod = createEnrollmentRegistrationPeriod(startTime, endTime, Grade.FRESHMAN);
+		EnrollmentRegistrationPeriod sophoPeriod = createEnrollmentRegistrationPeriod(startTime.plusDays(1), endTime.plusDays(1), Grade.SOPHOMORE);
+		EnrollmentRegistrationPeriod juniorPeriod = createEnrollmentRegistrationPeriod(startTime.plusDays(2), endTime.plusDays(2), Grade.JUNIOR);
+		EnrollmentRegistrationPeriod seniorPeriod = createEnrollmentRegistrationPeriod(startTime.plusDays(3), endTime.plusDays(3), Grade.SENIOR);
+		EnrollmentRegistrationPeriod commonPeriod = createEnrollmentRegistrationPeriod(startTime.plusDays(4), endTime.plusDays(4), Grade.COMMON);
+
+		return new EnrollmentRegistrationPeriods(List.of(freshmanPeriod, sophoPeriod, juniorPeriod, seniorPeriod, commonPeriod));
 	}
 
 }

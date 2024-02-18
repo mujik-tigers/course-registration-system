@@ -44,12 +44,9 @@ public class BasketRegistrationPeriodService {
 	}
 
 	public RegistrationDate validateBasketRegistrationPeriod(LocalDateTime now) {
-		BasketRegistrationPeriod registrationPeriod = basketRegistrationPeriodStorage.findById(Grade.COMMON.name())
-			.orElseThrow(BasketRegistrationPeriodNotFoundException::new);
-
-		if (!registrationPeriod.isWithinTimeRange(now)) {
-			throw new InvalidBasketTimeException();
-		}
+		basketRegistrationPeriodStorage.findById(Grade.COMMON.name())
+			.filter(period -> period.isWithinTimeRange(now))
+			.orElseThrow(InvalidBasketTimeException::new);
 
 		CurrentYearAndSemester currentYearAndSemester = clockService.fetchCurrentClock();
 		return new RegistrationDate(currentYearAndSemester);

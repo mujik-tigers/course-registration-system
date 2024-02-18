@@ -17,6 +17,7 @@ import site.courseregistrationsystem.enrollment.application.EnrollmentService;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLecture;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
+import site.courseregistrationsystem.enrollment.facade.RedissonEnrollmentLockFacade;
 import site.courseregistrationsystem.lecture.Semester;
 import site.courseregistrationsystem.util.api.ApiResponse;
 import site.courseregistrationsystem.util.api.ResponseMessage;
@@ -27,20 +28,21 @@ import site.courseregistrationsystem.util.resolver.Login;
 @RequiredArgsConstructor
 public class EnrollmentController {
 
+	private final RedissonEnrollmentLockFacade redissonEnrollmentLockFacade;
 	private final EnrollmentService enrollmentService;
 
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/{lectureId}")
 	public ApiResponse<EnrolledLecture> enrollLecture(@Login Long studentPk, @PathVariable Long lectureId) {
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.ENROLL_LECTURE_SUCCESS.getMessage(),
-			enrollmentService.enrollLecture(LocalDateTime.now(), studentPk, lectureId));
+			redissonEnrollmentLockFacade.enrollLecture(LocalDateTime.now(), studentPk, lectureId));
 	}
 
 	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping("/fast/{lectureNumber}")
 	public ApiResponse<EnrolledLecture> enrollLectureByNumber(@Login Long studentPk, @PathVariable Integer lectureNumber) {
 		return ApiResponse.of(HttpStatus.CREATED, ResponseMessage.ENROLL_LECTURE_SUCCESS.getMessage(),
-			enrollmentService.enrollLectureByNumber(LocalDateTime.now(), studentPk, lectureNumber));
+			redissonEnrollmentLockFacade.enrollLectureByNumber(LocalDateTime.now(), studentPk, lectureNumber));
 	}
 
 	@DeleteMapping("/{enrollmentId}")

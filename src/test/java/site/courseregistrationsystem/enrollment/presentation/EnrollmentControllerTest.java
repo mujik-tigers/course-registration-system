@@ -21,7 +21,7 @@ import site.courseregistrationsystem.enrollment.dto.EnrolledLectureDetail;
 import site.courseregistrationsystem.enrollment.dto.EnrolledLectures;
 import site.courseregistrationsystem.enrollment.dto.EnrollmentCapacity;
 import site.courseregistrationsystem.exception.credit.CreditLimitExceededException;
-import site.courseregistrationsystem.exception.enrollment.DuplicateEnrollmentException;
+import site.courseregistrationsystem.exception.enrollment.DuplicateSubjectException;
 import site.courseregistrationsystem.exception.enrollment.EnrollmentNotFoundException;
 import site.courseregistrationsystem.exception.enrollment.LectureNotInCurrentSemesterException;
 import site.courseregistrationsystem.exception.registration_period.InvalidEnrollmentTimeException;
@@ -39,7 +39,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLectureByNumber(any(), anyLong(), anyInt()))
+		given(redissonEnrollmentLockFacade.enrollLectureByNumber(any(), anyLong(), anyInt()))
 			.willReturn(new EnrolledLecture(lectureId));
 
 		// when & then
@@ -48,6 +48,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 				.cookie(sessionCookie))
 			.andDo(print())
 			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.data.enrolledLectureId").value(lectureId))
 			.andDo(document("fast-enrollment-success",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
@@ -70,7 +71,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLecture(any(), anyLong(), anyLong()))
+		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
 			.willReturn(new EnrolledLecture(lectureId));
 
 		// when & then
@@ -78,6 +79,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 				.cookie(sessionCookie))
 			.andDo(print())
 			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.data.enrolledLectureId").value(lectureId))
 			.andDo(document("enrollment-success",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
@@ -100,7 +102,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLecture(any(), anyLong(), anyLong()))
+		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
 			.willThrow(new InvalidEnrollmentTimeException());
 
 		// when & then
@@ -129,7 +131,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLecture(any(), anyLong(), anyLong()))
+		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
 			.willThrow(new LectureNotInCurrentSemesterException());
 
 		// when & then
@@ -158,7 +160,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLecture(any(), anyLong(), anyLong()))
+		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
 			.willThrow(new CreditLimitExceededException());
 
 		// when & then
@@ -187,8 +189,8 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLecture(any(), anyLong(), anyLong()))
-			.willThrow(new DuplicateEnrollmentException());
+		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
+			.willThrow(new DuplicateSubjectException());
 
 		// when & then
 		mockMvc.perform(post("/enrollments/" + lectureId)
@@ -216,7 +218,7 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
-		given(enrollmentService.enrollLecture(any(), anyLong(), anyLong()))
+		given(redissonEnrollmentLockFacade.enrollLecture(any(), anyLong(), anyLong()))
 			.willThrow(new ScheduleConflictException());
 
 		// when & then
@@ -377,15 +379,19 @@ class EnrollmentControllerTest extends RestDocsSupport {
 		Cookie sessionCookie = new Cookie(COOKIE_NAME, COOKIE_VALUE);
 
 		Long lectureId = 1L;
+		int CAPACITY = 20;
+		int ENROLLMENT_COUNT = 12;
 
 		given(enrollmentService.fetchCountBy(any(), any(), anyLong()))
-			.willReturn(new EnrollmentCapacity(20, 12));
+			.willReturn(new EnrollmentCapacity(CAPACITY, ENROLLMENT_COUNT));
 
 		// when & then
 		mockMvc.perform(get("/enrollments/" + lectureId + "/enrollment-count")
 				.cookie(sessionCookie))
 			.andDo(print())
 			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.capacity").value(CAPACITY))
+			.andExpect(jsonPath("$.data.currentEnrollmentCount").value(ENROLLMENT_COUNT))
 			.andDo(document("count-enrollments-success",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
