@@ -32,6 +32,8 @@ jobs:
           - 3306:3306
       redis:
         image: redis:latest
+        env:
+          REDIS_PASSWORD: 1234
         ports:
           - 6380:6379
 
