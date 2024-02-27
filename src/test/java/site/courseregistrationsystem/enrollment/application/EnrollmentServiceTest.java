@@ -7,8 +7,10 @@ import static org.mockito.ArgumentMatchers.*;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,6 +18,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import jakarta.persistence.EntityManager;
 import site.courseregistrationsystem.IntegrationTestSupport;
@@ -50,6 +53,9 @@ import site.courseregistrationsystem.subject.SubjectDivision;
 class EnrollmentServiceTest extends IntegrationTestSupport {
 
 	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
+
+	@Autowired
 	private EnrollmentService enrollmentService;
 
 	@Autowired
@@ -62,6 +68,11 @@ class EnrollmentServiceTest extends IntegrationTestSupport {
 	private EnrollmentRepository enrollmentRepository;
 
 	private static final LocalDateTime YEAR_2024_SEMESTER_SECOND = LocalDateTime.of(2024, 8, 15, 9, 0, 0);
+
+	@BeforeEach
+	void clearRedisCache() {
+		Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection().serverCommands().flushAll();
+	}
 
 	@Test
 	@DisplayName("수강 신청에 성공하면 신청된 강의의 PK를 반환한다")
