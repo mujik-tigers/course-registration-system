@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ import site.courseregistrationsystem.student.infrastructure.StudentRepository;
 @RequiredArgsConstructor
 public class EnrollmentService {
 
+	private final RedisTemplate<String, String> redisTemplate;
 	private final EnrollmentRegistrationPeriodService enrollmentRegistrationPeriodService;
 	private final EnrollmentRepository enrollmentRepository;
 	private final StudentRepository studentRepository;
@@ -57,7 +59,13 @@ public class EnrollmentService {
 			.lecture(lecture)
 			.build();
 
+		incrementApplicants(lecture);
+
 		return enrollmentRepository.save(newEnrollment);
+	}
+
+	private void incrementApplicants(Lecture lecture) {
+		redisTemplate.opsForValue().increment("applicants:" + lecture.getId());
 	}
 
 	private void checkLectureInCurrentSemester(Year year, Semester semester, Lecture lecture) {
@@ -67,11 +75,25 @@ public class EnrollmentService {
 	}
 
 	private void checkLectureApplicantsLimit(Lecture lecture) {
-		int applicants = enrollmentRepository.countByLecture(lecture);
+		int applicants = getApplicantsFromCache(lecture);
 
 		if (lecture.getTotalCapacity() < applicants + 1) {
 			throw new LectureApplicantsLimitExceededException();
 		}
+	}
+
+	private int getApplicantsFromCache(Lecture lecture) {
+		String key = "applicants:" + lecture.getId();
+		String applicants = redisTemplate.opsForValue().get(key);
+
+		if (applicants == null) {
+			int result = enrollmentRepository.countByLecture(lecture);
+			redisTemplate.opsForValue().set(key, String.valueOf(result));
+
+			return result;
+		}
+
+		return Integer.parseInt(applicants);
 	}
 
 	private void checkCreditsLimit(List<Enrollment> enrollments, int creditsToAdd) {
