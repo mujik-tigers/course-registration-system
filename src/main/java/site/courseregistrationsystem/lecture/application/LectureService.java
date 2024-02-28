@@ -28,7 +28,7 @@ public class LectureService {
 	private final BasketRepository basketRepository;
 
 	@Cacheable(value = "lecture", key = "T(site.courseregistrationsystem.util.ProjectConstant).LECTURE_NO_OPTION_FIRST_PAGE",
-		condition = "#lectureFilterOptions.fetchNoOptionFirstPage()")
+		condition = "#lectureFilterOptions.fetchNoOption() && (#pageable.getPageNumber() == 0)")
 	public LectureSchedulePage fetchLectureSchedule(Pageable pageable, LectureFilterOptions lectureFilterOptions) {
 		return new LectureSchedulePage(
 			lectureRepository.findMatchedLectures(
