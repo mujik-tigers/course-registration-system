@@ -2,6 +2,7 @@ package site.courseregistrationsystem.lecture.application;
 
 import java.time.Year;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,8 @@ public class LectureService {
 	private final LectureRepository lectureRepository;
 	private final BasketRepository basketRepository;
 
+	@Cacheable(value = "lecture", key = "T(site.courseregistrationsystem.util.ProjectConstant).LECTURE_NO_OPTION_FIRST_PAGE",
+		condition = "#lectureFilterOptions.fetchNoOptionFirstPage()")
 	public LectureSchedulePage fetchLectureSchedule(Pageable pageable, LectureFilterOptions lectureFilterOptions) {
 		return new LectureSchedulePage(
 			lectureRepository.findMatchedLectures(

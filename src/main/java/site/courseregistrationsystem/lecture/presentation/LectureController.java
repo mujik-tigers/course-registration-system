@@ -34,7 +34,6 @@ public class LectureController {
 	@GetMapping("/lectures/{lectureId}/basket-count")
 	public ApiResponse<BasketStoringCount> fetchBasketStoringCount(@PathVariable Long lectureId) {
 		BasketStoringCount basketStoringCount = lectureService.fetchBasketStoringCount(Year.now(), Semester.getCurrentSemester(), lectureId);
-		// TODO: 현재 년도, 현재 학기를 어떤식으로 계산할 지? 혹은 저장된 값을 조회할 지? 결정하면 좋을 듯
 
 		return ApiResponse.ok(ResponseMessage.BASKET_STORING_COUNT_FETCH_SUCCESS.getMessage(), basketStoringCount);
 	}

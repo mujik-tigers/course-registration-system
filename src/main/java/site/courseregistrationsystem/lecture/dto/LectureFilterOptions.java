@@ -34,4 +34,8 @@ public class LectureFilterOptions {
 		this.subjectName = subjectName;
 	}
 
+	public boolean fetchNoOptionFirstPage() {
+		return (subjectDivision == null) && (departmentId == null) && (subjectName == null);
+	}
+
 }
