@@ -2,23 +2,27 @@ package site.courseregistrationsystem.lecture.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import site.courseregistrationsystem.lecture.Lecture;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
+@Setter
 public class LectureDetail {
 
-	private final Long id;
-	private final Integer lectureNumber;
-	private final String subjectDivision;
-	private final String subjectName;
-	private final Integer hoursPerWeek;
-	private final Integer credits;
-	private final int targetGrade;
-	private final String departmentName;
-	private final String professorName;
-	private final String schedule;
-	private final Integer totalCapacity;
+	private Long id;
+	private Integer lectureNumber;
+	private String subjectDivision;
+	private String subjectName;
+	private Integer hoursPerWeek;
+	private Integer credits;
+	private int targetGrade;
+	private String departmentName;
+	private String professorName;
+	private String schedule;
+	private Integer totalCapacity;
 
 	public LectureDetail(Lecture lecture) {
 		id = lecture.getId();
