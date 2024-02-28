@@ -8,5 +8,6 @@ public abstract class ProjectConstant {
 	public static final int DEFAULT_CREDIT_LIMIT = 18;
 	public static final String CLOCK_ID = "currentClock";
 	public static final String ENROLLMENT_REGISTRATION_PERIOD_PREFIX = "enrollmentRegistrationPeriod:";
+	public static final String LECTURE_NO_OPTION_FIRST_PAGE = "firstPage";
 
 }
